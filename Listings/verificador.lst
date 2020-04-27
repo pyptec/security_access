@@ -1,0 +1,979 @@
+C51 COMPILER V9.59.0.0   VERIFICADOR                                                       04/22/2020 15:25:24 PAGE 1   
+
+
+C51 COMPILER V9.59.0.0, COMPILATION OF MODULE VERIFICADOR
+OBJECT MODULE PLACED IN .\Objects\verificador.obj
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE verificador.c LARGE OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND PRINT(.\
+                    -Listings\verificador.lst) TABS(2) OBJECT(.\Objects\verificador.obj)
+
+line level    source
+
+   1          /*
+   2              FUNCIONES PARA DISPENSADOR                                *
+   3          */
+   4          #include<verificador.h>
+   5          #include <reg51.h>
+   6          
+   7          /*funciones prototipo externas */
+   8          
+   9          extern void EscribirCadenaSoft_buffer(unsigned char *buffer,unsigned char tamano_cadena);
+  10          extern void EscribirCadenaSoft(unsigned char tamano_cadena,unsigned char tipo);
+  11          extern void DebugBufferMF(unsigned char *str,unsigned char num_char,char io);
+  12          extern void Debug_txt_Tibbo(unsigned char * str);
+  13          extern unsigned char  ValidaSensoresPaso(void);
+  14          extern void send_portERR(unsigned char cod_err);
+  15          extern void Debug_chr_Tibbo(unsigned char Dat);
+  16          extern void Debug_HexDec(unsigned char xfc);
+  17          extern char check_fechaOut(char *buffer);
+  18          extern unsigned char Dir_board();
+  19          extern void PantallaLCD(unsigned char cod_msg);
+  20          extern void Trama_pto_Paralelo_C_s(unsigned char *buffer_S1_B0,unsigned char *buffer_S1_B2);
+  21          extern void Cmd_LPR_Salida(unsigned char *buffer_S1_B0,unsigned char *buffer_S1_B2);
+  22          extern void Trama_pto_Paralelo(unsigned char *buffer_S1_B0,unsigned char *buffer_S1_B2,unsigned char cmd);
+  23          extern void Trama_pto_Paralelo_P(unsigned char *buffer_S1_B0,unsigned char *buffer_S1_B2,unsigned char cmd
+             -);
+  24          extern void analiza_tiempo(char *buffer,unsigned int Val_DctoMinutos);
+  25          extern void Trama_pto_Paralelo_new(unsigned char *buffer_S1_B0,unsigned char *buffer_S1_B2,unsigned char c
+             -md);
+  26          extern void Block_read_Clock_Hex(unsigned char *datos_clock);
+  27          extern void sel_Pulsa(void);
+  28          extern void Cmd_Lpr_Int();
+  29          extern void Delay_10ms(unsigned int cnt);
+  30          /*io sensores */
+  31          
+  32          sbit DataIn = P1^1;         //  dato de las entradas    
+  33          sbit sel_A = P3^5;          //Pulsador                        *
+  34          sbit sel_B = P3^6;          //Entrada Sensor 2                    *
+  35          sbit sel_C = P3^7;          //Entrada Sensor 1                    *
+  36          
+  37          sbit lock = P1^7;           //Relevo  
+  38          sbit Rele_Atasco = P0^3;        //Rele de on/off del verificador o transporte
+  39          sbit led_err_imp = P0^2;      //Error   
+  40          /*variables externas*/
+  41          
+  42          extern unsigned char g_cEstadoComSoft;
+  43          extern unsigned char ValTimeOutCom;
+  44          //extern unsigned char g_cEstadoComSeqMF;
+  45          extern unsigned char g_cContByteRx;
+  46          extern unsigned char xdata Buffer_Rta_Lintech[];
+  47          extern int ID_CLIENTE;
+  48          extern int COD_PARK;
+  49          extern unsigned int T_GRACIA;                                       /*tiempo de gracia del parqueo*/
+  50          extern unsigned char Timer_wait;
+  51          extern unsigned int  SIN_COBRO;
+  52          extern unsigned char  Tarjeta_on;
+C51 COMPILER V9.59.0.0   VERIFICADOR                                                       04/22/2020 15:25:24 PAGE 2   
+
+  53          extern unsigned char  CardAutomatic;  
+  54          extern unsigned char cnt__ask_off;
+  55          
+  56                                                              /*variable q define expedicion de tarjetas 1= automatico 0= a boton configurable
+             - en eeprom*/
+  57          /*externo bit*/
+  58          
+  59          extern bit aSk;
+  60          extern bit buffer_ready;
+  61          extern unsigned char USE_LPR;
+  62          
+  63          /*----------------------------------------------------------------------------
+  64          Definiciones de sequencias de verificador y expedidor
+  65          ------------------------------------------------------------------------------*/
+  66          
+  67          #define SEQ_INICIO                      0X00  
+  68          #define SEQ_RESPUESTA_TRASPORTE         0X01
+  69          #define SEQ_RTA_CARD_SENSOR             0x02
+  70          #define SEQ_MOVER_CARD_RF               0x03
+  71          
+  72          #define SEQ_RTA_SEL_STACKER   0X02
+  73          #define SEQ_MF_CHECK_STATUS   0X03
+  74          #define SEQ_MF_LINTECH        0x04
+  75          #define SEQ_MF_VERIFY         0x05
+  76          #define SEQ_RD_S1B1           0x06
+  77          #define SEQ_RTA_S1B1          0x07
+  78          #define SEQ_RD_S1B2           0x08
+  79          #define SEQ_WR_S1B2           0x09
+  80          #define SEQ_WR_S1B0           0x0A
+  81          
+  82          #define SEQ_MF_S2             0x0B
+  83          #define SEQ_WR_PLATE          0x0C
+  84          #define SEQ_RTA_S2B0          0x0D
+  85          
+  86          
+  87          #define SEQ_MF_FINALIZA       0x0E
+  88          #define SEQ_MF_FINAL          0X0F
+  89          #define SEQ_MF_FINAL_ENTREGA  0X10
+  90          #define SEQ_VACIO             0x11
+  91          #define SEQ_FINALIZADO        0x12
+  92          
+  93          #define SEQ_RTA_CAPTURE       0X14
+  94          /*NO USADOS EN EL MOMENTO*/
+  95          #define SEQ_RTA_CARD_POS1     0x19  /*no usada temporal tomar decision de borrar*/
+  96          #define SEQ_CHECK_STATUS      0X13
+  97          
+  98          #define SEQ_REQUEST           0x15
+  99          #define SEQ_RD_S1B0           0x16
+ 100          #define SEQ_RD_S1B0_EJECT     0x17
+ 101          #define SEQ_CARD_INSERCION    0X18
+ 102          
+ 103          #define SEQ_EXPULSAR_TARJ     0x20
+ 104          #define SEQ_EXPULSAR_CHECK    0x21
+ 105          #define SEQ_EXPULSAR          0x22
+ 106          #define SEQ_EXPULSAR_FROM     0x23
+ 107          
+ 108          /*----------------------------------------------------------------------------
+ 109           definiciones de lintech en la inicializacion de expedidor o verificador
+ 110          ------------------------------------------------------------------------------*/
+ 111          
+ 112          #define INICIA_LINTECH          0x30
+ 113          #define SEQ_CAPTURE_DATOS_INI   0x31
+C51 COMPILER V9.59.0.0   VERIFICADOR                                                       04/22/2020 15:25:24 PAGE 3   
+
+ 114          #define GRABA_EEPROM            0x32
+ 115          #define SEQ_CAPTURA_OK_EEPROM   0X33
+ 116          #define FIN_OK                  0x00
+ 117          
+ 118          
+ 119          #define True                    0x01
+ 120          #define False                   0x00
+ 121          /*----------------------------------------------------------------------------
+ 122           Definicion de datos asociados al buffer de resetcion del dato del trnasporte 
+ 123          
+ 124          ------------------------------------------------------------------------------*/
+ 125          
+ 126          
+ 127          #define ON    1
+ 128          #define OFF   0
+ 129          /*----------------------------------------------------------------------------
+ 130           ERRORES pto serie 
+ 131          
+ 132          ------------------------------------------------------------------------------*/
+ 133          #define REENVIA_TRAMA     0
+ 134          #define ESPERA_MAS_TIEMPO 1
+ 135          /*----------------------------------------------------------------------------
+ 136           definiciones de lintech en la inicializacion de expedidor o verificador
+ 137           funcion usada en lintech que me debuelve la respuesta de comunicacion del expedidor
+ 138           o verificador Trama_Validacion_P_N()
+ 139          RSPT_TRP_OK             (0) respuesta_transporte_oksignifica que la trama es valida y continua en el proceso
+ 140          NO_RSPD_TRP_PTO_COM     (1) no_responde_trasnporte_pto_com se cumple el tiempo de espera
+ 141          ESPR_RSPT_TRP_TRAMA     (2)Espera_respuesta_transporte_trama
+ 142          ERROR_TRP_TRAMA         (3) error_transpote_trama
+ 143          ------------------------------------------------------------------------------*/
+ 144          #define   RSPT_TRP_OK           0
+ 145          #define   NO_RSPD_TRP_PTO_COM   1
+ 146          #define   ESPR_RSPT_TRP_TRAMA   2
+ 147          #define   ERROR_TRP_TRAMA       3
+ 148          
+ 149          
+ 150          /*----------------------------------------------------------------------------
+ 151           definiciones de lintech en el comando Check_Status
+ 152          ------------------------------------------------------------------------------*/
+ 153          
+ 154          #define SENSOR_DETAIL       0x31
+ 155          #define SENSOR_NORMAL       0x30
+ 156          
+ 157          /*------------------------------------------------------------------------------
+ 158           definiciones de lintech en el comando Card_Insercion
+ 159          ------------------------------------------------------------------------------*/
+ 160          
+ 161          #define Habilita        0x30
+ 162          #define Inhabilita      0x31
+ 163          
+ 164          /*------------------------------------------------------------------------------
+ 165          Definicion de Lintech en el comando Inicializa
+ 166          ------------------------------------------------------------------------------*/
+ 167          
+ 168          #define TO_FRONT        '0'
+ 169          #define CAPTURE_BOX     '1'
+ 170          #define SIN_MOVIMIENTO  '3'
+ 171          
+ 172          /*------------------------------------------------------------------------------
+ 173          Definicion de Lintech en el comando mover tarjeta (Mov_Card)
+ 174          MovPos_Front        '0'   -> mueve  tarjeta al frente pero no la suelta
+ 175          MovPos_IC           '1'   ->mueve la tarjeta en posicion de read/write IC
+C51 COMPILER V9.59.0.0   VERIFICADOR                                                       04/22/2020 15:25:24 PAGE 4   
+
+ 176          MovPos_RF           '2'   ->mueve tarjeta a RF card read/write
+ 177          MovPos_Capture      '3'   ->captura la tarjeta
+ 178          MovPos_EjectFront   '9'   ->lanza la tarjeta del mecanismo
+ 179          
+ 180          ------------------------------------------------------------------------------*/
+ 181          
+ 182          #define   MovPos_Front        '0'   
+ 183          #define   MovPos_IC           '1'
+ 184          #define   MovPos_RF           '2'
+ 185          #define   MovPos_Capture      '3'
+ 186          #define   MovPos_EjectFront   '9'
+ 187          
+ 188          /*------------------------------------------------------------------------------
+ 189          Definicion de la trama Lintech de las respuestas de los cmd
+ 190          ------------------------------------------------------------------------------*/
+ 191          
+ 192          #define Pos_Length          3
+ 193          #define Pos_TipoResp        4
+ 194          #define Pos_St0             7
+ 195          #define Pos_St1             8
+ 196          #define Pos_St2             9
+ 197          #define Pos_IniDatMF        0x0a
+ 198          #define Card_type_H         0x0a
+ 199          #define Card_type_L         0x0b
+ 200          /*------------------------------------------------------------------------------
+ 201          Definicion del estado de st0,st1,st2 de la trama Lintech 
+ 202          NO_CARDS_IN_MCNSM -> No tiene tarjetas en el mecanismo      sto=0
+ 203          CARD_IN_MOUTH     -> hay una tarjeta dentro del bessel      st0=1
+ 204          CARD_OK_READ_RF   -> Tarjeta en posicion para leer/escribir dentro del mecanismo st0=2
+ 205          NO_HAVE_CARDS     -> no tiene tarjetas en el deposito st1=0
+ 206          LOW_NIVEL_CARDS   -> nivel bajo de tarjetas en el deposito  st1=1
+ 207          FULL_CARD         -> Deposito de tarjetas esta lleno        st1=2
+ 208          ------------------------------------------------------------------------------*/
+ 209          
+ 210          
+ 211          #define NO_CARDS_IN_MCNSM   '0'
+ 212          #define CARD_IN_MOUTH       '1'
+ 213          #define CARD_OK_READ_RF     '2'
+ 214          #define NO_HAVE_CARDS       '0'
+ 215          #define LOW_NIVEL_CARDS     '1'
+ 216          #define FULL_CARD           '2'
+ 217          /*----------------------------------------------------------------------------
+ 218          Comprobacion automatica del tipo de tarjeta 
+ 219          checking RF card type
+ 220          Card_type_H   Card_type_L  explicacion
+ 221              0             0           tarjeta desconocida
+ 222              1             0           MF50
+ 223              1             1           MF70
+ 224              1             2           MF_UL
+ 225              2             0           TYPE_A_CPU
+ 226          ------------------------------------------------------------------------------*/
+ 227          #define MF50_HIGH             '1'
+ 228          #define MF50_LOW              '0'
+ 229          
+ 230          /*----------------------------------------------------------------------------
+ 231          definicion de recepcion serial 
+ 232          ------------------------------------------------------------------------------*/
+ 233          
+ 234          #define  ESPERA_RX          0           //espera el primer cmd de recepcion del verificado 
+ 235          
+ 236          /*----------------------------------------------------------------------------
+ 237          tiempo de delay entre funciones
+C51 COMPILER V9.59.0.0   VERIFICADOR                                                       04/22/2020 15:25:24 PAGE 5   
+
+ 238          ------------------------------------------------------------------------------*/
+ 239          
+ 240          #define   TIME_CARD         100   //50
+ 241          
+ 242          
+ 243          /*----------------------------------------------------------------------------
+ 244          definicion de datos de trama lintech
+ 245          ------------------------------------------------------------------------------*/
+ 246          
+ 247          #define   ETX               03
+ 248          #define   STX_LINTECH       0xf2
+ 249          
+ 250          /*----------------------------------------------------------------------------
+ 251          msj de lcd tarjeta y lcd serie
+ 252          ------------------------------------------------------------------------------*/
+ 253          
+ 254          #define ERROR_LOOP              0XE0
+ 255          #define TARJETA_INVALIDA        0XE1
+ 256          #define TARJETA_SIN_FORMATO     0xDF
+ 257          #define ERROR_COD_PARK          0XE5
+ 258          #define SIN_INGRESO             0XE6
+ 259          #define SIN_PAGO                0XE7
+ 260          #define EXCEDE_GRACIA           0XE8
+ 261          #define GRACIAS                 0XFF
+ 262          
+ 263          #define NO_CARD                 0xfa  
+ 264          #define LOW_CARD                0x01
+ 265          #define ATASCADO                0x02
+ 266          #define AUDIO_ENTRADA     0XA0
+ 267          #define AUDIO_CAJA        0XA1
+ 268          #define AUDIO_GRACIAS     0XA2
+ 269          /*----------------------------------------------------------------------------
+ 270          definiciones para, el debuger. saber si la trama es enviada, o la trama es de respuesta
+ 271          ------------------------------------------------------------------------------*/
+ 272          
+ 273          #define   ENVIADOS          0X0
+ 274          #define   RESPUESTA         0X01
+ 275          
+ 276          /*----------------------------------------------------------------------------
+ 277          definiciones de la tarjeta MF tipo de cliente esto esta en la posicion (0) de la memoria MF
+ 278          (0) si el dato es cero esta inactiva
+ 279          (1) activa o ROTACION
+ 280          
+ 281          ------------------------------------------------------------------------------*/
+ 282          
+ 283          #define INACTIVA          0x00
+ 284          #define ROTACION          0x01
+ 285          
+ 286          /*----------------------------------------------------------------------------
+ 287          posicion de  MF  bloque 1 sector 1
+ 288          (0) tipo de tarjeta 
+ 289          (01) el id del cliente
+ 290          (03)codigo del parqueadero  
+ 291          ------------------------------------------------------------------------------*/
+ 292          #define   MF_TIPO_TARJETA   0X00
+ 293          #define   MF_ID_CLIENTE     0x01
+ 294          #define   MF_COD_PARK       0x03
+ 295          
+ 296          /*----------------------------------------------------------------------------
+ 297          posicion de  MF bloque 2 sector 1
+ 298          (00) donde esta grabado la fecha de entrada (año,mes,dia,hora,minutos) estan en hex  
+ 299          (0b) donde esta grabado la fecha de salida (año,mes,dia,hora,minutos) estan en hex 
+C51 COMPILER V9.59.0.0   VERIFICADOR                                                       04/22/2020 15:25:24 PAGE 6   
+
+ 300          ------------------------------------------------------------------------------*/
+ 301          
+ 302          #define   MF_FECHA_INT      0X00        /*año,mes,dia,hora,minutos*/
+ 303          
+ 304          
+ 305          #define   MF_DCTO           0x05        /*Tipo de descuento (00)sin descuento, (01xx xxxx) 0x40 fija fecha de salida
+             -,
+ 306                                                    10xx xxxx dcto por porcentaje xx xxxx= valor del porcentaje, 11xx xxxx dcto por diner
+             -o */
+ 307          #define   MF_LSB            0x06
+ 308          
+ 309          #define   MF_TIPO_VEHICULO  0x08              /*tipo vehiculo 00 carro, 01 moto, 02 bicicleta, 04 tractomula*/
+ 310          
+ 311          #define   MF_IN_PAGO        0x09
+ 312          #define   MF_APB            0x0A            /*antipassback 00 inicializado, 01 IN, 02 OUT, 03 NO USA*/
+ 313          
+ 314          #define   MF_FECHA_OUT      0X0B        /*año,mes,dia,hora,minutos*/
+ 315          
+ 316          /*tipo de vehiculo*/
+ 317          
+ 318          
+ 319          #define AUTOMOVIL           0X00
+ 320          #define MOTO                0X01
+ 321          /*----------------------------------------------------------------------------
+ 322          Definicion de varaibles globales del objeto
+ 323          ------------------------------------------------------------------------------*/
+ 324          
+ 325          static unsigned char Estado=INICIA_LINTECH;
+ 326          
+ 327          
+ 328          
+ 329          /*------------------------------------------------------------------------------
+ 330          funcion que valida la trama del verificador o transporte lintech
+ 331          RSPT_TRP_OK           (0) significa que la trama es valida y sigue en el proceso
+ 332          NO_RSPD_TRP_PTO_COM   (1) falla en la respuesta por pto serie o trama invalida  
+ 333          ESPR_RSPT_TRP_TRAMA   (2) no ha recibido la trama del verificador o transporte  
+ 334          ERROR_TRP_TRAMA       (3) ERROR DE TRAMA CMD (N)
+ 335          
+ 336          
+ 337          ------------------------------------------------------------------------------*/
+ 338          
+ 339          char Trama_Validacion_P_N()
+ 340          {
+ 341   1        char Trama_Validacion_P_N=ESPR_RSPT_TRP_TRAMA;                                /*espera respuesta del transporte*/
+ 342   1        
+ 343   1            if ((ValTimeOutCom==1)||(buffer_ready==1))
+ 344   1            {
+ 345   2              if (buffer_ready==1)
+ 346   2              {
+ 347   3                buffer_ready=0;
+ 348   3                  
+ 349   3              
+ 350   3                if (Buffer_Rta_Lintech[Pos_TipoResp]=='P')
+ 351   3                {
+ 352   4                          
+ 353   4                  Trama_Validacion_P_N=RSPT_TRP_OK;                                       /*trama ok*/
+ 354   4                    
+ 355   4                }
+ 356   3                else if (Buffer_Rta_Lintech[Pos_TipoResp]=='N')
+ 357   3                {
+ 358   4                  
+ 359   4                  Trama_Validacion_P_N=ERROR_TRP_TRAMA  ;                                 /*error de trama*/
+C51 COMPILER V9.59.0.0   VERIFICADOR                                                       04/22/2020 15:25:24 PAGE 7   
+
+ 360   4                  
+ 361   4                }
+ 362   3                else
+ 363   3                {
+ 364   4                  Debug_txt_Tibbo((unsigned char *) "Respuesta  DESCONOCIDA \r\n");       /*la respuesta es desconocida*
+             -/
+ 365   4                  Trama_Validacion_P_N=ERROR_TRP_TRAMA  ;   
+ 366   4                  
+ 367   4                }
+ 368   3              }
+ 369   2              else
+ 370   2              {
+ 371   3                          
+ 372   3                Trama_Validacion_P_N=NO_RSPD_TRP_PTO_COM;                                 /*pto serie no responde */
+ 373   3                                                  
+ 374   3              }
+ 375   2      
+ 376   2            }
+ 377   1            
+ 378   1        return Trama_Validacion_P_N;
+ 379   1      }
+ 380          /*------------------------------------------------------------------------------
+ 381          funcion de error de respuesta pto serie
+ 382          
+ 383          variable en uart. cnt__ask_off=cuenta los numeros de error pto serie y reset de transporte 
+ 384          se limpia cuando llega la respuesta del transporte. 
+ 385          Rele_Atasco = es un I/O del Mc que activa / inhabilita el rele
+ 386          ON    (1) esta activo 
+ 387          OFF   (0) inhactivo 
+ 388          REENVIA_TRAMA   1
+ 389          ESPERA_MAS_TIEMPO 0
+ 390          cnt_espera_ask_on= cuenta el tiempo de ASK que esta activo,sin que le llegue
+ 391                             la trama completa, al  5 tiempos borra el ask y retrasmite el cmd
+ 392          
+ 393          error_rx_pto= (0)= ESPERA_MAS_TIEMPO nos da mas tiempo para esperar la trama,
+ 394                      = (1)= REENVIA_TRAMA reenvia la trama al transporte
+ 395          
+ 396          cnt__ask_off= varible global esta definida en pto serie y es un contador , que 
+ 397          se limpia cada vez que la trama a llegado completa y validada
+ 398          
+ 399          aSk= significa que llego al pto serie el 06 = ask donde el transporte dice que a recibido el cmd
+ 400          esta ejecutando y nos enviara la respuesta,necesita tiempo esta bit esta definino en el modulo uart es glo
+             -bal
+ 401          
+ 402          ------------------------------------------------------------------------------*/
+ 403          unsigned char error_rx_pto(void)
+ 404          {
+ 405   1      
+ 406   1      static unsigned cnt_espera_ask_on=0;
+ 407   1      unsigned char error_rx_pto=ESPERA_MAS_TIEMPO;
+ 408   1      
+ 409   1          
+ 410   1                
+ 411   1            Debug_txt_Tibbo((unsigned char *) "Dispensador No Responde PTO SERIE ...\r\n\r\n");
+ 412   1            Debug_chr_Tibbo (cnt__ask_off); 
+ 413   1            Debug_chr_Tibbo (cnt_espera_ask_on);
+ 414   1            Debug_chr_Tibbo (error_rx_pto);
+ 415   1            Debug_txt_Tibbo((unsigned char *) "\r\n\r\n");
+ 416   1            if (aSk==OFF)
+ 417   1            
+ 418   1            { 
+ 419   2                cnt__ask_off++;                                                                   /*cuento el error*/                                                               
+C51 COMPILER V9.59.0.0   VERIFICADOR                                                       04/22/2020 15:25:24 PAGE 8   
+
+ 420   2              if(cnt__ask_off>=10)
+ 421   2              {                                                                                   /*no contesta debe reset el transporte*/
+ 422   3                Rele_Atasco=ON;                                                                   /*off el rele de reset del verificador*/    
+ 423   3                Delay_10ms(110);
+ 424   3                cnt__ask_off=0;                                                                   /*limpio ls errores*/
+ 425   3                cnt_espera_ask_on=0;
+ 426   3                error_rx_pto=ESPERA_MAS_TIEMPO;                                                   /**/
+ 427   3                Rele_Atasco=OFF;  
+ 428   3                Delay_10ms(110);                                                                  /*On el rele de reset del verificador*/   
+ 429   3                ValTimeOutCom=TIME_CARD;
+ 430   3              }
+ 431   2              else;
+ 432   2              {
+ 433   3                error_rx_pto=REENVIA_TRAMA;                                                       /*1 reenvia trama*/
+ 434   3                ValTimeOutCom=TIME_CARD;
+ 435   3              }
+ 436   2            }                                                                                     /*aSk esta activo */
+ 437   1            else
+ 438   1            {
+ 439   2                cnt_espera_ask_on++;                                                              /*cuento n tiempos de ask para recibir el total de
+             - la trama*/
+ 440   2              if(cnt_espera_ask_on>=3)
+ 441   2              {
+ 442   3                cnt__ask_off=0;                                                                   /*paso tiempo de espera y no se completo la trama 
+ 443   3                                                                                                  limpio los reg y reenvio la trama y ask=off*/
+ 444   3                cnt_espera_ask_on=0;
+ 445   3                error_rx_pto=REENVIA_TRAMA;
+ 446   3                aSk=OFF;
+ 447   3                ValTimeOutCom=TIME_CARD;
+ 448   3              }
+ 449   2              else
+ 450   2              {
+ 451   3                cnt__ask_off=0;                                                                   /*damos tiempo de espera de la trama del transporte*
+             -/
+ 452   3                error_rx_pto=ESPERA_MAS_TIEMPO;;
+ 453   3                ValTimeOutCom=TIME_CARD;
+ 454   3              }
+ 455   2            }
+ 456   1              return (error_rx_pto);
+ 457   1      }
+ 458          /*------------------------------------------------------------------------------
+ 459          Funcion de respuesta a los cmd del transporte
+ 460          Retorna rta_cmd_transporte el estado en que queda
+ 461          Recibe tres datos unos es el 
+ 462          Estado_futuro= significa que la respuesta fue ok
+ 463          Estado_Error= en caso de que aya un error a que estado envia el codigo
+ 464          Estado_Actua= No ha llegado la respuesta y sigue en el mismo estado
+ 465          RSPT_TRP_OK           (0) significa que la trama es valida y sigue en el proceso
+ 466          NO_RSPD_TRP_PTO_COM   (1) falla en la respuesta por pto serie o trama invalida  
+ 467          ESPR_RSPT_TRP_TRAMA   (2) no ha recibido la trama del verificador o transporte  
+ 468          ERROR_TRP_TRAMA       (3) ERROR DE TRAMA CMD (N)
+ 469          
+ 470          (0)= ESPERA_MAS_TIEMPO nos da mas tiempo para esperar la trama,
+ 471          (1)= REENVIA_TRAMA reenvia la trama al transporte
+ 472          ------------------------------------------------------------------------------*/
+ 473          unsigned char   rta_cmd_transporte(unsigned char Estado_futuro, unsigned char Estado_Error, unsigned Estad
+             -o_Actual)
+ 474          {
+ 475   1        unsigned char temp;
+ 476   1        unsigned char EstadoComSeqMF;
+ 477   1        
+ 478   1            
+C51 COMPILER V9.59.0.0   VERIFICADOR                                                       04/22/2020 15:25:24 PAGE 9   
+
+ 479   1      if((temp=Trama_Validacion_P_N())!=RSPT_TRP_OK )
+ 480   1          {
+ 481   2            if(temp==ESPR_RSPT_TRP_TRAMA)                                                         /*no he recibido respuesta espero*/
+ 482   2            {
+ 483   3            EstadoComSeqMF=Estado_Actual;                                                     /*SEQ_RTA_CARD_POSno ha respondido*/
+ 484   3            } 
+ 485   2            else if (temp==ERROR_TRP_TRAMA)
+ 486   2            {
+ 487   3            Debug_txt_Tibbo((unsigned char *) "RTA_CMD_ERROR\r\n\r\n");                     /* trama no valida respuesta inco
+             -rrecta falla en la escritura */
+ 488   3            DebugBufferMF(Buffer_Rta_Lintech,g_cContByteRx,RESPUESTA);                            /*imprimo la trama recibida*/ 
+ 489   3            EstadoComSeqMF=Estado_Error;                                                        /*SEQ_INICIO (3) Trama invalida cmd (N)reenvio 
+             -cmd*/  
+ 490   3            }     
+ 491   2            else
+ 492   2            {
+ 493   3            /*Dispensador No Responde PTO SERIE ...*/
+ 494   3          
+ 495   3              if(temp=error_rx_pto()==ESPERA_MAS_TIEMPO)
+ 496   3              {
+ 497   4                EstadoComSeqMF=Estado_Actual;
+ 498   4              }                                                                                     /*SEQ_RTA_CARD_POS;*/
+ 499   3              else                                                                                  //(temp=error_rx_pto()==REENVIA_TRAMA)
+ 500   3              {
+ 501   4                EstadoComSeqMF=Estado_Error;                                                    /*SEQ_INICIO*/
+ 502   4              }                                                 
+ 503   3            }       
+ 504   2          }
+ 505   1          else
+ 506   1          {
+ 507   2            EstadoComSeqMF=Estado_futuro;
+ 508   2          }
+ 509   1        return EstadoComSeqMF;
+ 510   1      }
+ 511          
+ 512          unsigned char Ingreso_Vehiculo(void)
+ 513            {
+ 514   1        if((ValidaSensoresPaso())!=False)                                               // valido los sensor de piso
+ 515   1          {
+ 516   2            if (CardAutomatic==True)                                                    //se pregunta si expide la tarjeta automatica o por p
+             -resionar el boton
+ 517   2              {
+ 518   3                Debug_txt_Tibbo((unsigned char *) "Tarjeta: Automatico");               //expide tarjetas automatico con pre
+             -sencia
+ 519   3                Mov_Card(MovPos_RF);                                                    // muevo la tarjeta hasta el lector de rf
+ 520   3                Estado=SEQ_RTA_SEL_STACKER;                                             // valido el cmd enviado al verificador
+ 521   3               }
+ 522   2               else
+ 523   2                  {
+ 524   3                    sel_Pulsa();                                                          //se valida el pulsador en hardware
+ 525   3                    if (DataIn!=True)       
+ 526   3                      {
+ 527   4                        Debug_txt_Tibbo((unsigned char *) "Pulsador Activo");             //el pulsador fue presionado
+ 528   4                        Mov_Card(MovPos_RF);                                              //muevo tarjeta hasta el lector de RF
+ 529   4                        Estado=SEQ_RTA_SEL_STACKER;                                       //valido el cmd enviado al verificador
+ 530   4                      }
+ 531   3                    else
+ 532   3                        {
+ 533   4                          Estado=SEQ_RTA_CARD_SENSOR;
+ 534   4                        }
+ 535   3                  
+ 536   3                  } 
+C51 COMPILER V9.59.0.0   VERIFICADOR                                                       04/22/2020 15:25:24 PAGE 10  
+
+ 537   2          }
+ 538   1          else
+ 539   1              { 
+ 540   2                /*no hay vehiculo en los sensores se hace el loop otra vez */
+ 541   2                Estado=SEQ_INICIO;  
+ 542   2              }
+ 543   1        return Estado;
+ 544   1      }
+ 545           
+ 546          unsigned char Responde_Estado_Sensores_Transporte()
+ 547          {
+ 548   1            Debug_txt_Tibbo((unsigned char *) "RTA_CARD_POS OK\r\n\r\n");                         // trama valida Habilitado 
+ 549   1            DebugBufferMF(Buffer_Rta_Lintech,g_cContByteRx,RESPUESTA);                            //imprimo la trama recibida
+ 550   1            if (Buffer_Rta_Lintech[Pos_St0]==NO_CARDS_IN_MCNSM)                                 // CANAL LIBRE    no tiene tarjetas 
+             -en el mecanismo
+ 551   1            {
+ 552   2                
+ 553   2              if  ((Buffer_Rta_Lintech[Pos_St1]==LOW_NIVEL_CARDS)||(Buffer_Rta_Lintech[Pos_St1]==FULL_CARD  ))  //  se
+             - detecta la tarjeta en la boca TARJETA EN BEZZEL
+ 554   2              {
+ 555   3                if (Buffer_Rta_Lintech[Pos_St1]==LOW_NIVEL_CARDS  )                                         // nivel de tarjetas
+ 556   3                  {
+ 557   4                    Debug_txt_Tibbo((unsigned char *) "Nivel bajo de tarjetas\r\n\r\n");        // nivel bajo de tarjetas 
+ 558   4                    send_portERR(LOW_CARD);                                                     //envio msj al primario
+ 559   4                    PantallaLCD('a');                                                           //envio msj por la raspberry nivel bajo de tarjetas
+ 560   4                      //msj           
+ 561   4                   }
+ 562   3                   else
+ 563   3                      {
+ 564   4                       Estado=Ingreso_Vehiculo();
+ 565   4                      /*respuesta ok*/
+ 566   4                      }
+ 567   3              } 
+ 568   2              else 
+ 569   2                  {
+ 570   3                    /*dispensador no posee tarjetas*/
+ 571   3                    Debug_txt_Tibbo((unsigned char *) "Dispensador SIN TARJETAS..."); 
+ 572   3                    //msj a tibbo de no card  msj por diseñar 
+ 573   3                    send_portERR(NO_CARD);                                                      // se envia msj al uC principal, visualiza en el l
+             -cd que no hay tarjetas
+ 574   3                    Estado=SEQ_INICIO;                                                //inicio el loop
+ 575   3                   }
+ 576   2            }
+ 577   1            else if (Buffer_Rta_Lintech[Pos_St0]==CARD_IN_MOUTH)                                      //  se detecta la tarjeta en la
+             - boca TARJETA EN BEZZEL
+ 578   1                  {
+ 579   2                    /*hay una tarjeta en la boca del verificador */
+ 580   2                    Debug_txt_Tibbo((unsigned char *) "Tarjeta en la boca");                      //se envia msj al debuger q hay 
+             -tarjeta en la boca
+ 581   2                    Card_Insercion(Habilita);                                                     //se habilita recepcion de tarjetas por boca
+ 582   2                    Estado=SEQ_RTA_CAPTURE;                                           //se trabaja mensual        
+ 583   2                  }
+ 584   1                  else
+ 585   1                      {
+ 586   2                        Estado=SEQ_INICIO;  
+ 587   2                      }
+ 588   1        return Estado;  
+ 589   1      }
+ 590          /*------------------------------------------------------------------------------
+ 591          Secuencia de los cmd de inicio (reset dispositivo y graba eeprom)
+ 592          
+ 593          funcion  de los cmd de inicio (reset dispositivo y graba eeprom) retorna un (00) cuando a terminado exitos
+C51 COMPILER V9.59.0.0   VERIFICADOR                                                       04/22/2020 15:25:24 PAGE 11  
+
+             -o
+ 594          ------------------------------------------------------------------------------*/
+ 595          
+ 596          unsigned char  Secuencia_inicio_expedidor(void)
+ 597          {
+ 598   1        char temp;
+ 599   1        switch (Estado)
+ 600   1        {
+ 601   2          case INICIA_LINTECH:
+ 602   2      
+ 603   2                
+ 604   2              Inicializa(SIN_MOVIMIENTO);                                       //Inicio el transporte sin movimiento
+ 605   2              Estado=SEQ_CAPTURE_DATOS_INI;                                     // entra a validar la respuesta del transporte
+ 606   2              
+ 607   2            
+ 608   2            return (Estado);
+ 609   2          break;
+ 610   2      
+ 611   2      
+ 612   2      /*------------------------------------------------------------------------------
+ 613   2      Envia la primera trama de inicializacion del transporte sin movimiento
+ 614   2            (0) LA RESPUESTA ES OK
+ 615   2            (1) NO RESPONDE EL PTO SERIE
+ 616   2            (2) NO RECIBIDO LA TRAMA 
+ 617   2            (3) ERROR DE TRAMA CMD (N)
+ 618   2      ------------------------------------------------------------------------------*/
+ 619   2            
+ 620   2          case SEQ_CAPTURE_DATOS_INI:
+ 621   2      
+ 622   2            if((temp=Trama_Validacion_P_N())!=0)
+ 623   2          {
+ 624   3            if(temp==2)
+ 625   3            {
+ 626   4            Estado=SEQ_CAPTURE_DATOS_INI;                                                         /*(2)no ha respondido*/
+ 627   4            } 
+ 628   3            else if (temp==3)
+ 629   3            {
+ 630   4            Debug_txt_Tibbo((unsigned char *) "INICIALIZA SIN MOVIMIENTO ERROR\r\n\r\n");         /* trama no valida*/
+ 631   4            DebugBufferMF(Buffer_Rta_Lintech,g_cContByteRx,RESPUESTA);                            /*imprimo la trama recibida*/ 
+ 632   4            Estado=INICIA_LINTECH;                                                                /* (3) Trama invalida cmd (N)*/ 
+ 633   4            }
+ 634   3            else
+ 635   3            {
+ 636   4              Debug_txt_Tibbo((unsigned char *) "Dispensador No Responde PTO SERIE ...\r\n\r\n");
+ 637   4              Estado=INICIA_LINTECH;                                                              /*(1) no responde el pto*/  
+ 638   4            }
+ 639   3          }
+ 640   2          else
+ 641   2          {
+ 642   3            Debug_txt_Tibbo((unsigned char *) "INICIALIZA SIN MOVIMIENTO OK\r\n\r\n");            /* trama valida Habilit
+             -ado */
+ 643   3            DebugBufferMF(Buffer_Rta_Lintech,g_cContByteRx,RESPUESTA);                            /*imprimo la trama recibida*/
+ 644   3            Estado=GRABA_EEPROM;                                                                  /*(0) respuesta ok*/
+ 645   3          }     
+ 646   2          return (Estado);
+ 647   2          break;
+ 648   2            
+ 649   2      /*------------------------------------------------------------------------------
+ 650   2      Envia el cmd de grabar claves a la eeprom del transporte 
+ 651   2      ------------------------------------------------------------------------------*/
+ 652   2            
+ 653   2            case GRABA_EEPROM:
+C51 COMPILER V9.59.0.0   VERIFICADOR                                                       04/22/2020 15:25:24 PAGE 12  
+
+ 654   2              
+ 655   2              Dwload_EEprom();                                                                    //envio el cmd de grabar la eeprom
+ 656   2              Estado=SEQ_CAPTURA_OK_EEPROM;                                                       // entra a validar la respuesta del transport
+             -e
+ 657   2            
+ 658   2            
+ 659   2      
+ 660   2            return (Estado);
+ 661   2              break;
+ 662   2        
+ 663   2      /*------------------------------------------------------------------------------
+ 664   2      se analiza la respuesta 
+ 665   2            (0) LA RESPUESTA ES OK
+ 666   2            (1) NO RESPONDE EL PTO SERIE
+ 667   2            (2) NO RECIBIDO LA TRAMA 
+ 668   2            (3) ERROR DE TRAMA CMD (N)
+ 669   2      ------------------------------------------------------------------------------*/
+ 670   2            
+ 671   2          case SEQ_CAPTURA_OK_EEPROM:
+ 672   2          
+ 673   2          if((temp=Trama_Validacion_P_N())!=0)
+ 674   2          {
+ 675   3            if(temp==2)
+ 676   3            {
+ 677   4            Estado=SEQ_CAPTURA_OK_EEPROM;                                                         /*no ha respondido*/
+ 678   4            }
+ 679   3            else if (temp==3)
+ 680   3            {
+ 681   4            Debug_txt_Tibbo((unsigned char *) "DWLOAP EEPROM ERROR\r\n\r\n");                     /* trama no valida respuest
+             -a incorrecta falla en la escritura de la clave*/
+ 682   4            DebugBufferMF(Buffer_Rta_Lintech,g_cContByteRx,RESPUESTA);                            /*imprimo la trama recibida*/ 
+ 683   4            Estado=INICIA_LINTECH;                                                                /* (3) Trama invalida cmd (N)*/ 
+ 684   4            }     
+ 685   3            else
+ 686   3            {
+ 687   4              Debug_txt_Tibbo((unsigned char *) "Dispensador No Responde PTO SERIE ...\r\n\r\n");
+ 688   4              Estado=INICIA_LINTECH;                                                              /*NO RESPONDE PTO SERIE */
+ 689   4            }       
+ 690   3          }
+ 691   2          else
+ 692   2          {
+ 693   3            Debug_txt_Tibbo((unsigned char *) "DWLOAP EEPROM OK\r\n\r\n");                        /* trama valida Habilitado */
+ 694   3            DebugBufferMF(Buffer_Rta_Lintech,g_cContByteRx,RESPUESTA);                            /*imprimo la trama recibida*/
+ 695   3            Estado=FIN_OK;                                                                        /*respuesta ok clave grabada con exito*/
+ 696   3          }     
+ 697   2      
+ 698   2          return (Estado);
+ 699   2          break;
+ 700   2      
+ 701   2      /*------------------------------------------------------------------------------
+ 702   2      Fin de la secuencia de comandos con exito 
+ 703   2      ------------------------------------------------------------------------------*/    
+ 704   2            
+ 705   2              case FIN_OK:
+ 706   2      
+ 707   2              return (Estado);
+ 708   2          break;
+ 709   2            
+ 710   2                
+ 711   2              default:
+ 712   2              return Estado=INICIA_LINTECH; 
+ 713   2              break;
+C51 COMPILER V9.59.0.0   VERIFICADOR                                                       04/22/2020 15:25:24 PAGE 13  
+
+ 714   2        }
+ 715   1      }
+ 716          
+ 717          /*------------------------------------------------------------------------------
+ 718          Prosedimiento  q hace paso a paso la secuencia de la MF
+ 719          atributos
+ 720          ValTimeOutCom = tiempo que  espera para recibir datos pto serie
+ 721          Tarjeta_on = detecto vehiculo en loop y tiene tarjeta en boca
+ 722          g_cEstadoComSeqMF = nos dice en el estado que nos encontramos dentro del seguimiento
+ 723          ------------------------------------------------------------------------------*/
+ 724          
+ 725          unsigned char SecuenciaExpedidorMF(unsigned char Estado_Comunicacion_Secuencia_MF)
+ 726          {
+ 727   1      //  unsigned char temp;
+ 728   1      //  unsigned char sen_on_off;
+ 729   1      //  static unsigned char buffer_S1_B0[17];
+ 730   1      //  static unsigned char buffer_S1_B1[17];
+ 731   1      //  static unsigned char buffer_S1_B2[17];
+ 732   1      
+ 733   1      //  unsigned char clock_temp[6];
+ 734   1        
+ 735   1      
+ 736   1        switch (Estado_Comunicacion_Secuencia_MF)
+ 737   1        {
+ 738   2      //***********************************************************************************************
+ 739   2          
+ 740   2          case SEQ_INICIO:
+ 741   2      
+ 742   2            if (ValTimeOutCom==1)
+ 743   2            {
+ 744   3              //Tarjeta_on=0;
+ 745   3              Rele_Atasco=OFF;                                                                    /*activo el rele de reset del verificador logica neg
+             -ativa*/    
+ 746   3              Check_Status(SENSOR_NORMAL);                                                              /* se pregunta al transporte en q estado es
+             -tan las TI*/
+ 747   3              Estado_Comunicacion_Secuencia_MF=SEQ_RESPUESTA_TRASPORTE;                                                 // entra a validar l
+             -a respuesta del transporte
+ 748   3              
+ 749   3            }
+ 750   2       
+ 751   2          break;
+ 752   2          case  SEQ_RESPUESTA_TRASPORTE:
+ 753   2            Estado_Comunicacion_Secuencia_MF=rta_cmd_transporte(SEQ_RTA_CARD_SENSOR,SEQ_INICIO,SEQ_RESPUESTA_TRASPO
+             -RTE);
+ 754   2            Debug_txt_Tibbo((unsigned char *) "Estado_Comunicacion_Secuencia_MF=");                     /* trama no valida re
+             -spuesta incorrecta falla en la escritura */
+ 755   2            Debug_chr_Tibbo(Estado_Comunicacion_Secuencia_MF);
+ 756   2            Debug_txt_Tibbo((unsigned char *) "\r\n\r\n");  
+ 757   2            
+ 758   2          break;
+ 759   2      /*------------------------------------------------------------------------------
+ 760   2      vengo de seq_inicio donde preguntamos en el estado q se encuentra las tarjetas
+ 761   2            en esta caso:
+ 762   2            Analizo la trama y valido
+ 763   2            
+ 764   2      RSPT_TRP_OK           (0) significa que la trama es valida y sigue en el proceso
+ 765   2      NO_RSPD_TRP_PTO_COM   (1) falla en la respuesta por pto serie o trama invalida  
+ 766   2      ESPR_RSPT_TRP_TRAMA   (2) no ha recibido la trama del verificador o transporte  
+ 767   2      ERROR_TRP_TRAMA       (3) ERROR DE TRAMA CMD (N)
+ 768   2      
+ 769   2      si la trama es correcta validamos si hay tarjetas en el expedidor
+ 770   2      Buffer_Rta_Lintech[Pos_St0]=='0'  el canal esta libre no tiene tarjeta  
+C51 COMPILER V9.59.0.0   VERIFICADOR                                                       04/22/2020 15:25:24 PAGE 14  
+
+ 771   2      (Buffer_Rta_Lintech[Pos_St1]=='1') (1)nivel bajo de tarjetas (x)tarjetas ok     
+ 772   2      (0)= ESPERA_MAS_TIEMPO nos da mas tiempo para esperar la trama,
+ 773   2      (1)= REENVIA_TRAMA reenvia la trama al transporte
+ 774   2        
+ 775   2            
+ 776   2      
+ 777   2      ------------------------------------------------------------------------------*/      
+ 778   2          
+ 779   2            
+ 780   2          case SEQ_RTA_CARD_SENSOR:
+ 781   2            Debug_txt_Tibbo((unsigned char *) "RTA_CARD_POS OK\r\n\r\n");                         // trama valida Habilitado 
+ 782   2            DebugBufferMF(Buffer_Rta_Lintech,g_cContByteRx,RESPUESTA);  
+ 783   2            Estado_Comunicacion_Secuencia_MF=Responde_Estado_Sensores_Transporte(); 
+ 784   2            ValTimeOutCom=TIME_CARD;
+ 785   2          break;
+ 786   2          case SEQ_MOVER_CARD_RF:
+ 787   2            Mov_Card(MovPos_RF);
+ 788   2          break;
+ 789   2        
+ 790   2      /*-----------------------------------------------------
+ 791   2      respuesta ok hacemos la validacion de los niveles de tarjetas 
+ 792   2      NO_CARDS_IN_MCNSM -> No tiene tarjetas en el mecanismo      sto=0
+ 793   2      CARD_IN_MOUTH     -> hay una tarjeta dentro del bessel      st0=1
+ 794   2      CARD_OK_READ_RF   -> Tarjeta en posicion para leer/escribir dentro del mecanismo st0=2
+ 795   2      NO_HAVE_CARDS     -> no tiene tarjetas en el deposito st1=0
+ 796   2      LOW_NIVEL_CARDS   -> nivel bajo de tarjetas en el deposito  st1=1
+ 797   2      FULL_CARD         -> Deposito de tarjetas esta lleno        st1=2
+ 798   2      -------------------------------------------------------------   */
+ 799   2        /*  else
+ 800   2          {
+ 801   2          Responde_Estado_Sensores_Transporte()
+ 802   2          {
+ 803   2            Debug_txt_Tibbo((unsigned char *) "RTA_CARD_POS OK\r\n\r\n");                         // trama valida Habilitado 
+ 804   2            DebugBufferMF(Buffer_Rta_Lintech,g_cContByteRx,RESPUESTA);                            //imprimo la trama recibida
+ 805   2              if (Buffer_Rta_Lintech[Pos_St0]==NO_CARDS_IN_MCNSM)                                 // CANAL LIBRE    no tiene tarjetas
+             - en el mecanismo
+ 806   2              {
+ 807   2                
+ 808   2                  if  ((Buffer_Rta_Lintech[Pos_St1]==LOW_NIVEL_CARDS)||(Buffer_Rta_Lintech[Pos_St1]==FULL_CARD  ))  /*  
+             -se detecta la tarjeta en la boca TARJETA EN BEZZEL
+ 809   2                  {
+ 810   2                    if (Buffer_Rta_Lintech[Pos_St1]==LOW_NIVEL_CARDS  )                                         // nivel de tarjetas
+ 811   2                    {
+ 812   2                      Debug_txt_Tibbo((unsigned char *) "Nivel bajo de tarjetas\r\n\r\n");        // nivel bajo de tarjetas 
+ 813   2                      send_portERR(LOW_CARD);                                                     //envio msj al primario
+ 814   2                      PantallaLCD('a');                                                           //envio msj por la raspberry nivel bajo de tarjetas
+ 815   2                      //msj           
+ 816   2                     }
+ 817   2                     else
+ 818   2                     {
+ 819   2                      /*respuesta ok*/
+ 820   2      /*funcion q valide los sensores y verifique si expide tarjetas automatica o por boton 
+ 821   2                                                                                                      */                
+ 822   2          /*            if((sen_on_off=ValidaSensoresPaso())!=0)                                    // valido los sensores
+ 823   2                      {
+ 824   2                          if (CardAutomatic==1)                                                   //se pregunta si expide la tarjeta automatica o p
+             -or presionar el boton
+ 825   2                          {
+ 826   2      
+ 827   2                            Debug_txt_Tibbo((unsigned char *) "Tarjeta: Automatico");             //expide tarjetas automatico co
+             -n presencia
+ 828   2                            Mov_Card(MovPos_RF);                                                  // muevo la tarjeta hasta el lector de rf
+C51 COMPILER V9.59.0.0   VERIFICADOR                                                       04/22/2020 15:25:24 PAGE 15  
+
+ 829   2                            g_cEstadoComSeqMF=SEQ_RTA_SEL_STACKER;                                // valido el cmd enviado al verificador
+ 830   2                              
+ 831   2                          }
+ 832   2                          else
+ 833   2                          {
+ 834   2                            sel_Pulsa();                                                          //se valida el pulsador en hardware
+ 835   2                              if ((DataIn==0))        
+ 836   2                              {
+ 837   2                                                    
+ 838   2                                Debug_txt_Tibbo((unsigned char *) "Pulsador Activo");             //el pulsador fue presionado
+ 839   2                                Mov_Card(MovPos_RF);                                              //muevo tarjeta hasta el lector de RF
+ 840   2                                g_cEstadoComSeqMF=SEQ_RTA_SEL_STACKER;                            //valido el cmd enviado al verificador
+ 841   2                              }
+ 842   2                              else
+ 843   2                              {
+ 844   2                                g_cEstadoComSeqMF=SEQ_RTA_CARD_SENSOR;
+ 845   2                              }
+ 846   2                  
+ 847   2                          } 
+ 848   2                      }
+ 849   2                    
+ 850   2                      else
+ 851   2                      { 
+ 852   2                        /*no hay vehiculo en los sensores se hace el loop otra vez */
+ 853   2        /*                g_cEstadoComSeqMF=SEQ_INICIO; 
+ 854   2                      }
+ 855   2                    }
+ 856   2                   }  
+ 857   2                   else 
+ 858   2                   {
+ 859   2                     /*dispensador no posee tarjetas*/
+ 860   2        /*            Debug_txt_Tibbo((unsigned char *) "Dispensador SIN TARJETAS..."); 
+ 861   2                    //msj a tibbo de no card  msj por diseñar 
+ 862   2                    send_portERR(NO_CARD);                                                      // se envia msj al uC principal, visualiza en el l
+             -cd que no hay tarjetas
+ 863   2                    g_cEstadoComSeqMF=SEQ_INICIO;                                               //inicio el loop
+ 864   2                   }
+ 865   2              }
+ 866   2              else if (Buffer_Rta_Lintech[Pos_St0]==CARD_IN_MOUTH)                                      //  se detecta la tarjeta en l
+             -a boca TARJETA EN BEZZEL
+ 867   2              {
+ 868   2                /*hay una tarjeta en la boca del verificador */
+ 869   2      /*          Debug_txt_Tibbo((unsigned char *) "Tarjeta en la boca");                      //se envia msj al debuger q hay 
+             -tarjeta en la boca
+ 870   2                Card_Insercion(Habilita);                                                     //se habilita recepcion de tarjetas por boca
+ 871   2                g_cEstadoComSeqMF=SEQ_RTA_CAPTURE;                                            //se trabaja mensual        
+ 872   2              }
+ 873   2          }*/ 
+ 874   2        //  break;
+ 875   2      
+ 876   2        
+ 877   2      /*------------------------------------------------------------------------------
+ 878   2      expulsa la tarjeta por que no pertenece a MF50
+ 879   2      ------------------------------------------------------------------------------*/      
+ 880   2          
+ 881   2              default:
+ 882   2              Estado_Comunicacion_Secuencia_MF=SEQ_INICIO;  
+ 883   2              break;  
+ 884   2            
+ 885   2        } 
+ 886   1        return Estado_Comunicacion_Secuencia_MF;
+ 887   1      }
+C51 COMPILER V9.59.0.0   VERIFICADOR                                                       04/22/2020 15:25:24 PAGE 16  
+
+ 888          
+ 889          
+ 890            
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =   1032    ----
+   CONSTANT SIZE    =    369    ----
+   XDATA SIZE       =      3       9
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)
