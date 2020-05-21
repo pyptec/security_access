@@ -27,5 +27,7 @@ void Prog_Use_Lpr();
 void Prog_Comparacion_Activa();
 void tipo_pantalla();
 unsigned char *hash_id(unsigned char *clave);
+void Prog_tarjeta_automatica_o_boton();
+void Prog_AntiPassBack();
 
 #endif	/* _PROG_H_ */

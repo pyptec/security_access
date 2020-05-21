@@ -1,4 +1,4 @@
-C51 COMPILER V9.59.0.0   PANTALLAS                                                         04/22/2020 15:25:23 PAGE 1   
+C51 COMPILER V9.59.0.0   PANTALLAS                                                         05/21/2020 14:05:11 PAGE 1   
 
 
 C51 COMPILER V9.59.0.0, COMPILATION OF MODULE PANTALLAS
@@ -62,7 +62,7 @@ line level    source
   52   1        d=putchar(data_com);
   53   1        if (enable_char_add != 0) d=putchar(0x00);
   54   1        
-C51 COMPILER V9.59.0.0   PANTALLAS                                                         04/22/2020 15:25:23 PAGE 2   
+C51 COMPILER V9.59.0.0   PANTALLAS                                                         05/21/2020 14:05:11 PAGE 2   
 
   55   1      }
   56          
@@ -126,7 +126,7 @@ line level    source
  114          
  115          /*------------------------------------------------------------------------------
  116          Escribo el reloj en ascii en bloque 
-C51 COMPILER V9.59.0.0   PANTALLAS                                                         04/22/2020 15:25:23 PAGE 3   
+C51 COMPILER V9.59.0.0   PANTALLAS                                                         05/21/2020 14:05:11 PAGE 3   
 
  117          AA 80 28 trama de inicio de configuracion de la pantalla
  118          07 numero de caracteres de la trama de reloj
@@ -190,7 +190,7 @@ line level    source
  175   3                LCD_txt ((unsigned char *)       "ERROR: VALIDANDO PLACA... ",1);
  176   3                
  177   3                break;
-C51 COMPILER V9.59.0.0   PANTALLAS                                                         04/22/2020 15:25:23 PAGE 4   
+C51 COMPILER V9.59.0.0   PANTALLAS                                                         05/21/2020 14:05:11 PAGE 4   
 
  178   3      
  179   3              case ERROR_LOOP:
@@ -254,7 +254,7 @@ line level    source
  237   3                tx_chrlcd(num_chr*2,0);
  238   3                LCD_txt((unsigned char *)        "FUERA DE LINEA ",1);
  239   3              
-C51 COMPILER V9.59.0.0   PANTALLAS                                                         04/22/2020 15:25:23 PAGE 5   
+C51 COMPILER V9.59.0.0   PANTALLAS                                                         05/21/2020 14:05:11 PAGE 5   
 
  240   3                break;
  241   3              
@@ -318,7 +318,7 @@ line level    source
  299   3                        break;
  300   3                  case ERROR_COD_PARK:
  301   3                       
-C51 COMPILER V9.59.0.0   PANTALLAS                                                         04/22/2020 15:25:23 PAGE 6   
+C51 COMPILER V9.59.0.0   PANTALLAS                                                         05/21/2020 14:05:11 PAGE 6   
 
  302   3                        Raspberry_data((unsigned char  *) "a;98;CARD NO ES DE PARQUEADERO \n\r\0");
  303   3                        break;
@@ -382,7 +382,7 @@ line level    source
  361   3                  case  'C':    /*Mensualidad cancelada*/
  362   3                  Raspberry_data((unsigned char  *) "a;97;MENSUALIDAD CANCELADA ... DIRIJASE A ADMINISTRACION\n\
              -r\0");
-C51 COMPILER V9.59.0.0   PANTALLAS                                                         04/22/2020 15:25:23 PAGE 7   
+C51 COMPILER V9.59.0.0   PANTALLAS                                                         05/21/2020 14:05:11 PAGE 7   
 
  363   3                        break;
  364   3                  case  'a':    /*Mensualidad cancelada*/

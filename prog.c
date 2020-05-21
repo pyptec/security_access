@@ -21,20 +21,22 @@ unsigned char validacion [9]={"admin"};	//usuario
 
 
 /*define posiciones de memoria*/
-#define EE_ID_CLIENTE					0x0000
-#define EE_ID_PARK		  			0x0002
-#define EE_TIEMPO_GRACIA		  0x0004
-#define EE_SIN_COBRO					0x0006
-#define EE_DEBUG							0x0008
-#define EE_USE_LPR						0x000A
-#define EE_CPRCN_ACTIVA				0x000C
-#define EE_TIPO_PANTALLA			0X000E
-#define EE_TICKET_ID					0X0100
+#define EE_ID_CLIENTE						0x0000
+#define EE_ID_PARK		  				0x0002
+#define EE_TIEMPO_GRACIA		 	 	0x0004
+#define EE_SIN_COBRO						0x0006
+#define EE_DEBUG								0x0008
+#define EE_USE_LPR							0x000A
+#define EE_CPRCN_ACTIVA					0x000C
+#define EE_TIPO_PANTALLA				0X000E
+#define EE_CARD_AUTOMATIC_BOTON	0x000f
+#define EE_HABILITA_APB					0x0010
+#define EE_TICKET_ID						0X0100
 
 /* Definicion del tamaño de comando y longitud de cmd*/
 
-#define 	NUMCOMMAND 10
-#define 	LONGSIZE 2
+#define 	NUMCOMMAND 12
+#define 	LONGSIZE 3
 
 
 
@@ -48,8 +50,10 @@ char comandos[NUMCOMMAND][LONGSIZE]=
 	"5",		//USE_LPR
 	"6",//COMPARACION_ACTIVA
 	"7",			//TIPO_PANTALLA
-	"8",     //AYUDA Ayuda!muestra todos los comandos
-	"9"		//SALIRSalir de programacion
+	"8",				// tarjeta automatica o boton
+	"9",			//habilita apb o inhabilta
+	"10",     //AYUDA Ayuda!muestra todos los comandos
+	"11"		//SALIRSalir de programacion
 };
 
 /*------------------------------------------------------------------------------
@@ -483,6 +487,73 @@ void tipo_pantalla()
 	}
 	
 }
+void Prog_tarjeta_automatica_o_boton()
+{
+	unsigned char buffer[10];
+	unsigned int dataee;
+
+	
+	dataee=rd_eeprom(0xa8,EE_CARD_AUTOMATIC_BOTON);																//se lee LA CONFIGURACION 
+	sprintf(buffer,"%d",dataee);																									/*se convierte  un entero a un string*/
+	if(dataee==0)
+	{
+		printf("\r\n\n EXPIDE TARJETA PULSANDO BOTON\r\n\n");														/*se muestra el id_cliente actual en pantalla*/
+	}
+	else
+	{
+		printf("\r\n\n EXPIDE TARJETA AUTOMATICA\r\n\n");			
+	}
+	
+	printf("\r\n\n DIGITE EL NUEVO ESTADO DEL EXPEDIDOR=");																	/*digite el nuevo id_cliente*/
+	IngresaDato(buffer,0);																												/*trae el dato digitado*/
+	dataee=atoi(buffer);																													/*lo convierto a un dato hex*/
+	wr_eeprom(0xa8,EE_CARD_AUTOMATIC_BOTON,dataee);																					/*grabo el dato en la eeprom*/
+	
+	dataee=rd_eeprom(0xa8,EE_CARD_AUTOMATIC_BOTON);																				/*leo el dato grabado*/
+	sprintf(buffer,"%d",dataee);	
+	if(dataee==0)
+	{
+		printf("\r\n\n EXPIDE TARJETA PULSANDO BOTON\r\n\n");														/*se muestra el id_cliente actual en pantalla*/
+	}
+	else
+	{
+		printf("\r\n\n EXPIDE TARJETA AUTOMATICA\r\n\n");			
+	}
+}
+void Prog_AntiPassBack()
+{
+	unsigned char buffer[10];
+	unsigned int dataee;
+
+	
+	dataee=rd_eeprom(0xa8,EE_HABILITA_APB);																					/*se lee el id_cliente actual */
+	sprintf(buffer,"%d",dataee);																									/*se convierte  un entero a un string*/
+	if(dataee==0)
+	{
+		printf("\r\n\n ACTUAL ANTIPASSBACK INHABILITADO=%s\r\n\n",buffer);														/*se muestra el id_cliente actual en pantalla*/
+	}
+	else
+	{
+		printf("\r\n\n ACTUAL ANTIPASSBACK HABILITADO=%s\r\n\n",buffer);			
+	}
+	
+	printf("\r\n\n DIGITE EL NUEVO ESTADO DE ANTIPASSBACK=");																	/*digite el nuevo id_cliente*/
+	IngresaDato(buffer,0);																												/*trae el dato digitado*/
+	dataee=atoi(buffer);																													/*lo convierto a un dato hex*/
+	wr_eeprom(0xa8,EE_HABILITA_APB,dataee);																					/*grabo el dato en la eeprom*/
+	
+	dataee=rd_eeprom(0xa8,EE_HABILITA_APB);																				/*leo el dato grabado*/
+	sprintf(buffer,"%d",dataee);	
+	if(dataee==0)
+	{
+		printf("\r\n\n ACTUAL ANTIPASSBACK INHABILITADO=%s\r\n\n",buffer);														/*se muestra el id_cliente actual en pantalla*/
+	}
+	else
+	{
+		printf("\r\n\n ACTUAL ANTIPASSBACK HABILITADO=%s\r\n\n",buffer);			
+	}
+}
+
 /*------------------------------------------------------------------------------
 Rutina que muestra la lista de comandos
 ------------------------------------------------------------------------------*/
@@ -495,9 +566,11 @@ void Show()
    printf("\r\n DEBUG         --- CMD 4 Habilitar = 1, Inhabilitar = 0");
 	 printf("\r\n USE_LPR       --- CMD 5 Habilitar = 1, Inhabilitar = 0");
    printf("\r\n COMPARACION_ACTIVA --- CMD 6 Habilitar = 1, Inhabilitar = 0");
-	 printf("\r\n TIPO_PANTALLA     --- CMD 7 Muestra los comandos");
-	 printf("\r\n AYUDA         --- CMD 8 Muestra los comandos");
-   printf("\r\n SALIR         --- CMD 9 Salir de programacion");
+	 printf("\r\n TIPO_PANTALLA     --- CMD 7 PANTALLA LCD =0 PANTALLA RASPBERRI=1");
+	 printf("\r\n CARD_AUTOMATICA   --- CMD 8 BOTTON=0 AUTOMATICA=1");
+	 printf("\r\n ANTIPASSBACK        --- CMD 9 Habilitar = 1, Inhabilitar = 0");
+	 printf("\r\n AYUDA         --- CMD 10 Muestra los comandos");
+   printf("\r\n SALIR         --- CMD 11 Salir de programacion");
 
 }
 
@@ -515,7 +588,7 @@ unsigned char buffer[40];
 
 
   
-  printf("\r\n\nSistema de Programacion Expedidor Impresora cod  Barras, QR \r\n\r\n");
+  printf("\r\n\nSistema de Programacion Expedidor \r\n\r\n");
 
  
 	
@@ -608,11 +681,18 @@ printf("\r\n\n/>Password:");
 						case 7:  		//tipo de pantalla
 						tipo_pantalla();
 						  break;
-						case 8:  //help me
+						case 8:			//tarjeta automatica o pulsador
+						Prog_tarjeta_automatica_o_boton();
+						break;
+						case 9:  //cmd antipassback
+           
+							Prog_AntiPassBack();
+               break;
+						case 0x0a:  //help me
            
 							Show();
                break;
-						case 9:  //salir
+						case 0x0b:  //salir
 						return;
 
                break;

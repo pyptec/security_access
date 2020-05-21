@@ -108,7 +108,7 @@ void Check_Status(unsigned char Detalle)
 {
 	unsigned char j, bcc;
 	unsigned char	g_scArrTxComSoft[10];
-	Debug_txt_Tibbo((unsigned char *) "Check_Status\r\n\r\n");
+	Debug_txt_Tibbo((unsigned char *) "Check_Status\r\n");
 
 	bcc=0;
 
@@ -146,13 +146,13 @@ void Card_Insercion(char Tipo)
 	unsigned char	g_scArrTxComSoft[10];
 	if (Tipo==Habilita)
 	{
-		Debug_txt_Tibbo((unsigned char *) "Habilita Insersion\r\n\r\n");
+		Debug_txt_Tibbo((unsigned char *) "Habilita Insersion\r\n");
 		g_scArrTxComSoft[6]=Habilita;
 	}
 	else
 	{
 		
-		Debug_txt_Tibbo((unsigned char *) "Inhabilita Insersion\r\n\r\n");
+		Debug_txt_Tibbo((unsigned char *) "Inhabilita Insersion\r\n");
 		g_scArrTxComSoft[6]=Inhabilita;
 	
 	}
@@ -200,23 +200,23 @@ void Mov_Card(unsigned char Posicion)
 	{
 	 	if (Posicion==MovPos_RF)
 		{
-		 	Debug_txt_Tibbo((unsigned char *) "Moviendo Tarjeta a RF\r\n\r\n");
+		 	Debug_txt_Tibbo((unsigned char *) "Moviendo Tarjeta a RF\r\n");
 		}
 		else if (Posicion==MovPos_IC)
 		{
-			Debug_txt_Tibbo((unsigned char *) "Moviendo Tarjeta a IC\r\n\r\n");
+			Debug_txt_Tibbo((unsigned char *) "Moviendo Tarjeta a IC\\r\n");
    		}
 		else if (Posicion==MovPos_Front)
 		{
-			Debug_txt_Tibbo((unsigned char *) "Moviendo Tarjeta a Bezel\r\n\r\n");
+			Debug_txt_Tibbo((unsigned char *) "Moviendo Tarjeta a Bezel\r\n");
  		}
 		else if (Posicion==MovPos_EjectFront)
 		{
-			Debug_txt_Tibbo((unsigned char *) "Expulsando Tarjeta\r\n\r\n");
+			Debug_txt_Tibbo((unsigned char *) "Expulsando Tarjeta\r\n");
 		}
 		else if (Posicion==MovPos_Capture)
 		{
-			Debug_txt_Tibbo((unsigned char *) "Capturando Tarjeta\r\n\r\n");
+			Debug_txt_Tibbo((unsigned char *) "Capturando Tarjeta\r\n");
  		}
 
 		g_scArrTxComSoft[0]=STX_LINTECH;
@@ -251,7 +251,7 @@ unsigned char j, bcc;
 unsigned char	g_scArrTxComSoft[10];
 		  bcc=0;
 	
-	Debug_txt_Tibbo((unsigned char *) "Aut_Card_check_Status\r\n\r\n");
+	Debug_txt_Tibbo((unsigned char *) "Aut_Card_check_Status\r\n");
  	
 	g_scArrTxComSoft[0]=STX_LINTECH;
 		g_scArrTxComSoft[1]=0X00;
@@ -282,7 +282,7 @@ CMD q programa la clave en el verificador o transporte
  	unsigned char j, bcc;
 	unsigned char	g_scArrTxComSoft[21];
 	bcc=0;
-	Debug_txt_Tibbo((unsigned char *) "Download MF EEprom\r\n\r\n");
+	Debug_txt_Tibbo((unsigned char *) "Download MF EEprom\r\n");
 	
 	g_scArrTxComSoft[0]=0xF2;
 	g_scArrTxComSoft[1]=0X00;
@@ -325,7 +325,7 @@ void LoadVerify_EEprom(void)
 	unsigned char j, bcc;
 	unsigned char	g_scArrTxComSoft[15];
 	bcc=0;
-	Debug_txt_Tibbo((unsigned char *) "Carga y Verifica de EEprom\r\n\r\n");
+	Debug_txt_Tibbo((unsigned char *) "Carga y Verifica de EEprom\r\n");
 
 
 	g_scArrTxComSoft[0]=0xF2;
@@ -337,7 +337,7 @@ void LoadVerify_EEprom(void)
 	g_scArrTxComSoft[6]='3';
 	g_scArrTxComSoft[7]=0x00;
 	g_scArrTxComSoft[8]=0x21;
-   	g_scArrTxComSoft[9]=0x00;
+  g_scArrTxComSoft[9]=0x00;
 	g_scArrTxComSoft[10]=0x01;
 	g_scArrTxComSoft[11]=ETX;
 	g_scArrTxComSoft[12]=0xc6;
@@ -373,7 +373,7 @@ void RD_MF(unsigned char Sector, unsigned char Bloque)
 	
 	Debug_txt_Tibbo((unsigned char *) " Bloque: ");
 	Debug_chr_Tibbo(Bloque);
-	Debug_txt_Tibbo((unsigned char *) "\r\n\r\n");
+	Debug_txt_Tibbo((unsigned char *) "\r\n");
 
 
 	g_scArrTxComSoft[0]=0xF2;
@@ -422,7 +422,7 @@ void WR_MF(unsigned char Sector, unsigned char Bloque,unsigned char *buffer)
 	
 	Debug_txt_Tibbo((unsigned char *) " Bloque: ");
 	Debug_chr_Tibbo(Bloque);
-	Debug_txt_Tibbo((unsigned char *) "\r\n\r\n");
+	Debug_txt_Tibbo((unsigned char *) "\r\n");
 																	  
 	g_scArrTxComSoft[0]=0xF2;
 	g_scArrTxComSoft[1]=0X00;									  
@@ -438,63 +438,11 @@ void WR_MF(unsigned char Sector, unsigned char Bloque,unsigned char *buffer)
 	g_scArrTxComSoft[10]=Bloque;														//Bloque;
 	g_scArrTxComSoft[11]=0x01;
 
-	if(Sector!=2)
-	{	
-/*------------------------------------------------------------------------------
-borro la fecha de entrada de entrada 
-------------------------------------------------------------------------------*/
-
-  g_scArrTxComSoft[12]=0x00;															/*borro la fecha de entrada año mes dia hora minutos*/
-	g_scArrTxComSoft[13]=0x00;
-	g_scArrTxComSoft[14]=0x00;
-	g_scArrTxComSoft[15]=0x00;
-	g_scArrTxComSoft[16]=0x00;
-
-/*------------------------------------------------------------------------------
-borro los descuentos
-------------------------------------------------------------------------------*/
-	g_scArrTxComSoft[17]=0x00;
-	g_scArrTxComSoft[18]=0x00;
-	g_scArrTxComSoft[19]=0x00;
-	
-/*------------------------------------------------------------------------------
-tipo de vehiculo
-------------------------------------------------------------------------------*/
-	
-	g_scArrTxComSoft[20]=*buffer;
-	
-/*------------------------------------------------------------------------------
-direccion de BOArd_pcb de salida o puerta de salida
-------------------------------------------------------------------------------*/	
-	g_scArrTxComSoft[21]=0x0f&Dir_board();
-	
-/*------------------------------------------------------------------------------
-programo el APB como salida (02) entrada(01)
-------------------------------------------------------------------------------*/
-g_scArrTxComSoft[22]=02;
-
-/*------------------------------------------------------------------------------
-borro la fecha de salida 
-------------------------------------------------------------------------------*/
-
-  g_scArrTxComSoft[23]=0x00;															/*borro la fecha de entrada año mes dia hora minutos*/
-	g_scArrTxComSoft[24]=0x00;
-	g_scArrTxComSoft[25]=0x00;
-	g_scArrTxComSoft[26]=0x00;
-	g_scArrTxComSoft[27]=0x00;
-
-	}
-		else 
-		{
-			for (j=12; j<=28; j++)
+		for (j=0; j<=16; ++j)
 			{
-				g_scArrTxComSoft[j]=0x00;	
+				g_scArrTxComSoft[j+12]=*(buffer + j);	
 			}
-		}
-
-
-
-
+	
 	g_scArrTxComSoft[28]=ETX;
 	
 	for (j=0; j<=28; j++)

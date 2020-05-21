@@ -374,7 +374,7 @@
       </TargetOption>
       <Groups>
         <Group>
-          <GroupName>Source Group 1</GroupName>
+          <GroupName>Expedidor</GroupName>
           <Files>
             <File>
               <FileName>main.c</FileName>
@@ -440,6 +440,16 @@
               <FileName>verificador.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\verificador.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>Documentacion</GroupName>
+          <Files>
+            <File>
+              <FileName>Documentacion.txt</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\Documentacion.txt</FilePath>
             </File>
           </Files>
         </Group>

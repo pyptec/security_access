@@ -92,7 +92,7 @@ definiciones de los estados del verificador o expedidor
  unsigned	char 	Tarjeta_on=0;																		/*detecto vehiculo en loop y tiene tarjeta en boca*/
  unsigned char 	Raspberry;																		/*variable que define los msj por lcd (0) o rasberry (1)*/
  unsigned int Timer_tivo=0;
- unsigned char CardAutomatic;															/*varible q define si entrega tarjetas automaticas=1 o por boton=0*/
+// unsigned char CardAutomatic;															/*varible q define si entrega tarjetas automaticas=1 o por boton=0*/
 /* definicion de variables globales de configuracion del parqueadero*/
 
 int ID_CLIENTE;						

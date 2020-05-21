@@ -27,5 +27,7 @@ void wrpage_eeprom (unsigned char control,unsigned char dir_h,unsigned char dir_
 unsigned char rd_eeprom (unsigned char control,unsigned int Dir); 
 void graba_serie(unsigned char *buffer);
 unsigned char *Lee_No_Ticket();
+unsigned long int  Read_EEprom_Ticket();
+void Incremente_Ticket();
 
 #endif	/* _EEPROM_H_ */

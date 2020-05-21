@@ -1,4 +1,4 @@
-C51 COMPILER V9.59.0.0   CLOCK                                                             04/22/2020 15:25:23 PAGE 1   
+C51 COMPILER V9.59.0.0   CLOCK                                                             05/21/2020 14:05:11 PAGE 1   
 
 
 C51 COMPILER V9.59.0.0, COMPILATION OF MODULE CLOCK
@@ -62,7 +62,7 @@ line level    source
   52   3          }
   53   2          else
   54   2          {
-C51 COMPILER V9.59.0.0   CLOCK                                                             04/22/2020 15:25:23 PAGE 2   
+C51 COMPILER V9.59.0.0   CLOCK                                                             05/21/2020 14:05:11 PAGE 2   
 
   55   3            io=0;
   56   3          }
@@ -126,7 +126,7 @@ line level    source
  114   1        
  115   1        
  116   1          if ((*datos_clock >= '0') &&(*datos_clock <= '9'))                                /*valida el dia parte alta */
-C51 COMPILER V9.59.0.0   CLOCK                                                             04/22/2020 15:25:23 PAGE 3   
+C51 COMPILER V9.59.0.0   CLOCK                                                             05/21/2020 14:05:11 PAGE 3   
 
  117   1          {
  118   2          
@@ -190,7 +190,7 @@ line level    source
  176   6                    {
  177   7                      validador =1;
  178   7                      
-C51 COMPILER V9.59.0.0   CLOCK                                                             04/22/2020 15:25:23 PAGE 4   
+C51 COMPILER V9.59.0.0   CLOCK                                                             05/21/2020 14:05:11 PAGE 4   
 
  179   7                    }               
  180   6                  }
@@ -254,7 +254,7 @@ line level    source
  238   1            datos_clock++;
  239   1            datos_clock++;
  240   1            datos_clock++;
-C51 COMPILER V9.59.0.0   CLOCK                                                             04/22/2020 15:25:23 PAGE 5   
+C51 COMPILER V9.59.0.0   CLOCK                                                             05/21/2020 14:05:11 PAGE 5   
 
  241   1            /*hora*/
  242   1            wr_clk(WHORA,two_one(*datos_clock,*(datos_clock+1)));                   //hora
@@ -318,7 +318,7 @@ line level    source
  300   1         nibble_h<<=4;
  301   1         nibble_h=nibble_h & 0xf0;
  302   1         nibble_l=nibble_l & 0x0f;
-C51 COMPILER V9.59.0.0   CLOCK                                                             04/22/2020 15:25:23 PAGE 6   
+C51 COMPILER V9.59.0.0   CLOCK                                                             05/21/2020 14:05:11 PAGE 6   
 
  303   1         byte_out=(nibble_h | nibble_l);
  304   1         return byte_out;
@@ -382,7 +382,7 @@ line level    source
  362   1      
  363   1        temp=id_l;
  364   1        temp=temp&0xf0;
-C51 COMPILER V9.59.0.0   CLOCK                                                             04/22/2020 15:25:23 PAGE 7   
+C51 COMPILER V9.59.0.0   CLOCK                                                             05/21/2020 14:05:11 PAGE 7   
 
  365   1        temp>>=4;
  366   1        valor=valor+(pow(16,1))*temp;
@@ -446,7 +446,7 @@ line level    source
  424   1          datos_clock++;
  425   1          *datos_clock=(dato&0x0f)| 0x30;           /*dato parte bajo*/
  426   1          datos_clock++;    
-C51 COMPILER V9.59.0.0   CLOCK                                                             04/22/2020 15:25:23 PAGE 8   
+C51 COMPILER V9.59.0.0   CLOCK                                                             05/21/2020 14:05:11 PAGE 8   
 
  427   1      
  428   1          /*dia*/
@@ -510,7 +510,7 @@ line level    source
  486          {
  487              
  488            /*año*/
-C51 COMPILER V9.59.0.0   CLOCK                                                             04/22/2020 15:25:23 PAGE 9   
+C51 COMPILER V9.59.0.0   CLOCK                                                             05/21/2020 14:05:11 PAGE 9   
 
  489            /**datos_clock=hex_bcd(lee_clk(RANO));      
  490             datos_clock++;
@@ -574,7 +574,7 @@ line level    source
  548   1        char temp=1;
  549   1        unsigned char datos_clk[6];
  550   1        
-C51 COMPILER V9.59.0.0   CLOCK                                                             04/22/2020 15:25:23 PAGE 10  
+C51 COMPILER V9.59.0.0   CLOCK                                                             05/21/2020 14:05:11 PAGE 10  
 
  551   1      
  552   1        /*se valida la fecha de salida si es cero no ha pagado*/
@@ -638,7 +638,7 @@ line level    source
  608   6                  temp=2;                                                 /*Excede T.GRACIA*/
  609   6                }
  610   5              }
-C51 COMPILER V9.59.0.0   CLOCK                                                             04/22/2020 15:25:23 PAGE 11  
+C51 COMPILER V9.59.0.0   CLOCK                                                             05/21/2020 14:05:11 PAGE 11  
 
  611   4              else
  612   4              {
@@ -702,7 +702,7 @@ line level    source
  665   2        {
  666   3          min_out=*(buffer+4)+Minutos_Dcto;         
  667   3          if (min_out>59)                   // Si los minutos no sube de 60 no hay que aumentar nada
-C51 COMPILER V9.59.0.0   CLOCK                                                             04/22/2020 15:25:23 PAGE 12  
+C51 COMPILER V9.59.0.0   CLOCK                                                             05/21/2020 14:05:11 PAGE 12  
 
  668   3          {
  669   4      //----------------------------------------------------
@@ -766,7 +766,7 @@ line level    source
  723   6      /*
  724   6                float flotante=12.345;
  725   6                int entero;
-C51 COMPILER V9.59.0.0   CLOCK                                                             04/22/2020 15:25:23 PAGE 13  
+C51 COMPILER V9.59.0.0   CLOCK                                                             05/21/2020 14:05:11 PAGE 13  
 
  726   6      
  727   6                entero=(int)flotante;
@@ -830,7 +830,7 @@ line level    source
  783   6                {
  784   7                  if (dia_out>28)
  785   7                  {
-C51 COMPILER V9.59.0.0   CLOCK                                                             04/22/2020 15:25:23 PAGE 14  
+C51 COMPILER V9.59.0.0   CLOCK                                                             05/21/2020 14:05:11 PAGE 14  
 
  786   8                    dia_out=dia_out-28;
  787   8                    mes_out=*(buffer+1)+1;
@@ -894,7 +894,7 @@ line level    source
  841   4                if ((mes_out==1)||(mes_out==3)||(mes_out==5)||(mes_out==7)||(mes_out==8)||(mes_out==10)||(mes_out==12
              -))    // Meses de 31 dias
  842   4                {
-C51 COMPILER V9.59.0.0   CLOCK                                                             04/22/2020 15:25:23 PAGE 15  
+C51 COMPILER V9.59.0.0   CLOCK                                                             05/21/2020 14:05:11 PAGE 15  
 
  843   5                  if (dia_out>31)
  844   5                  {
@@ -958,7 +958,7 @@ line level    source
  901   5                      }
  902   5                    }
  903   5                    else
-C51 COMPILER V9.59.0.0   CLOCK                                                             04/22/2020 15:25:23 PAGE 16  
+C51 COMPILER V9.59.0.0   CLOCK                                                             05/21/2020 14:05:11 PAGE 16  
 
  904   5                    {
  905   5                      bisiesto=1;
@@ -1022,7 +1022,7 @@ MODULE INFORMATION:   STATIC OVERLAYABLE
    CODE SIZE        =   4159    ----
    CONSTANT SIZE    =   ----    ----
    XDATA SIZE       =      1      58
-C51 COMPILER V9.59.0.0   CLOCK                                                             04/22/2020 15:25:23 PAGE 17  
+C51 COMPILER V9.59.0.0   CLOCK                                                             05/21/2020 14:05:11 PAGE 17  
 
    PDATA SIZE       =   ----    ----
    DATA SIZE        =   ----    ----

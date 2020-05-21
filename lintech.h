@@ -7,3 +7,6 @@ void Mov_Card(unsigned char Posicion);
 void SecuenciaExpedidor(void);
 void Card_Insercion(char Tipo);
 void Dwload_EEprom (void);
+void RD_MF(unsigned char Sector, unsigned char Bloque);
+void WR_MF(unsigned char Sector, unsigned char Bloque,unsigned char *buffer);	
+void LoadVerify_EEprom(void);

@@ -154,7 +154,7 @@ void variable_inicio()
 	USE_LPR=rd_eeprom(0xa8,EE_USE_LPR);
 	COMPARACION_ACTIVA=rd_eeprom(0xa8,EE_CPRCN_ACTIVA);
 	Raspberry = rd_eeprom(0xa8,EE_TIPO_PANTALLA);
-	CardAutomatic=01;										/*0= con boton 1= es igual automatico*/
+	//CardAutomatic=01;										/*0= con boton 1= es igual automatico*/
 }
 /*------------------------------------------------------------------------------
 Note that the two function above, _getkey and putchar, replace the library

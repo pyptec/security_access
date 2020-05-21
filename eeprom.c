@@ -313,23 +313,47 @@ void graba_serie(unsigned char *buffer)
 			
 		}
 }
+/*----------------------------------------------------------------------------------
+Procedimiento que lee el No de Ticket en EEprom y lo retorna en un strint
+-----------------------------------------------------------------------------------*/
 unsigned char *Lee_No_Ticket()
 {
-	unsigned char cod_3,cod_2,cod_1,cod_0;
-	unsigned long int Noticket=0;
+	unsigned long int Noticket;
 	unsigned char Lee_No_Ticket[11];
-	
-	cod_3=rd_eeprom(0xa8,EE_TICKET_ID);
-	cod_2=rd_eeprom(0xa8,EE_TICKET_ID+1);
-	cod_1=rd_eeprom(0xa8,EE_TICKET_ID+2);
-	cod_0=rd_eeprom(0xa8,EE_TICKET_ID+3);
-	
-	Noticket=((Noticket| cod_3)<<8);
-	Noticket=((Noticket| cod_2)<<8);
-	Noticket=((Noticket| cod_1)<<8);
-	Noticket=Noticket| cod_0;
+	Noticket=Read_EEprom_Ticket();
 	sprintf( Lee_No_Ticket,"%lu",Noticket);
 	Debug_txt_Tibbo((unsigned char *) Lee_No_Ticket);
 	Debug_txt_Tibbo((unsigned char *) "\n\r");
 	return Lee_No_Ticket;
+}
+/*----------------------------------------------------------------------------------
+Procedimiento que lee el No de Ticket en EEprom y lo retorna en un long int
+-----------------------------------------------------------------------------------*/
+unsigned long int  Read_EEprom_Ticket()
+{
+	unsigned char cod3,cod2,cod1,cod0;
+	unsigned long int Noticket=0;
+	cod3=rd_eeprom(0xa8,EE_TICKET_ID);
+	cod2=rd_eeprom(0xa8,EE_TICKET_ID+1);
+	cod1=rd_eeprom(0xa8,EE_TICKET_ID+2);
+	cod0=rd_eeprom(0xa8,EE_TICKET_ID+3);
+	
+	Noticket=((Noticket| cod3)<<8);
+	Noticket=((Noticket| cod2)<<8);
+	Noticket=((Noticket| cod1)<<8);
+	Noticket=Noticket| cod0;
+	return Noticket;
+}
+/*----------------------------------------------------------------------------------
+Procedimiento que incrementa en uno el numero del Ticket y la graba en  EEprom 
+-----------------------------------------------------------------------------------*/
+void Incremente_Ticket()
+{
+	
+	unsigned long int Noticket;
+	unsigned char Lee_No_Ticket[11];
+	Noticket=Read_EEprom_Ticket();
+	Noticket=Noticket+1;
+	sprintf( Lee_No_Ticket,"%lu",Noticket);
+	graba_serie(Lee_No_Ticket);
 }

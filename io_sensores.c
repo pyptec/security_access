@@ -127,14 +127,14 @@ unsigned char  ValidaSensoresPaso(void)
 				{  sel_Auto();
 					if (DataIn==0)
 					{					  															// sensor Auto activo es un carro 
-					   Debug_txt_Tibbo((unsigned char *) "Sensores Auto y sensor1 activos.");
+					   Debug_txt_Tibbo((unsigned char *) "Sensores Auto y sensor1 activos.\n\r");
 					   Tipo_Vehiculo=AUTOMOVIL;
 							return 0xff;
 						
 					}
 					else
 						{
-							Debug_txt_Tibbo((unsigned char *) "Sensor activo sensor1 .");
+							Debug_txt_Tibbo((unsigned char *) "Sensor activo sensor1.\n\r");
 							Tipo_Vehiculo=MOTO;
 							return 0xff ;
 						}
@@ -146,13 +146,13 @@ unsigned char  ValidaSensoresPaso(void)
 					if (DataIn==0)
 					{
 					
-					Debug_txt_Tibbo((unsigned char *) "Detectado. Sensor Auto.");
+					Debug_txt_Tibbo((unsigned char *) "Detectado. Sensor Auto.\n\r");
 						Tipo_Vehiculo=MOTO;
 						return 0xff;	
 					}
 					else
 					{
-						Debug_txt_Tibbo((unsigned char *) "Sensores no detectados");
+						Debug_txt_Tibbo((unsigned char *) "Sensores no detectados.\n\r");
 						return 0x00;	
 					}
 						
@@ -161,12 +161,12 @@ unsigned char  ValidaSensoresPaso(void)
 			}
 			else 
 			{
-				Debug_txt_Tibbo((unsigned char *) "Vehiculo Esperando Salir.");
+				Debug_txt_Tibbo((unsigned char *) "Vehiculo Esperando Salir.\n\r");
 				return 0x00;
 			}
 		}else 
 		{
-		Debug_txt_Tibbo((unsigned char *) "Vehiculo Saliendo. Un momento");
+		Debug_txt_Tibbo((unsigned char *) "Vehiculo Saliendo. Un momento.\n\r");
 		return 0x00;
 		}
 
