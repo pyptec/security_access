@@ -52,16 +52,13 @@ sbit ready = P3^2;					//Salida. solicitud envio Datos							*
 definiciones de los estados de recepcion de datos pto serie
 ------------------------------------------------------------------------------*/
 #define  	ESPERA_RX 				0  		//espera el primer cmd de recepcion del verificado 
-#define  	ESPERA_INICIO_RTA 1			// se almacena el stx
-#define 	LEN_DATA					2
-#define 	STORE_DATA				3
 
 /*tiempo de delay entre funciones
 ------------------------------------------------------------------------------*/
 #define 	TIME_CARD					5			//50
-#define 	TIME_EJECT				5			//60
-#define 	RET_MINIMO				3
+#define 	TIME_WAIT					20
 
+#define False										0x00
 /*------------------------------------------------------------------------------*
 definiciones de los estados del verificador o expedidor
 ------------------------------------------------------------------------------*/
@@ -70,7 +67,7 @@ definiciones de los estados del verificador o expedidor
 
 */
 #define SEQ_INICIO				0X00	
-#define INICIA_LINTECH		0x30
+
 
 /* definicion de variables globales*/
  
@@ -79,24 +76,20 @@ definiciones de los estados del verificador o expedidor
  unsigned char xdata Buffer_Rta_Lintech[TBUF_SIZE_LINTECH];
 
  unsigned char ValTimeOutCom=10;																	// define el tiempo de espera del timer 
- unsigned char Timer_wait=0;
+ unsigned char Timer_wait=0;																			// timer de seg
  unsigned char g_cEstadoComSoft=ESPERA_RX;												// estado del buffer de recepcion de datos
  unsigned char g_cContByteRx=0;																		// contador de datos de recepcion serial
- unsigned char g_cEstadoComSeqMF=SEQ_INICIO;
  unsigned char Tipo_Vehiculo=0;																		/*tipo de vehiculo*/
  unsigned int  T_GRACIA;																				/*tiempo de gracia del parqueo*/
  unsigned int  SIN_COBRO;																				/*SIN_COBRO=0 inhabilitado =(1) sin cobro = (2) sin cobro y salida el mismo dia*/
  unsigned char  Debug_Tibbo;
  unsigned char  USE_LPR;
- unsigned char  COMPARACION_ACTIVA;
- unsigned	char 	Tarjeta_on=0;																		/*detecto vehiculo en loop y tiene tarjeta en boca*/
  unsigned char 	Raspberry;																		/*variable que define los msj por lcd (0) o rasberry (1)*/
  unsigned int Timer_tivo=0;
-// unsigned char CardAutomatic;															/*varible q define si entrega tarjetas automaticas=1 o por boton=0*/
+
 /* definicion de variables globales de configuracion del parqueadero*/
 
-int ID_CLIENTE;						
-int COD_PARK;
+
 
 /*constantes globales*/
 const unsigned  char ACK= 06	;
@@ -104,8 +97,8 @@ const unsigned  char ETX= 03	;
 const unsigned  char STX_LINTECH= 0xf2	;
 
 /*definicion de bit*/
-bit buffer_ready=0;
-
+bit buffer_ready = 0;
+bit placa_ready = 0;
 /*define posiciones de memoria*/
 #define EE_ID_CLIENTE					0x0000
 #define EE_ID_PARK		  			0x0002
@@ -129,6 +122,7 @@ bit buffer_ready=0;
 #include <Accescan.h>
 #include <pantallas.h>
 #include <prog.h>
+#include <monitor.h>
 
 /*Definicion de funciones prototipo*/
 void off_Timer0_Interrup(void);

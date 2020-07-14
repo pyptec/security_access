@@ -7,6 +7,7 @@ extern void Delay (void);
 extern void Delay_20us(unsigned int cnt);
 extern void Debug_Fecha_actual(unsigned char *buffer);
 extern float pow   (float x, float y);
+extern void Debug_chr_Tibbo(unsigned char Dat);
 /*variables externas */
 extern unsigned char  Debug_Tibbo;
 
@@ -29,6 +30,14 @@ sbit rst = P1^6 ;
 #define RMIN						0x83
 #define RSEG						0x81
 #define RDIA_SEMANA			0x8B
+
+#define True										0x01
+#define False										0x00
+
+enum Dia_Semana{
+	Domingo=1,Lunes, Martes, Miercoles, Jueves, Viernes, Sabado 
+};
+
 
 unsigned char data_clk;
 //*********************************************************************************
@@ -219,6 +228,7 @@ Escribo el reloj en ascii en bloque
 void Block_write_clock_ascii(unsigned char *datos_clock)	
 
 {			
+	unsigned char temp;
 //dia,mes,año,hora,minutos,segundos,Dia de la semana 
 		
 			/*dia*/
@@ -254,7 +264,8 @@ void Block_write_clock_ascii(unsigned char *datos_clock)
 			datos_clock++;
 			datos_clock++;
 			/*dia de la semana*/
-			wr_clk(WDIA_SEMANA,(*datos_clock&0x0f));			 													//dia de la semana
+			temp =*datos_clock & 0x07;
+			wr_clk(WDIA_SEMANA,temp);			 													//dia de la semana
 	
 }
 /*------------------------------------------------------------------------------
@@ -279,7 +290,7 @@ unsigned char bcd_hex (unsigned char l_data)
  /*------------------------------------------------------------------------------
  Rutina que convierte de Hex a bcd 
 ------------------------------------------------------------------------------*/
- unsigned char hex_bcd (unsigned char byte)
+unsigned char hex_bcd (unsigned char byte)
 {
   unsigned char nibble_h; 
 	unsigned char nibble_l;
@@ -302,6 +313,28 @@ unsigned char bcd_hex (unsigned char l_data)
 	 nibble_l=nibble_l & 0x0f;
 	 byte_out=(nibble_h | nibble_l);
  	 return byte_out;
+	
+}
+void hex_ascii(unsigned char * datos,unsigned char * fecha_asii)
+{
+	unsigned char dato;
+	//unsigned fecha_asii[7];
+	
+		dato=hex_bcd (*datos);
+		*fecha_asii=((dato&0xf0)>>4)| 0x30;			/*dato parte alta*/
+	 	*(fecha_asii+1)=(dato&0x0f)| 0x30;						/*dato parte bajo*/
+	  datos++;
+	
+		dato=hex_bcd (*(datos));
+			*(fecha_asii+2)=((dato&0xf0)>>4)| 0x30;			/*dato parte alta*/
+	 		*(fecha_asii+3)=(dato&0x0f)| 0x30;						/*dato parte bajo*/
+	  datos++;
+	
+		dato=hex_bcd (*(datos));
+			*(fecha_asii+4)=((dato&0xf0)>>4)| 0x30;			/*dato parte alta*/
+	 		*(fecha_asii+5)=(dato&0x0f)| 0x30;						/*dato parte bajo*/
+	  
+			*(fecha_asii+6)=0;
 	
 }
 /*------------------------------------------------------------------------------
@@ -332,7 +365,8 @@ void ByteHex_Decimal(unsigned char *buffer,unsigned char valorhex)
 	*buffer=decena|0x30;
 	buffer++;
 	*buffer=numero|0x30;														/*unidad en ascii */
-	
+	buffer++;
+	*buffer= 0;
 
 }
 /*------------------------------------------------------------------------------
@@ -440,27 +474,16 @@ void Block_read_clock_ascii(unsigned char *datos_clock)
 		*datos_clock=(dato&0x0f)| 0x30;						/*dato parte bajo*/
 		datos_clock++;				
 		
-		/*minutos*/					
-		dato=lee_clk(RMIN);
+		/*minutos*/		
+		dato=lee_clk(RMIN);		
 		*datos_clock=((dato&0xf0)>>4)| 0x30;			/*dato parte alta*/
 	  datos_clock++;
 		*datos_clock=(dato&0x0f)| 0x30;						/*dato parte bajo*/
 		datos_clock++;	
-	
-		/*segundos*/		
-		dato=lee_clk(RSEG);
-		*datos_clock=((dato&0xf0)>>4)| 0x30;			/*dato parte alta*/
-	  datos_clock++;
-		*datos_clock=(dato&0x0f)| 0x30;						/*dato parte bajo*/
-		datos_clock++;
-	
-		/*dia de la semana*/
-		dato=lee_clk(RDIA_SEMANA);
-		*datos_clock=(dato&0x0f)| 0x30;						/*dato parte bajo*/
-		datos_clock++;
 		*datos_clock=0;
 								
 }	
+
 void Block_read_Clock_Hex(unsigned char *datos_clock)
 {
 	
@@ -539,96 +562,38 @@ void cond_ini_clock()
 funcion q verifica la fecha maxima de salida 
 VERIFICA PAGO (sin_pago)....																		  
 SI PAGO, VERIFICA QUE LA FECHA MAX DE SALIDA NO EXCEDE A LA ACTUAL (acceso_ok)							
-(0) pago parqueadero y esta entre el tiempo permitido
-(1) no hay pago
-(2) excede tiempo de gracia
+(0) vencida
+(1) ok en rango
+
 ------------------------------------------------------------------------------*/
 char check_fechaOut(char *buffer)
 {
-	char temp=1;
+	unsigned long int fecha_inicio,fecha_fin;
 	unsigned char datos_clk[6];
+	char temp;
 	
-
-	/*se valida la fecha de salida si es cero no ha pagado*/
-
-	if ((*buffer==0x00)&&(*(buffer+1)==0x00)&&(*(buffer+2)==0x00)&&(*(buffer+3)==0x00)&&(*(buffer+4)==0x00))
-		{
+	
+		Block_read_Clock_Hex(datos_clk);															/*leo el clock actual*/
+ 		fecha_inicio =	datos_clk[0] * 365 + datos_clk[1] * 30 + datos_clk[2] ;
+		fecha_fin = *(buffer ) * 365 + *(buffer + 1) * 30  + *(buffer + 2);
 		
-		temp=1;																													/*no hay pago*/
 			
-	 	}
-	else
+		if (fecha_fin >= fecha_inicio	)						
 		{
-			
-			Block_read_Clock_Hex(datos_clk);															/*leo el clock actual*/
- 	
-		if (Debug_Tibbo==1)
-		{
-			 Debug_Fecha_actual(datos_clk);																/*muestro la fecha y hora actual*/
-			
-		}	
-			
-		
- 		if (datos_clk[0]<*buffer)																				/*comparo el año leido de board_pcb con el dato de salida leido en  la MF */
-		{
-			temp=0;																												/*el tiempo esta entre el tiempo de gracia y activa la salida*/
- 		}
-		else if (datos_clk[0]==*buffer)																	/*el año es igual*/
-		{
-			if (datos_clk[1]<*(buffer+1))																	/*comparo el mes*/
-			{
-				temp=0;																											/*el tiempo esta entre el tiempo de gracia y activa la salida*/
-			}
-			else if (datos_clk[1]==*(buffer+1))														/*el mes es igual*/
- 			{
-				if (datos_clk[2]<*(buffer+2))																/*se compara el dia*/
-				{
-			  		temp=0;																									/*el tiempo esta entre el tiempo de gracia y activa la salida*/
-				}
-				else if(datos_clk[2]==*(buffer+2))													/*el dia es igual*/
-				{
-					if (datos_clk[3]<*(buffer+3))															/*comparo la hora del board_pcb con el dato de salida de la MF*/
-					{
-   			  			temp=0;																							/*el tiempo esta entre el tiempo de gracia y activa la salida*/
-					}
-					else if (datos_clk[3]==*(buffer+3))												/*es igual la hora*/
-					{
-						if (datos_clk[4]<*(buffer+4))   //(minut<=minutOut)
-						{
-					 		temp=0;																								/*el tiempo esta entre el tiempo de gracia y activa la salida*/
-						}
-						else 
-						{
-							temp=2;																								/*Excede T.GRACIA*/
-						}
-
-					}
-					else
-					{
-						temp=2;																									/*Excede T.GRACIA*/
-					}
-				}
-				else
-				{
-					temp=2;																										/*Excede T.GRACIA*/
-				} 
-			}
-			else
-			{
-				temp=2;																											/*Excede T.GRACIA*/
-			}
+			temp = True;
 		}
 		else
 		{
-	 		temp=2;																												/*Excede T.GRACIA*/
- 
+			temp = False;
 		}
-		
-	}
+			
+
+	
 	return temp;
 }
 
 //*******************************************************************************************
+/*
 void analiza_tiempo(char *buffer,unsigned int Val_DctoMinutos)
 {
 
@@ -671,6 +636,7 @@ if ((*(buffer+0x0b)==0x00)&&(*(buffer+0x0c)==0x00)&&(*(buffer+0x0d)==0x00)&&(*(b
 			min_out=min_out-(Xtemp*60);					// Total de minutos
 //----------------------------------------------------
 			hora_out=*(buffer+3)+Xtemp;					/*horas*/
+/*
 			if (hora_out>23)
 			{
 				Xtemp= hora_out/24;					  	// Numero Dias a aumentar
@@ -696,8 +662,8 @@ if ((*(buffer+0x0b)==0x00)&&(*(buffer+0x0c)==0x00)&&(*(buffer+0x0d)==0x00)&&(*(b
 					else
 					{
 					 	mes_out=*(buffer+1);												/*mes*/
-						ano_out=*(buffer+0);												/*año*/
-					}	
+	/*					ano_out=*(buffer+0);												/*año*/
+	/*				}	
  				}
 				else if ((*(buffer+1)==4)||(*(buffer+1)==6)||(*(buffer+1)==9)||(*(buffer+1)==11))										// Meses de 30 dias
 				{
@@ -758,7 +724,7 @@ if ((*(buffer+0x0b)==0x00)&&(*(buffer+0x0c)==0x00)&&(*(buffer+0x0d)==0x00)&&(*(b
 					}
 */
 
-					if ((*(buffer+0)==16)||(*(buffer+0)==20)||(*(buffer+0)==24)||(*(buffer+0)==28)||(*(buffer+0)==32)||(*(buffer+0)==36))
+	/*				if ((*(buffer+0)==16)||(*(buffer+0)==20)||(*(buffer+0)==24)||(*(buffer+0)==28)||(*(buffer+0)==32)||(*(buffer+0)==36))
 					{
 				 		bisiesto=1;
 					}		
@@ -906,7 +872,7 @@ if ((*(buffer+0x0b)==0x00)&&(*(buffer+0x0c)==0x00)&&(*(buffer+0x0d)==0x00)&&(*(b
 							}
 						}
 */
-						if ((ano_out==16)||(ano_out==20)||(ano_out==24)||(ano_out==28)||(ano_out==32)||(ano_out==36))
+	/*					if ((ano_out==16)||(ano_out==20)||(ano_out==24)||(ano_out==28)||(ano_out==32)||(ano_out==36))
 						{
 			 				bisiesto=1;
 						}		
@@ -953,3 +919,4 @@ if ((*(buffer+0x0b)==0x00)&&(*(buffer+0x0c)==0x00)&&(*(buffer+0x0d)==0x00)&&(*(b
 	
 
 }
+*/

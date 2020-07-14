@@ -8,12 +8,20 @@ Diseñado Ing. Jaime Pedraza
 interrupcion por timer 
 ValTimeOutCom se decrementa cada overflow de la interrupcion
 Timer_wait		Incrementa cada overflow de la interrrupcion
+clock=22.1184mhz
+ciclo de mqn= clock/12 =0.5nseg
+timer= ciclo mqn* reloj = 0.5 x65535 =32
+temporizado=timer* ValTimeOutCom = 32*100=320ms
 ------------------------------------------------------------------------------*/
  timer0_int() interrupt 1 using 2
     {
 			
 			ValTimeOutCom--;
-			Timer_wait++;
+			if (ValTimeOutCom == 1)
+			{
+				Timer_wait++;
+			}
+			
 			Timer_tivo++;
 			TF0=0;
 			
@@ -93,39 +101,7 @@ void EscribirCadenaSoft_buffer(unsigned char *buffer,unsigned char tamano_cadena
 			buffer++;
     }
 }
-/*
-unsigned char recibe_cmd_LPR(unsigned char *buffer_cmd)
-{
-	 unsigned char j, MaxChrRx;
-	 unsigned int contador;
-	
-	 bit time_out;
-	 
-	 MaxChrRx=11;
 
-	
-			for (j=0; j<MaxChrRx; j++)
-			{
-				contador=0;
-				time_out=0;
-				while ((rx_ip==1)&&(time_out==0))
-				{
-					contador++;
-					if (contador>65000)
-					{
-						time_out=1;
-						
-					}				
-				}
-				if(time_out==1)break;
-					
-	 				*buffer_cmd=rx_Data();
-						buffer_cmd++;
-			}
-
-			*buffer_cmd=0;
-			return j;
-}
 /*------------------------------------------------------------------------------
 Rutina de las condiciones iniciales del board
 ------------------------------------------------------------------------------*/
@@ -146,15 +122,13 @@ Rutina que lee la eeprom, los bit de configuracion
 void variable_inicio()
 {
 	
-	ID_CLIENTE=rd_eeprom(0xa8,EE_ID_CLIENTE);	
-	COD_PARK=rd_eeprom(0xa8,EE_ID_PARK);
+	
 	T_GRACIA=rd_eeprom(0xa8,EE_TIEMPO_GRACIA);
 	SIN_COBRO=rd_eeprom(0xa8,EE_SIN_COBRO);
-	Debug_Tibbo=1;//rd_eeprom(0xa8,EE_DEBUG);
+	Debug_Tibbo=rd_eeprom(0xa8,EE_DEBUG);
 	USE_LPR=rd_eeprom(0xa8,EE_USE_LPR);
-	COMPARACION_ACTIVA=rd_eeprom(0xa8,EE_CPRCN_ACTIVA);
 	Raspberry = rd_eeprom(0xa8,EE_TIPO_PANTALLA);
-	//CardAutomatic=01;										/*0= con boton 1= es igual automatico*/
+	
 }
 /*------------------------------------------------------------------------------
 Note that the two function above, _getkey and putchar, replace the library
@@ -167,11 +141,9 @@ void main (void)
 {
 	
 	static unsigned char buffer[40];
-	//unsigned char buffer_clock[]={0x02,0x31,0x48,0x32,0x32,0x2f,0x30,0x33,0x2f,0X32,0X30,0X31,0X39,0x20,0x31,0x31,0x3a,0x33,0x39,0x3a,0x30,0x30,0x20,0x34,0x03,0}; //dia,mes,año,hora,minutos,SEGUNDOS,Dia de la semana
-	unsigned char S1_B2[]={0x13, 0x03, 0x1D, 0x0B, 0x0E, 00, 00, 00, 00, 00, 0x01, 0x13, 0x03, 0x1D, 0x0E, 0x1D};
-	unsigned char S1_B0[]={0x32, 0x31, 0x30, 0x37, 0x31, 0x35, 00, 00, 00, 00, 00, 00, 00, 00, 00, 01};
+	//unsigned char buffer1[13];
 	unsigned char Estado_Comunicacion_Secuencia_MF=SEQ_INICIO;
-		char Length_trama;
+	char Length_trama;
 
 	
 ini_timer();																															/* initialize interrupt timer0 */
@@ -184,14 +156,17 @@ EA = 1;                         																					/* Enable Interrupts global
 time_bit();																																/*solo para pruebas*/
 Delay_20us(33);
 time_mbit();
+//	Debug_txt_Tibbo((unsigned char *) "pqui estoy");	
 tx_aux('a');	
-	
+
 sel_Funcion();																															/*el pulsador funcion es el cmd q da la entrada a programacion */
 	
 	if (DataIn==0)							
 	{
 	menu();																																		/*menu de configuracion*/
 	}
+	//Debug_txt_Tibbo((unsigned char *) "aqui estoy");
+
 	variable_inicio();																												/*leo y cargo  las variables de inicio de configuracion*/
 while(Secuencia_inicio_expedidor());																				/* procedimiento de inicio de transporte (reset, y grabar eeprom)*/
 	ValTimeOutCom=TIME_CARD;
@@ -199,17 +174,10 @@ while(Secuencia_inicio_expedidor());																				/* procedimiento de inic
 	while (1) 																																/* Loop Principal								*/	
 	{   
 	
-  //  if(Tarjeta_on==1)
-	//	{
-//		 EstadoComSeqMF=SecuenciaExpedidor(EstadoComSeqMF);																									/* procedimiento del transporte*/	
-	//	}
-		//else
-	//	{					
+ 				
 				if (rx_ip==0)																													/*pregunto si llega datos de monitor pto serie emulado*/
 				{
-				
-				 Length_trama=recibe_cmd_Monitor(buffer);														/*recibe la trama en buffer y saco la longitud de la trama*/
-				 Debug_monitor(buffer,Length_trama);
+					 Rx_Monitor();
 				}
 				
 			
@@ -229,7 +197,7 @@ while(Secuencia_inicio_expedidor());																				/* procedimiento de inic
 				Valida_Trama_Pto(buffer,Length_trama);																/*valido la informacion recibida */
 				 
 				}
-			msj_lcd_informativo();																									/*muestra la informacion de  ID cliente, cod parque, fecha,comparacion*/
+		msj_lcd_informativo();																									/*muestra la informacion de  ID cliente, cod parque, fecha,comparacion*/
 	
 
 		//}

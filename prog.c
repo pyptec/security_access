@@ -13,9 +13,19 @@ extern unsigned char rd_eeprom (unsigned char control,unsigned int Dir);
 extern void wr_eeprom (unsigned char control,unsigned int Dir, unsigned char data_eeprom);
 extern int sprintf  (char *, const char *, ...);
 extern int    atoi (const char *s1);
+extern unsigned long int  Read_EEprom_Ticket();
+extern void LeerMemoria(unsigned int addres, unsigned char *res);
+extern void EscribirMemoria(unsigned int addres,unsigned char *res);
+extern int   rand ();
+extern void Block_read_clock_ascii(unsigned char *datos_clock);
+extern char check_fechaOut(char *buffer);
+extern void ByteHex_Decimal(unsigned char *buffer,unsigned char valorhex);
+extern unsigned char hex_bcd (unsigned char byte);
+extern void hex_ascii(unsigned char * datos,unsigned char * fecha_asii);
 
 unsigned char cursor[20] = "/"; //current working directory
-unsigned char validacion [9]={"admin"};	//usuario
+unsigned char validacion [11]={"admin"};	//usuario
+
 
 
 
@@ -27,19 +37,59 @@ unsigned char validacion [9]={"admin"};	//usuario
 #define EE_SIN_COBRO						0x0006
 #define EE_DEBUG								0x0008
 #define EE_USE_LPR							0x000A
-#define EE_CPRCN_ACTIVA					0x000C
 #define EE_TIPO_PANTALLA				0X000E
 #define EE_CARD_AUTOMATIC_BOTON	0x000f
 #define EE_HABILITA_APB					0x0010
-#define EE_TICKET_ID						0X0100
-
+#define EE_PLACA								0X0011
+#define EE_ADDRESS_HIGH_BOARD		0X0012
+#define EE_JUST_ONE_TIME_CLAVE	0X0013
+#define EE_VALIDA_TIPO_VEHICULO_MENSUAL 0X0014
+#define	EE_HABILITA_APB_MENSUAL 0X0015
+#define EE_HORARIO_1						0X0019
+#define EE_HORARIO_2						0x0032
+#define EE_HORARIO_3						0x004b
+#define EE_HORARIO_4						0x0064
+#define EE_HORARIO_5						0x007d
+#define EE_HORARIO_6						0x0096
+#define EE_HORARIO_7						0x00af
+#define EE_HORARIO_8						0x00c8
+#define EE_HORARIO_9						0x00e1
+#define EE_HORARIO_10						0x00fa
+#define EE_TICKET_ID						0X0200
+#define EE_ID_REGISTER					0x0300
+#define EE_FECHA_VENCIMIENTO		0X0350
 /* Definicion del tamaño de comando y longitud de cmd*/
 
-#define 	NUMCOMMAND 12
+#define 	NUMCOMMAND 17
 #define 	LONGSIZE 3
 
+#define True										0x01
+#define False										0x00
 
 
+
+enum ee_horario_addr{
+	ee_horario1_addr, ee_horario2_addr, ee_horario3_addr, ee_horario4_addr, ee_horario5_addr,
+	ee_horario6_addr, ee_horario7_addr, ee_horario8_addr, ee_horario9_addr, ee_horario10_addr,
+	ee_horarioNULL_addr
+};
+
+
+enum Dia_Semana_addr{
+	Lunes_addr = 1, Martes_addr = 2, Miercoles_addr = 3, Jueves_addr =4, Viernes_addr = 5, 
+	Sabado_addr = 6, Domingo_addr =0 
+};
+enum Dia_Semana_data{
+	Domingo_dato=0x31, Lunes_dato=0x32, Martes_dato=0x33, Miercoles_dato=0x34, Jueves_dato=0x35, Viernes_dato=0x36, Sabado_dato=0x37  
+};
+enum Hora_Minutos_addr{
+	Hora_High_addr_Desde = 7, Hora_Low_addr_Desde = 8, Minutos_High_addr_Desde = 9, Minutos_Low_addr_Desde = 10,
+	Hora_High_addr_Hasta = 11, Hora_Low_addr_Hasta = 12, Minutos_High_addr_Hasta = 13, Minutos_Low_addr_Hasta = 14,
+	Habilita_addr =15, Segundo_Tiempo=16
+};
+enum Hora_Minutos_data{
+		Hora_High_data = 0, Hora_Low_data = 1, Minutos_High_data = 3, Minutos_Low_data =4
+};
 char comandos[NUMCOMMAND][LONGSIZE]=
 {
   "0",       		//ID_CLIENTEValor del punto cero.
@@ -48,12 +98,17 @@ char comandos[NUMCOMMAND][LONGSIZE]=
 	"3",		//SIN_COBROAjuste del cero del sensor
 	"4",	//DEBUG Calibracion por la curva de la pendiente
 	"5",		//USE_LPR
-	"6",//COMPARACION_ACTIVA
-	"7",			//TIPO_PANTALLA
-	"8",				// tarjeta automatica o boton
-	"9",			//habilita apb o inhabilta
-	"10",     //AYUDA Ayuda!muestra todos los comandos
-	"11"		//SALIRSalir de programacion
+	"6",			//TIPO_PANTALLA
+	"7",				// tarjeta automatica o boton
+	"8",			//habilita apb o inhabilta
+	"9",			//placa
+	"10",			// direccion logico
+	"11",			// prog horario
+	"12",			// Validar tipo de vehiculo mensual
+	"13",			// habilita apb para mensual
+	"14",     //AYUDA Ayuda!muestra todos los comandos
+	"15",		//SALIRSalir de programacion
+	"16"			//cmd escondido fecha de vencimiento password
 };
 
 /*------------------------------------------------------------------------------
@@ -67,44 +122,58 @@ unsigned char *hash_id(unsigned char *clave)
 	unsigned char len_clave,i;
 	static unsigned int temp, temp1;
 	unsigned char aleatorio []={":[<%?XT]=)" };
+	//unsigned char aleatorio2 []={"@#!\`Fb^&*" };
 	unsigned char suma []={"#*YJAIMEcamiltK"};/*caracteres q se le suman a la trama */
 	unsigned char xxor []={"wrz25q68-91fS.@" };
-	unsigned char usuario1[6];
+	unsigned char usuario1[11];
+	unsigned char vencimiento_password [4];
 	
-	len_clave=strlen(clave);											/*longitud de la clave a encriptar*/
-	for (i=0; i<len_clave;i++)
+	LeerMemoria(EE_FECHA_VENCIMIENTO,vencimiento_password);	
+	if (check_fechaOut(vencimiento_password) != True)
+		
 	{
-		temp=*(clave+i)+aleatorio[i];								/*el primer caracter de la clave se le suma con el primero de los aleatorios*/
-		temp1=temp & 15;														/*al  resultado se le hace una and con (0x0f)*/
-		if (temp1==0)temp1++;	
-		temp=*(clave+i) + suma[temp1-1];						/*se suma la clave  con el arreglo suma y el valor del arreglo biene de  aleatorio el resultado q da en temp */
-		temp1=temp & 15;
-		if (temp1==0)temp1++;
-		temp=temp ^ xxor[temp1-1];									/*temp se le hace uan xor aleatoria*/
- 		if (temp > 255)
-		{
-			temp=temp & 255;
-		}			
-		if ((temp >=122)&&(temp<=255))
-		{
-		temp=temp & 122;
-		
-		}
-		if (temp < 48)
-		{
-			temp=temp+64;
-		}
-		if ((temp>=91)&&(temp<=96))
-		{
-			temp=temp +7 ;
-		}
-		if ((temp>=58)&&(temp<=64))
-		{
-			temp=temp - 7 ;
-		}
-		usuario1[i]=temp;
-		
+		strcpy(aleatorio,"@#!\`Fb^&*");
 	}
+	else
+	{
+		strcpy(aleatorio, ":[<%?XT]=)");
+	}
+	len_clave=strlen(clave);											/*longitud de la clave a encriptar*/
+		for (i=0; i<len_clave;i++)
+		{
+			temp=*(clave+i)+aleatorio[i];								/*el primer caracter de la clave se le suma con el primero de los aleatorios*/
+			temp1=temp & 15;														/*al  resultado se le hace una and con (0x0f)*/
+			if (temp1==0)temp1++;	
+			temp=*(clave+i) + suma[temp1-1];						/*se suma la clave  con el arreglo suma y el valor del arreglo biene de  aleatorio el resultado q da en temp */
+			temp1=temp & 15;
+			if (temp1==0)temp1++;
+			temp=temp ^ xxor[temp1-1];									/*temp se le hace uan xor aleatoria*/
+			if (temp > 255)
+			{
+				temp=temp & 255;
+			}			
+			if ((temp >=122)&&(temp<=255))
+			{
+			temp=temp & 122;
+		
+			}
+			if (temp < 48)
+			{
+			temp=temp+64;
+			}
+			if ((temp>=91)&&(temp<=96))
+			{
+			temp=temp +7 ;
+			}
+			if ((temp>=58)&&(temp<=64))
+			{
+			temp=temp - 7 ;
+			}
+			usuario1[i]=temp;
+		
+		}
+		usuario1[i]=0;
+	
 	return usuario1;
 }
 
@@ -134,7 +203,7 @@ Rutina que valida la clave
 ------------------------------------------------------------------------------*/
 unsigned char  ValidarClave(unsigned char *buffer)
 {
-unsigned char buf [7];
+unsigned char buf [11];
   
       strcpy(buf, &validacion[0]);
       if (strcmp(buf, buffer)==0)
@@ -412,42 +481,7 @@ void Prog_Use_Lpr()
 		printf("\r\n\n ACTUAL USE_LPR HABILITADO=%s\r\n\n",buffer);			
 	}
 }
-/*------------------------------------------------------------------------------------
-Compara la placa de la tarjeta y la del software
---------------------------------------------------------------------------------------*/
-void Prog_Comparacion_Activa()
-{
-	unsigned char buffer[10];
-	unsigned int dataee;
 
-	
-	dataee=rd_eeprom(0xa8,EE_CPRCN_ACTIVA);																					/*se lee el id_cliente actual */
-	sprintf(buffer,"%d",dataee);																									/*se convierte  un entero a un string*/
-	if(dataee==0)
-	{
-		printf("\r\n\n ACTUAL COMPARACION ACTIVA INHABILITADO=%s\r\n\n",buffer);														/*se muestra el id_cliente actual en pantalla*/
-	}
-	else
-	{
-		printf("\r\n\n ACTUAL COMPARACION ACTIVA  HABILITADO=%s\r\n\n",buffer);			
-	}
-	
-	printf("\r\n\n DIGITE EL NUEVO ESTADO DE COMPARACION ACTIVA =");																	/*digite el nuevo id_cliente*/
-	IngresaDato(buffer,0);																												/*trae el dato digitado*/
-	dataee=atoi(buffer);																													/*lo convierto a un dato hex*/
-	wr_eeprom(0xa8,EE_CPRCN_ACTIVA,dataee);																					/*grabo el dato en la eeprom*/
-	
-	dataee=rd_eeprom(0xa8,EE_CPRCN_ACTIVA);																				/*leo el dato grabado*/
-	sprintf(buffer,"%d",dataee);	
-	if(dataee==0)
-	{
-		printf("\r\n\n ACTUAL COMPARACION ACTIVA  INHABILITADO=%s\r\n\n",buffer);														/*se muestra el id_cliente actual en pantalla*/
-	}
-	else
-	{
-		printf("\r\n\n ACTUAL COMPARACION ACTIVA  HABILITADO=%s\r\n\n",buffer);			
-	}
-}
 /*------------------------------------------------------------------------------------
 cmd del tipo de pantalla a usar
 Rasberry = 1
@@ -553,66 +587,517 @@ void Prog_AntiPassBack()
 		printf("\r\n\n ACTUAL ANTIPASSBACK HABILITADO=%s\r\n\n",buffer);			
 	}
 }
+void Prog_Placa()
+{
+	unsigned char buffer[10];
+	unsigned int dataee;
 
+	
+	dataee=rd_eeprom(0xa8,EE_PLACA);																					/*se lee el id_cliente actual */
+	sprintf(buffer,"%d",dataee);																									/*se convierte  un entero a un string*/
+	if(dataee==0)
+	{
+		printf("\r\n\n ACTUAL PLACA INHABILITADO=%s\r\n\n",buffer);														/*se muestra el id_cliente actual en pantalla*/
+	}
+	else
+	{
+		printf("\r\n\n ACTUAL PLACA HABILITADO=%s\r\n\n",buffer);			
+	}
+	
+	printf("\r\n\n DIGITE EL NUEVO ESTADO DE PLACA=");																	/*digite el nuevo id_cliente*/
+	IngresaDato(buffer,0);																												/*trae el dato digitado*/
+	dataee=atoi(buffer);																													/*lo convierto a un dato hex*/
+	wr_eeprom(0xa8,EE_PLACA,dataee);																					/*grabo el dato en la eeprom*/
+	
+	dataee=rd_eeprom(0xa8,EE_PLACA);																				/*leo el dato grabado*/
+	sprintf(buffer,"%d",dataee);	
+	if(dataee==0)
+	{
+		printf("\r\n\n ACTUAL PLACA INHABILITADO=%s\r\n\n",buffer);														/*se muestra el id_cliente actual en pantalla*/
+	}
+	else
+	{
+		printf("\r\n\n ACTUAL PLACA HABILITADO=%s\r\n\n",buffer);			
+	}
+}
+void Prog_Address_High_Board()
+{
+	unsigned char buffer[10];
+	unsigned int dataee;
+
+	
+	dataee=rd_eeprom(0xa8,EE_ADDRESS_HIGH_BOARD);																					/*se lee el id_cliente actual */
+	sprintf(buffer,"%d",dataee);																									/*se convierte  un entero a un string*/
+	if(dataee==0)
+	{
+		printf("\r\n\n ACTUAL ADDRESS_HIGH_BOARD=%s\r\n\n",buffer);														/*se muestra el id_cliente actual en pantalla*/
+	}
+	else
+	{
+		printf("\r\n\n ACTUAL ADDRESS_HIGH_BOARD=%s\r\n\n",buffer);			
+	}
+	
+	printf("\r\n\n DIGITE LA NUEVA ADDRESS_HIGH_BOARD=");																	/*digite el nuevo id_cliente*/
+	IngresaDato(buffer,0);																												/*trae el dato digitado*/
+	dataee=atoi(buffer);																													/*lo convierto a un dato hex*/
+	wr_eeprom(0xa8,EE_ADDRESS_HIGH_BOARD,dataee);																					/*grabo el dato en la eeprom*/
+	
+	dataee=rd_eeprom(0xa8,EE_ADDRESS_HIGH_BOARD);																				/*leo el dato grabado*/
+	sprintf(buffer,"%d",dataee);	
+	if(dataee==0)
+	{
+		printf("\r\n\n ACTUAL ADDRESS_HIGH_BOARD=%s\r\n\n",buffer);														/*se muestra el id_cliente actual en pantalla*/
+	}
+	else
+	{
+		printf("\r\n\n ACTUAL ADDRESS_HIGH_BOARD=%s\r\n\n",buffer);			
+	}
+}
+
+unsigned char *Addr_Horarios()
+{
+	unsigned char ee_addr_horario[11];
+		/*direcciones de memoria de almacenamiento*/
+	ee_addr_horario[ee_horario1_addr]= EE_HORARIO_1;
+	ee_addr_horario[ee_horario2_addr]= EE_HORARIO_2;
+	ee_addr_horario[ee_horario3_addr]= EE_HORARIO_3;
+	ee_addr_horario[ee_horario4_addr]= EE_HORARIO_4;
+	ee_addr_horario[ee_horario5_addr]= EE_HORARIO_5;
+	ee_addr_horario[ee_horario6_addr]= EE_HORARIO_6;
+	ee_addr_horario[ee_horario7_addr]= EE_HORARIO_7;
+	ee_addr_horario[ee_horario8_addr]= EE_HORARIO_8;
+	ee_addr_horario[ee_horario9_addr]= EE_HORARIO_9;
+	ee_addr_horario[ee_horario10_addr]= EE_HORARIO_10;
+	ee_addr_horario[ee_horarioNULL_addr] = False;
+	return ee_addr_horario;
+}
+unsigned char Prog_Horarios_on_off(unsigned int addr)
+{
+	unsigned char buffer[10];
+	unsigned int dataee,habilitado;
+	dataee = rd_eeprom(0xa8,addr);																					/*se lee el id_cliente actual */
+	sprintf(buffer,"%d",dataee);																									/*se convierte  un entero a un string*/
+	if(dataee==0)
+	{
+		printf("\r\n\n ACTUAL HORARIO INHABILITADO=%s\r\n\n",buffer);														/*se muestra el id_cliente actual en pantalla*/
+	}
+	else
+	{
+		printf("\r\n\n ACTUAL HORARIO HABILITADO=%s\r\n\n",buffer);			
+	}
+	printf("\r\n\n DIGITE EL NUEVO ESTADO DE HORARIO=");																	/*digite el nuevo id_cliente*/
+	IngresaDato(buffer,0);																												/*trae el dato digitado*/
+	dataee=atoi(buffer);																													/*lo convierto a un dato hex*/
+	wr_eeprom(0xa8,addr,dataee);																					/*grabo el dato en la eeprom*/
+	
+	dataee=rd_eeprom(0xa8,addr);																				/*leo el dato grabado*/
+	sprintf(buffer,"%d",dataee);	
+	if(dataee==0)
+	{
+		habilitado= False;
+		printf("\r\n\n ACTUAL HORARIO INHABILITADO=%s\r\n\n",buffer);														/*se muestra el id_cliente actual en pantalla*/
+	}
+	else
+	{
+		habilitado=True;
+		printf("\r\n\n ACTUAL HORARIO HABILITADO=%s\r\n\n",buffer);			
+	}
+	return habilitado;
+}
+void Prog_Horario_Desde_Hasta(unsigned int addr)
+{
+		unsigned char buffer[10];
+		unsigned char dataee;
+	/*la hora de inicio del horario*/
+	
+	printf("\r\n\n Digite Hora 08:00 Minutos Desde: ");
+	IngresaDato(buffer,0);
+	printf("\r\n\n Hora Programada Desde: ");
+	wr_eeprom(0xa8, addr + Hora_High_addr_Desde,buffer[Hora_High_data]);
+	dataee = rd_eeprom(0xa8,addr + Hora_High_addr_Desde);
+	printf("%c",dataee);
+	wr_eeprom(0xa8,addr + Hora_Low_addr_Desde ,buffer[Hora_Low_data]);
+	dataee = rd_eeprom(0xa8,addr + Hora_Low_addr_Desde); //
+	printf("%c:",dataee);
+	wr_eeprom(0xa8,addr + Minutos_High_addr_Desde,buffer[Minutos_High_data]);
+	dataee = rd_eeprom(0xa8,addr + Minutos_High_addr_Desde);
+	printf("%c",dataee);
+	wr_eeprom(0xa8,addr + Minutos_Low_addr_Desde,buffer[Minutos_Low_data]);
+	dataee = rd_eeprom(0xa8,addr +  Minutos_Low_addr_Desde);
+	printf("%c",dataee);
+
+/*la hora de final del horario*/
+
+	printf("\r\n\n Digite Hora:Minutos Hasta: ");
+	IngresaDato(buffer,0);
+	
+	printf("\r\n\n Hora Programada Hasta: ");
+
+	wr_eeprom(0xa8,addr + Hora_High_addr_Hasta,buffer[Hora_High_data]);
+	dataee = rd_eeprom(0xa8,addr + Hora_High_addr_Hasta);
+	printf("%c",dataee);
+	wr_eeprom(0xa8,addr + Hora_Low_addr_Hasta ,buffer[Hora_Low_data]);
+	dataee = rd_eeprom(0xa8,addr + Hora_Low_addr_Hasta);
+	printf("%c:",dataee);
+	wr_eeprom(0xa8,addr + Minutos_High_addr_Hasta,buffer[Minutos_High_data]);
+	dataee = rd_eeprom(0xa8,addr + Minutos_High_addr_Hasta);
+	printf("%c",dataee);
+	wr_eeprom(0xa8,addr + Minutos_Low_addr_Hasta ,buffer[Minutos_Low_data]);
+	dataee = rd_eeprom(0xa8,addr + Minutos_Low_addr_Hasta);
+	printf("%c",dataee);
+}
+void Prog_Horario_dias(unsigned int addr)
+{
+	unsigned char buffer[10];
+	unsigned char dataee, j, temp;
+	/*los dias programados*/
+	printf("\r\n\n Digite los dias a programar Lunes = 2, ");
+	printf("Martes = 3, Miercoles = 4, Jueves = 5, ");
+	printf("Viernes = 6, Sabado = 7, Domingo = 1 : ");
+	IngresaDato(buffer,0);
+	
+	
+	printf("\r\n\n Dias Programados : ");
+	
+	for(j=0; j < 8 ; j++)
+	{
+		
+		if ((temp=buffer[j]) == Lunes_dato) 
+		{
+			printf(" Lunes");
+		
+			wr_eeprom(0xa8,addr+Lunes_addr,Lunes_dato);	
+			dataee=rd_eeprom(0xa8,addr+Lunes_addr);	
+			printf("= %c,",dataee);
+		}
+		
+		if ((temp=buffer[j]) == Martes_dato)
+		{
+			printf(" Martes");
+			wr_eeprom(0xa8,addr+Martes_addr,Martes_dato);
+			dataee=rd_eeprom(0xa8,addr+Martes_addr);	
+			printf("= %c,",dataee);
+		}
+	
+		if ((temp=buffer[j])== Miercoles_dato)
+		{
+			printf(" Miercoles");
+			wr_eeprom(0xa8,addr+Miercoles_addr,Miercoles_dato);
+			dataee=rd_eeprom(0xa8,addr+Miercoles_addr);	
+			printf("= %c,",dataee);
+		}
+		
+		if ((temp=buffer[j]) == Jueves_dato)
+		{
+			printf(" Jueves");
+			wr_eeprom(0xa8,addr+Jueves_addr,Jueves_dato);
+			dataee=rd_eeprom(0xa8,addr+Jueves_addr);	
+			printf("= %c,",dataee);
+		}
+		
+		if ((temp=buffer[j]) == Viernes_dato)
+		{	
+			printf(" Viernes");
+			wr_eeprom(0xa8,addr+Viernes_addr,Viernes_dato);
+			dataee=rd_eeprom(0xa8,addr+Viernes_addr);	
+			printf("= %c,",dataee);
+		}
+		
+		if ((temp=buffer[j]) == Sabado_dato) 
+		{
+			printf(" Sabado");
+			wr_eeprom(0xa8,addr+Sabado_addr,Sabado_dato);
+			dataee=rd_eeprom(0xa8,addr+Sabado_addr);	
+			printf("= %c,",dataee);
+		}
+		
+		if ((temp=buffer[j]) == Domingo_dato)
+		{
+			printf(" Domingo");
+			wr_eeprom(0xa8,addr+Domingo_addr,Domingo_dato);
+			dataee = rd_eeprom(0xa8,addr+Domingo_addr);	
+			printf("= %c",dataee);
+		}
+	}
+	
+}
+void Prog_Horarios()
+{
+	unsigned char buffer[10];
+	unsigned char ee_addr_horario[11];
+	unsigned int addr,temp;
+	unsigned char dataee;
+	unsigned char j;
+	
+	/*direcciones de memoria de almacenamiento*/
+	
+		strcpy (ee_addr_horario,(Addr_Horarios()));
+		
+	/*se programa el banco de horarios del 1 al 10*/
+	
+	printf("\r\n\n Digite el numero del Horario a programar = ");		
+	IngresaDato(buffer,0);	
+	
+	j=(atoi(buffer)) - 1;
+	
+	/*mi direccion eeprom*/
+	
+	addr= ee_addr_horario[j];
+	temp= addr;
+	
+	/*habilita o desabilita el uso del horario*/
+	
+	addr =addr + Habilita_addr ;
+	if (Prog_Horarios_on_off(addr) == True);
+	{
+		/*limpiar la memoria*/
+	addr= temp;
+		for(j=Lunes_addr; j < 8 ; j++)
+		{
+			wr_eeprom(0xa8,addr+j,0xff);
+		}
+	
+	addr= temp;
+	/*los dias programados*/
+	
+	Prog_Horario_dias(addr);
+		
+	/*la hora de inicio del horario*/
+	
+	Prog_Horario_Desde_Hasta(addr);
+	
+	/*programo si hay segundo horario*/
+	printf("\r\n\n Programar segundo Horario si=(1) no=(0)= ");		
+	IngresaDato(buffer,0);
+	dataee=atoi(buffer);																													/*lo convierto a un dato hex*/
+	wr_eeprom(0xa8,addr+Segundo_Tiempo,dataee);																					/*grabo el dato en la eeprom*/
+	
+	dataee=rd_eeprom(0xa8,addr+Segundo_Tiempo);																				/*leo el dato grabado*/
+	sprintf(buffer,"%d",dataee);	
+		if(dataee==True)
+		{
+			/*la hora de inicio del segundo horario*/
+			addr =addr + Minutos_Low_addr_Desde ;
+			Prog_Horario_Desde_Hasta(addr);
+		}
+	}
+	
+}
+void Prog_Validar_Tipo_Vehiculo_Mensual()	
+{
+	unsigned char buffer[10];
+	unsigned int dataee;
+
+	
+	dataee=rd_eeprom(0xa8,EE_VALIDA_TIPO_VEHICULO_MENSUAL);																					/*se lee el id_cliente actual */
+	sprintf(buffer,"%d",dataee);																									/*se convierte  un entero a un string*/
+	if(dataee==0)
+	{
+		printf("\r\n\n ACTUAL TIPO_VEHICULO MENSUAL INHABILITADO=%s\r\n\n",buffer);														/*se muestra el id_cliente actual en pantalla*/
+	}
+	else
+	{
+		printf("\r\n\n ACTUAL TIPO_VEHICULO MENSUAL HABILITADO=%s\r\n\n",buffer);			
+	}
+	
+	printf("\r\n\n DIGITE EL NUEVO ESTADO DE TIPO_VEHICULO MENSUAL=");																	/*digite el nuevo id_cliente*/
+	IngresaDato(buffer,0);																												/*trae el dato digitado*/
+	dataee=atoi(buffer);																													/*lo convierto a un dato hex*/
+	wr_eeprom(0xa8,EE_VALIDA_TIPO_VEHICULO_MENSUAL,dataee);																					/*grabo el dato en la eeprom*/
+	
+	dataee=rd_eeprom(0xa8,EE_VALIDA_TIPO_VEHICULO_MENSUAL);																				/*leo el dato grabado*/
+	sprintf(buffer,"%d",dataee);	
+	if(dataee==0)
+	{
+		printf("\r\n\n ACTUAL TIPO_VEHICULO MENSUAL INHABILITADO=%s\r\n\n",buffer);														/*se muestra el id_cliente actual en pantalla*/
+	}
+	else
+	{
+		printf("\r\n\n ACTUAL TIPO_VEHICULO  MENSUAL HABILITADO=%s\r\n\n",buffer);			
+	}
+}
+void Prog_Apb_Mensual()
+{
+	unsigned char buffer[10];
+	unsigned int dataee;
+
+	
+	dataee=rd_eeprom(0xa8,EE_HABILITA_APB_MENSUAL);																					/*se lee el id_cliente actual */
+	sprintf(buffer,"%d",dataee);																									/*se convierte  un entero a un string*/
+	if(dataee==0)
+	{
+		printf("\r\n\n ACTUAL ANTIPASSBACK MENSUAL INHABILITADO=%s\r\n\n",buffer);														/*se muestra el id_cliente actual en pantalla*/
+	}
+	else
+	{
+		printf("\r\n\n ACTUAL ANTIPASSBACK MENSUAL HABILITADO=%s\r\n\n",buffer);			
+	}
+	
+	printf("\r\n\n DIGITE EL NUEVO ESTADO DE ANTIPASSBACK MENSUAL=");																	/*digite el nuevo id_cliente*/
+	IngresaDato(buffer,0);																												/*trae el dato digitado*/
+	dataee=atoi(buffer);																													/*lo convierto a un dato hex*/
+	wr_eeprom(0xa8,EE_HABILITA_APB_MENSUAL,dataee);																					/*grabo el dato en la eeprom*/
+	
+	dataee=rd_eeprom(0xa8,EE_HABILITA_APB_MENSUAL);																				/*leo el dato grabado*/
+	sprintf(buffer,"%d",dataee);	
+	if(dataee==0)
+	{
+		printf("\r\n\n ACTUAL ANTIPASSBACK MENSUAL INHABILITADO=%s\r\n\n",buffer);														/*se muestra el id_cliente actual en pantalla*/
+	}
+	else
+	{
+		printf("\r\n\n ACTUAL ANTIPASSBACK  MENSUAL HABILITADO=%s\r\n\n",buffer);			
+	}
+}
+
+void Prog_fecha_vencimiento()
+{
+	unsigned char buffer[11];
+	unsigned char *cmd;
+	
+	unsigned char fecha[7];
+	unsigned int dataee;
+
+	LeerMemoria(EE_FECHA_VENCIMIENTO,buffer);		
+		 hex_ascii(buffer,fecha);
+															
+	
+	printf("\r\n\n ACTUAL FECHA VENCIMIENTO PASSWORD:%s\r\n\n",fecha);														/*se muestra el id_cliente actual en pantalla*/
+		
+	 do{
+	printf("\r\n\n/>Id Registro:");
+	LeerMemoria(EE_ID_REGISTER,buffer);
+	printf("%s", buffer);
+	strcpy (validacion,hash_id(buffer));
+	printf("\r\n\n/>Password:");
+	
+		/*para pruebas*/
+	//printf("\r\n\%s ", validacion);
+		
+	IngresaDato(buffer,1);					//ingreso el password por teclado 
+	cmd = GetCMD(buffer);					//quita el carri return	
+	EscribirMemoria(EE_ID_REGISTER,validacion);
+
+	}while(ValidarClave(cmd)!=0);
+	
+	
+	printf("\r\n\n DIGITE LA NUEVA FECHA DE VENCIMIENTO=");																	/*digite el nuevo id_cliente*/
+	IngresaDato(buffer,0);	
+	printf("\r\n\n %s\r\n\n",buffer);	
+	
+		fecha[0]=buffer[0];	
+		fecha[1]=buffer[1];	
+		fecha[2]=0;	
+		
+		dataee=atoi(fecha);
+		printf("\r\n\n %X",dataee);	
+	/*lo convierto a un dato hex*/
+	 wr_eeprom(0xa8,EE_FECHA_VENCIMIENTO,dataee);																					/*grabo el dato en la eeprom*/
+		fecha[0]=buffer[2];	
+		fecha[1]=buffer[3];	
+		fecha[2]=0;	
+		dataee=atoi(fecha);
+		printf("\r\n\n %X",dataee);	
+		wr_eeprom(0xa8,EE_FECHA_VENCIMIENTO+1,dataee);
+		fecha[0]=buffer[4];	
+		fecha[1]=buffer[5];	
+		fecha[2]=0;	
+		dataee=atoi(fecha);	
+		printf("\r\n\n %X",dataee);			
+		wr_eeprom(0xa8,EE_FECHA_VENCIMIENTO+2,dataee);
+		wr_eeprom(0xa8,EE_FECHA_VENCIMIENTO+3,0);
+		
+		LeerMemoria(EE_FECHA_VENCIMIENTO,buffer);
+		
+		hex_ascii(buffer,fecha);	
+		printf("\r\n\n ACTUAL FECHA DE VENCIMIENTO PROGRAMADA =%s\r\n\n",fecha);	
+	
+}
 /*------------------------------------------------------------------------------
 Rutina que muestra la lista de comandos
 ------------------------------------------------------------------------------*/
 void Show()
 {
-   printf("\r\n ID_CLIENTE    --- CMD 0 Identificador del cliente maximo 255");
-   printf("\r\n COD_PARK      --- CMD 1 El numero del parqueadero maximo 255");
-   printf("\r\n T_GRACIA      --- CMD 2 Tiempo sin cobro 00,  maximo 255");
-   printf("\r\n SIN_COBRO     --- CMD 3 Inhabilitado= 0, Gratis= 1 , Gratis y salida el mismo dia= 2");
-   printf("\r\n DEBUG         --- CMD 4 Habilitar = 1, Inhabilitar = 0");
-	 printf("\r\n USE_LPR       --- CMD 5 Habilitar = 1, Inhabilitar = 0");
-   printf("\r\n COMPARACION_ACTIVA --- CMD 6 Habilitar = 1, Inhabilitar = 0");
-	 printf("\r\n TIPO_PANTALLA     --- CMD 7 PANTALLA LCD =0 PANTALLA RASPBERRI=1");
-	 printf("\r\n CARD_AUTOMATICA   --- CMD 8 BOTTON=0 AUTOMATICA=1");
-	 printf("\r\n ANTIPASSBACK        --- CMD 9 Habilitar = 1, Inhabilitar = 0");
-	 printf("\r\n AYUDA         --- CMD 10 Muestra los comandos");
-   printf("\r\n SALIR         --- CMD 11 Salir de programacion");
+   printf("\r\n ID_CLIENTE         --- CMD 0 Identificador del cliente maximo 255");
+   printf("\r\n COD_PARK           --- CMD 1 El numero del parqueadero maximo 255");
+   printf("\r\n T_GRACIA           --- CMD 2 Tiempo sin cobro 00,  maximo 255");
+   printf("\r\n SIN_COBRO          --- CMD 3 Inhabilitado= 0, Gratis= 1 , Gratis y salida el mismo dia= 2");
+   printf("\r\n DEBUG              --- CMD 4 Habilitar = 1, Inhabilitar = 0");
+	 printf("\r\n USE_LPR            --- CMD 5 Habilitar = 1, Inhabilitar = 0");
+   printf("\r\n TIPO_PANTALLA      --- CMD 6 PANTALLA LCD =0 PANTALLA RASPBERRI=1");
+	 printf("\r\n CARD_AUTOMATICA    --- CMD 7 BOTTON=0 AUTOMATICA=1");
+	 printf("\r\n ANTIPASSBACK       --- CMD 8 Habilitar = 1, Inhabilitar = 0");
+	 printf("\r\n PLACA              --- CMD 9 Habilitar = 1, Inhabilitar = 0");
+	 printf("\r\n ADDRESS_HIGH_BOARD --- CMD 10 La direccion alta del board del numero 5 al 9 sino se usa debe ir en 0");
+	 printf("\r\n HORARIO            --- CMD 11 Progama 10 horarios del 1 al 10");
+	 printf("\r\n VALIDA_VEHI_MENSUAL--- CMD 12 Habilitar = 1, Inhabilitar = 0");
+	 printf("\r\n USE_APB_MENSUAL    --- CMD 13 Habilitar = 1, Inhabilitar = 0");
+	 printf("\r\n AYUDA              --- CMD 14 Muestra los comandos");
+   printf("\r\n SALIR              --- CMD 15 Salir de programacion");
 
 }
 
 /*------------------------------------------------------------------------------
 Rutina de principal de programacion
 ------------------------------------------------------------------------------*/
-
+void  First_Clave()
+{
+	unsigned char clave[11];
+	
+	
+		Block_read_clock_ascii(clave);
+		clave[10] = 0;
+		strcpy (validacion,hash_id(clave));
+		EscribirMemoria(EE_ID_REGISTER,validacion);
+		validacion[0]=0x14;
+		validacion[0]=0x08;
+		validacion[0]=0x14;
+		validacion[0]=0;
+		
+		EscribirMemoria(EE_FECHA_VENCIMIENTO,validacion);
+	
+	
+}
 void menu(void)
 {
 
-unsigned char *cmd,*option1,*option2,*usuario;
+unsigned char *cmd,*option1,*option2;
 unsigned char opt_buffer[40];
-unsigned char buffer[40];
+unsigned char buffer[20];
 
 
 
   
   printf("\r\n\nSistema de Programacion Expedidor \r\n\r\n");
 
+
+	
+	
+	if(rd_eeprom(0xa8,EE_JUST_ONE_TIME_CLAVE) != False)	
+	{
+		First_Clave();	
+		wr_eeprom(0xa8,EE_JUST_ONE_TIME_CLAVE,0x0);
+		//printf("%s", buffer);
+	
+	}
  
-	
-	
-	do{
-	printf("\r\n\n/>Usuario:");
-	
-  // main loop
-	IngresaDato(buffer,0);					//ingreso el usuario por teclado 
-	cmd = GetCMD(buffer);					//quita el carri return	
-	usuario=hash_id(buffer);				//el usuario es encriptado
-}while(ValidarClave(cmd)!=0);				//validamos el usuario
-
-
   do{
-printf("\r\n\n/>Password:");
-
+	printf("\r\n\n/>Id Registro:");
+	LeerMemoria(EE_ID_REGISTER,buffer);
+	printf("%s", buffer);
+	strcpy (validacion,hash_id(buffer));
+	printf("\r\n\n/>Password:");
+	
+		/*para pruebas*/
+	printf("\r\n\%s ", validacion);
+		
 	IngresaDato(buffer,1);					//ingreso el password por teclado 
 	cmd = GetCMD(buffer);					//quita el carri return	
-	strcpy (validacion,"123456");
-	//strcpy (validacion,usuario);		/*valida el valor encriptado*/
+	EscribirMemoria(EE_ID_REGISTER,validacion);
 
 	}while(ValidarClave(cmd)!=0);				//
 
+	//EscribirMemoria(EE_ID_REGISTER,validacion);
 	
 	Show();
 	while(1)
@@ -654,49 +1139,53 @@ printf("\r\n\n/>Password:");
 				     break;
             
             case 1:  //Tiempo de recolecion entre muestra
-						prog_cod_park();
-               break;
-            
+							prog_cod_park();
+            break;
             case 2:  //Informacion recolectada enviada al rs232
-		
-						Prog_tiempo_gracia();
-					
-               break;
-            
+							Prog_tiempo_gracia();
+					  break;
             case 3:  //Ajuste del cero del sensor
-						Prog_Sin_Cobro();
-
-               break;
-            
-						case 4:  //Ajuste de calibracion por medio de la pendiente
+							Prog_Sin_Cobro();
+            break;
+ 						case 4:  //Ajuste de calibracion por medio de la pendiente
 							Prog_debug();
-               break;
+            break;
 						case 5:  //help me
 							Prog_Use_Lpr();
                break;
-						case 6:  //help me
-           Prog_Comparacion_Activa();
-
-               break;
-						case 7:  		//tipo de pantalla
-						tipo_pantalla();
-						  break;
-						case 8:			//tarjeta automatica o pulsador
-						Prog_tarjeta_automatica_o_boton();
+						case 6:  		//tipo de pantalla
+							tipo_pantalla();
 						break;
-						case 9:  //cmd antipassback
-           
+						case 7:			//tarjeta automatica o pulsador
+							Prog_tarjeta_automatica_o_boton();
+						break;
+						case 8:  //cmd antipassback
 							Prog_AntiPassBack();
-               break;
-						case 0x0a:  //help me
-           
-							Show();
-               break;
-						case 0x0b:  //salir
-						return;
-
-               break;
-           
+            break;
+						case 9:		//cmd placa
+							Prog_Placa();
+            break;
+						case 10:		//cmd configuracion de la direccion del board
+							Prog_Address_High_Board();
+            break;
+						case 11:		//cmd configuracion los horarios
+							Prog_Horarios();
+            break;
+						case 12:		//cmd configuracion los horarios
+							Prog_Validar_Tipo_Vehiculo_Mensual();
+            break;
+						case 13:		//cmd configuracion los horarios
+							Prog_Apb_Mensual();
+            break;
+						case 14:  //help me
+           		Show();
+            break;
+						case 15:  //salir
+							return;
+            break;
+						case 16:
+							Prog_fecha_vencimiento();
+							break;
 		
 					
             default:

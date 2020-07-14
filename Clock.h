@@ -32,6 +32,7 @@ void ByteHex_Decimal(unsigned char *buffer,unsigned char valorhex);
 unsigned char bcd_hex (unsigned char l_data);
 unsigned char hex_bcd (unsigned char byte);
 unsigned char validar_clk(unsigned char *datos_clock);
+void hex_ascii(unsigned char * datos,unsigned char * fecha_asii);
 
 
 #endif	/* _CLOCK_H_*/

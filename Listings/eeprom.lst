@@ -1,4 +1,4 @@
-C51 COMPILER V9.59.0.0   EEPROM                                                            05/21/2020 14:05:11 PAGE 1   
+C51 COMPILER V9.59.0.0   EEPROM                                                            07/14/2020 08:20:39 PAGE 1   
 
 
 C51 COMPILER V9.59.0.0, COMPILATION OF MODULE EEPROM
@@ -38,7 +38,7 @@ line level    source
   28          /*define posiciones de memoria*/
   29          #define EE_ID_CLIENTE   0x0000
   30          
-  31          #define EE_TICKET_ID          0X0100
+  31          #define EE_TICKET_ID          0X0200
   32          
   33          
   34          //*******************************************************************************************
@@ -62,7 +62,7 @@ line level    source
   52   1        if (memory_flag==1)
   53   1        { 
   54   2      
-C51 COMPILER V9.59.0.0   EEPROM                                                            05/21/2020 14:05:11 PAGE 2   
+C51 COMPILER V9.59.0.0   EEPROM                                                            07/14/2020 08:20:39 PAGE 2   
 
   55   2        }  
   56   1      } 
@@ -126,7 +126,7 @@ line level    source
  114          {
  115   1        scl=0;
  116   1        sda=0;
-C51 COMPILER V9.59.0.0   EEPROM                                                            05/21/2020 14:05:11 PAGE 3   
+C51 COMPILER V9.59.0.0   EEPROM                                                            07/14/2020 08:20:39 PAGE 3   
 
  117   1        scl=1;
  118   1        sda=1;
@@ -190,7 +190,7 @@ line level    source
  176   1        Delay_1ms(13);
  177   1        
  178   1        scl=1;
-C51 COMPILER V9.59.0.0   EEPROM                                                            05/21/2020 14:05:11 PAGE 4   
+C51 COMPILER V9.59.0.0   EEPROM                                                            07/14/2020 08:20:39 PAGE 4   
 
  179   1        sda=1;
  180   1        Delay_20us(98);                   /*wait long*/
@@ -254,7 +254,7 @@ line level    source
  237   1        start();
  238   1        e_d_m(control+0x01);
  239   1        ackd();
-C51 COMPILER V9.59.0.0   EEPROM                                                            05/21/2020 14:05:11 PAGE 5   
+C51 COMPILER V9.59.0.0   EEPROM                                                            07/14/2020 08:20:39 PAGE 5   
 
  240   1        scl=0;
  241   1        l_d_m();
@@ -272,120 +272,158 @@ line level    source
  253          void graba_serie(unsigned char *buffer)
  254          {
  255   1        
- 256   1        unsigned char  j,cod_3,cod_2,cod_1,cod_0;
+ 256   1        unsigned char  j;
  257   1        unsigned char error=0;
- 258   1        unsigned long int Noticket,Bnoticket=0;
+ 258   1        
  259   1        
  260   1      /*valido q los datos recibidos sean numericos*/
- 261   1        *(buffer+10)=0;
- 262   1        
- 263   1        for (j=0; j<=9; j++)
- 264   1        {
- 265   2          if  ((*(buffer+j)<0x30)||(*(buffer+j)>0x39))
- 266   2          {
- 267   3            error=1;
- 268   3            
- 269   3            Debug_txt_Tibbo((unsigned char *) "Error de ticket");
- 270   3            Debug_txt_Tibbo((unsigned char *) buffer);
- 271   3            Debug_txt_Tibbo((unsigned char *) "\n\r");
- 272   3          }
- 273   2        
- 274   2        }
- 275   1        
+ 261   1        
+ 262   1        *(buffer+10)=0;
+ 263   1        
+ 264   1        for (j=0; j<=9; j++)
+ 265   1        {
+ 266   2          if  ((*(buffer+j)<0x30)||(*(buffer+j)>0x39))
+ 267   2          {
+ 268   3            error=1;
+ 269   3            
+ 270   3            Debug_txt_Tibbo((unsigned char *) "Error de ticket");
+ 271   3            Debug_txt_Tibbo((unsigned char *) buffer);
+ 272   3            Debug_txt_Tibbo((unsigned char *) "\n\r");
+ 273   3          }
+ 274   2        
+ 275   2        }
  276   1        
- 277   1        /* son numericos*/
- 278   1          if (error==0)
- 279   1          {
- 280   2            Debug_txt_Tibbo((unsigned char *) "Numero de ticket:");
- 281   2            Debug_txt_Tibbo((unsigned char *) buffer);
- 282   2            Debug_txt_Tibbo((unsigned char *) "\n\r");
- 283   2            Noticket= atol(buffer);
- 284   2            
- 285   2            Debug_txt_Tibbo((unsigned char *) "No de ticket HEX:");
- 286   2            Bnoticket=Noticket>>24;
- 287   2            cod_3=Bnoticket;
- 288   2            Debug_chr_Tibbo(cod_3);
- 289   2            
- 290   2            Bnoticket=Noticket >>16;
- 291   2            cod_2=Bnoticket;
- 292   2            Debug_chr_Tibbo(cod_2);
- 293   2            
- 294   2            Bnoticket=Noticket >>8;
- 295   2            cod_1=Bnoticket;
- 296   2            Debug_chr_Tibbo(cod_1);
- 297   2            
- 298   2            cod_0=Noticket;
- 299   2            Debug_chr_Tibbo(cod_0);
- 300   2            Debug_txt_Tibbo((unsigned char *) "\n\r");
- 301   2            
-C51 COMPILER V9.59.0.0   EEPROM                                                            05/21/2020 14:05:11 PAGE 6   
+ 277   1        
+ 278   1        /* son numericos*/
+ 279   1          if (error==0)
+ 280   1          {
+ 281   2            Write_EEprom_Ticket(buffer);
+ 282   2              
+ 283   2          }
+ 284   1          else
+ 285   1          {
+ 286   2            wr_eeprom(0xa8,EE_TICKET_ID,00);
+ 287   2            wr_eeprom(0xa8,EE_TICKET_ID+1,00);
+ 288   2            wr_eeprom(0xa8,EE_TICKET_ID+2,00);
+ 289   2            wr_eeprom(0xa8,EE_TICKET_ID+3,00);  
+ 290   2            
+ 291   2          }
+ 292   1      }
+ 293          void Write_EEprom_Ticket(unsigned char *buffer)
+ 294          {
+ 295   1        unsigned char  cod_3,cod_2,cod_1,cod_0;
+ 296   1        unsigned long int Noticket,Bnoticket=0;
+ 297   1        Debug_txt_Tibbo((unsigned char *) "Numero de ticket:");
+ 298   1        Debug_txt_Tibbo((unsigned char *) buffer);
+ 299   1        Debug_txt_Tibbo((unsigned char *) "\n\r");
+ 300   1        Noticket= atol(buffer);
+ 301   1          
+C51 COMPILER V9.59.0.0   EEPROM                                                            07/14/2020 08:20:39 PAGE 6   
 
- 302   2            wr_eeprom(0xa8,EE_TICKET_ID,cod_3);
- 303   2            wr_eeprom(0xa8,EE_TICKET_ID+1,cod_2);
- 304   2            wr_eeprom(0xa8,EE_TICKET_ID+2,cod_1);
- 305   2            wr_eeprom(0xa8,EE_TICKET_ID+3,cod_0); 
- 306   2          }
- 307   1          else
- 308   1          {
- 309   2            wr_eeprom(0xa8,EE_TICKET_ID,00);
- 310   2            wr_eeprom(0xa8,EE_TICKET_ID+1,00);
- 311   2            wr_eeprom(0xa8,EE_TICKET_ID+2,00);
- 312   2            wr_eeprom(0xa8,EE_TICKET_ID+3,00);  
- 313   2            
- 314   2          }
- 315   1      }
- 316          /*----------------------------------------------------------------------------------
- 317          Procedimiento que lee el No de Ticket en EEprom y lo retorna en un strint
- 318          -----------------------------------------------------------------------------------*/
- 319          unsigned char *Lee_No_Ticket()
- 320          {
- 321   1        unsigned long int Noticket;
- 322   1        unsigned char Lee_No_Ticket[11];
- 323   1        Noticket=Read_EEprom_Ticket();
- 324   1        sprintf( Lee_No_Ticket,"%lu",Noticket);
- 325   1        Debug_txt_Tibbo((unsigned char *) Lee_No_Ticket);
- 326   1        Debug_txt_Tibbo((unsigned char *) "\n\r");
- 327   1        return Lee_No_Ticket;
- 328   1      }
- 329          /*----------------------------------------------------------------------------------
- 330          Procedimiento que lee el No de Ticket en EEprom y lo retorna en un long int
- 331          -----------------------------------------------------------------------------------*/
- 332          unsigned long int  Read_EEprom_Ticket()
- 333          {
- 334   1        unsigned char cod3,cod2,cod1,cod0;
- 335   1        unsigned long int Noticket=0;
- 336   1        cod3=rd_eeprom(0xa8,EE_TICKET_ID);
- 337   1        cod2=rd_eeprom(0xa8,EE_TICKET_ID+1);
- 338   1        cod1=rd_eeprom(0xa8,EE_TICKET_ID+2);
- 339   1        cod0=rd_eeprom(0xa8,EE_TICKET_ID+3);
- 340   1        
- 341   1        Noticket=((Noticket| cod3)<<8);
- 342   1        Noticket=((Noticket| cod2)<<8);
- 343   1        Noticket=((Noticket| cod1)<<8);
- 344   1        Noticket=Noticket| cod0;
- 345   1        return Noticket;
- 346   1      }
- 347          /*----------------------------------------------------------------------------------
- 348          Procedimiento que incrementa en uno el numero del Ticket y la graba en  EEprom 
- 349          -----------------------------------------------------------------------------------*/
- 350          void Incremente_Ticket()
- 351          {
- 352   1        
- 353   1        unsigned long int Noticket;
- 354   1        unsigned char Lee_No_Ticket[11];
- 355   1        Noticket=Read_EEprom_Ticket();
- 356   1        Noticket=Noticket+1;
- 357   1        sprintf( Lee_No_Ticket,"%lu",Noticket);
- 358   1        graba_serie(Lee_No_Ticket);
- 359   1      }
+ 302   1        Debug_txt_Tibbo((unsigned char *) "No de ticket HEX:");
+ 303   1        Bnoticket=Noticket>>24;
+ 304   1        cod_3=Bnoticket;
+ 305   1        Debug_chr_Tibbo(cod_3);
+ 306   1          
+ 307   1        Bnoticket=Noticket >>16;
+ 308   1        cod_2=Bnoticket;
+ 309   1        Debug_chr_Tibbo(cod_2);
+ 310   1            
+ 311   1        Bnoticket=Noticket >>8;
+ 312   1        cod_1=Bnoticket;
+ 313   1        Debug_chr_Tibbo(cod_1);
+ 314   1            
+ 315   1        cod_0=Noticket;
+ 316   1        Debug_chr_Tibbo(cod_0);
+ 317   1        Debug_txt_Tibbo((unsigned char *) "\n\r");
+ 318   1            
+ 319   1        wr_eeprom(0xa8,EE_TICKET_ID,cod_3);
+ 320   1        wr_eeprom(0xa8,EE_TICKET_ID+1,cod_2);
+ 321   1        wr_eeprom(0xa8,EE_TICKET_ID+2,cod_1);
+ 322   1        wr_eeprom(0xa8,EE_TICKET_ID+3,cod_0); 
+ 323   1      }
+ 324          /*----------------------------------------------------------------------------------
+ 325          Procedimiento que lee el No de Ticket en EEprom y lo retorna en un strint
+ 326          -----------------------------------------------------------------------------------*/
+ 327          unsigned char *Lee_No_Ticket()
+ 328          {
+ 329   1        unsigned long int Noticket;
+ 330   1        unsigned char Lee_No_Ticket[11];
+ 331   1        Noticket=Read_EEprom_Ticket();
+ 332   1        sprintf( Lee_No_Ticket,"%lu",Noticket);
+ 333   1        Debug_txt_Tibbo((unsigned char *) Lee_No_Ticket);
+ 334   1        Debug_txt_Tibbo((unsigned char *) "\n\r");
+ 335   1        return Lee_No_Ticket;
+ 336   1      }
+ 337          /*----------------------------------------------------------------------------------
+ 338          Procedimiento que lee el No de Ticket en EEprom y lo retorna en un long int
+ 339          -----------------------------------------------------------------------------------*/
+ 340          unsigned long int  Read_EEprom_Ticket()
+ 341          {
+ 342   1        unsigned char cod3,cod2,cod1,cod0;
+ 343   1        unsigned long int Noticket=0;
+ 344   1        cod3=rd_eeprom(0xa8,EE_TICKET_ID);
+ 345   1        cod2=rd_eeprom(0xa8,EE_TICKET_ID+1);
+ 346   1        cod1=rd_eeprom(0xa8,EE_TICKET_ID+2);
+ 347   1        cod0=rd_eeprom(0xa8,EE_TICKET_ID+3);
+ 348   1        
+ 349   1        Noticket=((Noticket| cod3)<<8);
+ 350   1        Noticket=((Noticket| cod2)<<8);
+ 351   1        Noticket=((Noticket| cod1)<<8);
+ 352   1        Noticket=Noticket| cod0;
+ 353   1        return Noticket;
+ 354   1      }
+ 355          /*----------------------------------------------------------------------------------
+ 356          Procedimiento que incrementa en uno el numero del Ticket y la graba en  EEprom 
+ 357          -----------------------------------------------------------------------------------*/
+ 358          void Incremente_Ticket()
+ 359          {
+ 360   1        
+ 361   1        unsigned long int Noticket;
+ 362   1        unsigned char Lee_No_Ticket[11];
+ 363   1        Noticket=Read_EEprom_Ticket();
+C51 COMPILER V9.59.0.0   EEPROM                                                            07/14/2020 08:20:39 PAGE 7   
+
+ 364   1        Noticket=Noticket+1;
+ 365   1        sprintf( Lee_No_Ticket,"%lu",Noticket);
+ 366   1        Write_EEprom_Ticket(Lee_No_Ticket);
+ 367   1      }
+ 368          
+ 369          //***********************************************************************************************
+ 370          //Rutina que lee la eeprom 
+ 371          //***********************************************************************************************
+ 372          void LeerMemoria(unsigned int addres, unsigned char *res)
+ 373            {
+ 374   1      unsigned char i;
+ 375   1      do {
+ 376   2        *res=rd_eeprom(0xa8,addres);;
+ 377   2        i=*res;
+ 378   2        addres++;
+ 379   2        res++;
+ 380   2      }while(i !='\0');
+ 381   1        *res='\0';
+ 382   1        }
+ 383          void EscribirMemoria(unsigned int addres,unsigned char *res)
+ 384            {
+ 385   1      
+ 386   1      
+ 387   1      while(*res !='\0'){
+ 388   2        if(*res =='\r'){*res='\0';}  
+ 389   2        wr_eeprom(0xa8,addres,*res);
+ 390   2       //  write_eeprom(addres,*res);         //Escibe el fin de la cadena (0)
+ 391   2          addres++;
+ 392   2          res++;
+ 393   2        }
+ 394   1       wr_eeprom(0xa8,addres,*res);
+ 395   1      // write_eeprom(addres,*res); 
+ 396   1      
+ 397   1      }
 
 
 MODULE INFORMATION:   STATIC OVERLAYABLE
-   CODE SIZE        =   1070    ----
-C51 COMPILER V9.59.0.0   EEPROM                                                            05/21/2020 14:05:11 PAGE 7   
-
+   CODE SIZE        =   1286    ----
    CONSTANT SIZE    =     59    ----
-   XDATA SIZE       =      3      46
+   XDATA SIZE       =      3      55
    PDATA SIZE       =   ----    ----
    DATA SIZE        =   ----    ----
    IDATA SIZE       =   ----    ----

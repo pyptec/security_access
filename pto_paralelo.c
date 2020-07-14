@@ -12,6 +12,7 @@ extern int sprintf  (char *, const char *, ...);
 extern void DebugBufferMF(unsigned char *str,unsigned char num_char,char io);
 extern void Debug_Dividir_texto();
 extern void Block_read_Clock_Hex(unsigned char *datos_clock);
+extern unsigned char rd_eeprom (unsigned char control,unsigned int Dir); 
 
 /*pines del pto paralelo*/
 sbit port_clk = P3^4;				//Recepcion AUX											*
@@ -24,10 +25,12 @@ sbit led_err_imp = P0^2;			//Error
 #define TIME_WBUS 			20000
 #define STX							02 
 #define ETX							03 
+#define EE_ID_CLIENTE						0x0000
+#define EE_ID_PARK		  				0x0002
 
 /*definicion de variable globales*/
-extern int ID_CLIENTE;						
-extern int COD_PARK;
+//extern int ID_CLIENTE;						
+//extern int COD_PARK;
 
 /*------------------------------------------------------------------------------
 
@@ -149,6 +152,7 @@ void  send_port(unsigned char *buffer_port, unsigned char length_char)
 		}while (length_char);
 			
 		}
+
 	P2=0XFF;
 	ready=1;
 	port_clk=1;
@@ -221,26 +225,26 @@ void Trama_pto_Paralelo(unsigned char *buffer_S1_B0,unsigned char *buffer_S1_B2,
 /*-------------------------------------------------------------------------------------------
 Funcion q arma la trama a transmitir pto paralelo trama P
 -------------------------------------------------------------------------------------------*/	
-void Trama_pto_Paralelo_P(unsigned char *buffer_S1_B0,unsigned char *buffer_S1_B2,unsigned char cmd)
-{
+//void Trama_pto_Paralelo_P(unsigned char *buffer_S1_B0,unsigned char *buffer_S1_B2,unsigned char cmd)
+//{
 	
-static unsigned char Buffer_port[30];
-	unsigned char j=3;
-	Buffer_port[0]=STX;																/*inicio de cmd STx*/
-	Buffer_port[1]=cmd;																/*cmd*/
-	Buffer_port[2]=21;																/*numero de digitos de transmicion NO IMPORTA NO ES VALIDADO EN PRINCIPAL*/
-	do
-	{
-	 Buffer_port[j++]=*buffer_S1_B0;									/*ticket*/
-		buffer_S1_B0++;
-	}while (*buffer_S1_B0!=0);
-	Buffer_port[2]=j-3;
-	if(*(buffer_S1_B2+5)!=0)													/*MF_DCTO						0x05				Tipo de descuento (00)sin descuento, (01xx xxxx) 0x40 fija fecha de salida,
-																										10xx xxxx dcto por porcentaje xx xxxx= valor del porcentaje, 11xx xxxx dcto por dinero */
-	{
-		Buffer_port[j++]='-';														/*separador del descuento*/
-		Buffer_port[j++]=*(buffer_S1_B2+5)+0x30;				/*descuento pasado a ascii*/
-	}
+//static unsigned char Buffer_port[30];
+//	unsigned char j=3;
+//	Buffer_port[0]=STX;																/*inicio de cmd STx*/
+//	Buffer_port[1]=cmd;																/*cmd*/
+//	Buffer_port[2]=21;																/*numero de digitos de transmicion NO IMPORTA NO ES VALIDADO EN PRINCIPAL*/
+//	do
+//	{
+//	 Buffer_port[j++]=*buffer_S1_B0;									/*ticket*/
+//		buffer_S1_B0++;
+//	}while (*buffer_S1_B0!=0);
+//	Buffer_port[2]=j-3;
+//	if(*(buffer_S1_B2+5)!=0)													/*MF_DCTO						0x05				Tipo de descuento (00)sin descuento, (01xx xxxx) 0x40 fija fecha de salida,
+//																										10xx xxxx dcto por porcentaje xx xxxx= valor del porcentaje, 11xx xxxx dcto por dinero */
+//	{
+//		Buffer_port[j++]='-';														/*separador del descuento*/
+//		Buffer_port[j++]=*(buffer_S1_B2+5)+0x30;				/*descuento pasado a ascii*/
+//	}
 	
 	/*
 	if(*(buffer_S1_B2+9)&0x0f==0x0f)									/*MF_IN_PAGO				0x09	*/	
@@ -253,29 +257,29 @@ static unsigned char Buffer_port[30];
 	//	Buffer_port[j++]=*(buffer_S1_B2+4)+0x030;				/*minutos de entrada*/
 	//}
 	
-		Buffer_port[j++]='.';														/*separador tipo de vehiculo*/
+	//	Buffer_port[j++]='.';														/*separador tipo de vehiculo*/
 																										/*MF_TIPO_VEHICULO	0x08							tipo vehiculo 00 carro, 01 moto, 02 bicicleta, 04 tractomula*/
 		
-		if(*(buffer_S1_B2+8)!=0)
-		{
-			Buffer_port[j++]='M';													/*moto*/
-		}
-		else
-		{
-			Buffer_port[j++]='C';													/*carro*/
-		}
+	//	if(*(buffer_S1_B2+8)!=0)
+	//	{
+	//		Buffer_port[j++]='M';													/*moto*/
+	//	}
+	//	else
+	//	{
+	//		Buffer_port[j++]='C';													/*carro*/
+	//	}
 		//Buffer_port[j++]=ETX;	
 		
-		ready=0;
+	//	ready=0;
 			//while(busy==0);
-		send_port(Buffer_port,j);													/*trama transmitida pto paralelo*/
-			Debug_Dividir_texto();																							/*division del texto */
+	//	send_port(Buffer_port,j);													/*trama transmitida pto paralelo*/
+	//		Debug_Dividir_texto();																							/*division del texto */
 							
-			DebugBufferMF(Buffer_port,j,1);		
-			Debug_Dividir_texto();	
+	//		DebugBufferMF(Buffer_port,j,1);		
+	//		Debug_Dividir_texto();	
 		
 			
-}
+//}
 
 /*-------------------------------------------------------------------------------------------
 Funcion q arma la trama a transmitir pto paralelo trama 
@@ -346,82 +350,82 @@ s =
 /*-------------------------------------------------------------------------------------------
 Funcion q arma la trama a transmitir pto paralelo trama g
 -------------------------------------------------------------------------------------------*/	
-void Trama_pto_Paralelo_new(unsigned char *buffer_S1_B0,unsigned char *buffer_S1_B2,unsigned char cmd)
-{
-	unsigned char Buffer_port[30];
-	unsigned char j=2;
+//void Trama_pto_Paralelo_new(unsigned char *buffer_S1_B0,unsigned char *buffer_S1_B2,unsigned char cmd)
+//{
+//	unsigned char Buffer_port[30];
+//	unsigned char j=2;
 	
-	Buffer_port[0]=STX;																/*inicio de cmd STx*/
-	Buffer_port[1]=cmd;																/*cmd*/
+//	Buffer_port[0]=STX;																/*inicio de cmd STx*/
+//	Buffer_port[1]=cmd;																/*cmd*/
 
-	do
-	{
-	 Buffer_port[j++]=*buffer_S1_B0;									/*ticket*/
-		buffer_S1_B0++;
-	}while (*buffer_S1_B0!=0);
+//	do
+//	{
+//	 Buffer_port[j++]=*buffer_S1_B0;									/*ticket*/
+//		buffer_S1_B0++;
+//	}while (*buffer_S1_B0!=0);
 	
-	if(*(buffer_S1_B2+5)!=0)													/*MF_DCTO						0x05				Tipo de descuento (00)sin descuento, (01xx xxxx) 0x40 fija fecha de salida,
-																										10xx xxxx dcto por porcentaje xx xxxx= valor del porcentaje, 11xx xxxx dcto por dinero */
-	{
-		Buffer_port[j++]='-';														/*separador del descuento*/
-		Buffer_port[j++]=*(buffer_S1_B2+5)+0x30;				/*descuento pasado a ascii*/
-	}
-	else
-	{
-		Buffer_port[j++]='-';														/*separador del descuento*/
-		Buffer_port[j++]='0';
-	}
+//	if(*(buffer_S1_B2+5)!=0)													/*MF_DCTO						0x05				Tipo de descuento (00)sin descuento, (01xx xxxx) 0x40 fija fecha de salida,
+	//																									10xx xxxx dcto por porcentaje xx xxxx= valor del porcentaje, 11xx xxxx dcto por dinero */
+//	{
+//		Buffer_port[j++]='-';														/*separador del descuento*/
+//		Buffer_port[j++]=*(buffer_S1_B2+5)+0x30;				/*descuento pasado a ascii*/
+//	}
+//	else
+//	{
+//		Buffer_port[j++]='-';														/*separador del descuento*/
+//		Buffer_port[j++]='0';
+//	}
 	
-	if((*(buffer_S1_B2+9)&0x0f)==0x0f)									/*MF_IN_PAGO=0x09				si es =0x0f fue liquidado en cajero 	*/	
-	{
-		Buffer_port[1]='C';
-	}
-	else
-	{
-		Buffer_port[1]='s';
-	}
+//	if((*(buffer_S1_B2+9)&0x0f)==0x0f)									/*MF_IN_PAGO=0x09				si es =0x0f fue liquidado en cajero 	*/	
+//	{
+	//	Buffer_port[1]='C';
+//	}
+//	else
+//	{
+//		Buffer_port[1]='s';
+//	}
 	
-		Buffer_port[j++]='-';														/*separador de la fecha de entrada*/
-		Buffer_port[j++]=*(buffer_S1_B2+0)+0x030;				/*año de entrada*/
-		Buffer_port[j++]=*(buffer_S1_B2+1)+0x030;				/*mes de entrada*/
-		Buffer_port[j++]=*(buffer_S1_B2+2)+0x030;				/*dia de entrada*/
-		Buffer_port[j++]=*(buffer_S1_B2+3)+0x030;				/*hora de entrada*/
-		Buffer_port[j++]=*(buffer_S1_B2+4)+0x030;				/*minutos de entrada*/
-		Buffer_port[j++]='-';	
+//		Buffer_port[j++]='-';														/*separador de la fecha de entrada*/
+//		Buffer_port[j++]=*(buffer_S1_B2+0)+0x030;				/*año de entrada*/
+//		Buffer_port[j++]=*(buffer_S1_B2+1)+0x030;				/*mes de entrada*/
+//		Buffer_port[j++]=*(buffer_S1_B2+2)+0x030;				/*dia de entrada*/
+//		Buffer_port[j++]=*(buffer_S1_B2+3)+0x030;				/*hora de entrada*/
+//		Buffer_port[j++]=*(buffer_S1_B2+4)+0x030;				/*minutos de entrada*/
+//		Buffer_port[j++]='-';	
 		
-		Block_read_Clock_Hex(Buffer_port+j);
+//		Block_read_Clock_Hex(Buffer_port+j);
 		
-		Buffer_port[j++]=Buffer_port[j]+ 0x30;
-		Buffer_port[j++]=Buffer_port[j]+ 0x30;
-		Buffer_port[j++]=Buffer_port[j]+ 0x30;
-		Buffer_port[j++]=Buffer_port[j]+ 0x30;
-		Buffer_port[j++]=Buffer_port[j]+ 0x30;
+//		Buffer_port[j++]=Buffer_port[j]+ 0x30;
+//		Buffer_port[j++]=Buffer_port[j]+ 0x30;
+//		Buffer_port[j++]=Buffer_port[j]+ 0x30;
+//		Buffer_port[j++]=Buffer_port[j]+ 0x30;
+//		Buffer_port[j++]=Buffer_port[j]+ 0x30;
 		
 		
 	
-		Buffer_port[j++]='.';														/*separador tipo de vehiculo*/
+//		Buffer_port[j++]='.';														/*separador tipo de vehiculo*/
 																										/*MF_TIPO_VEHICULO	0x08							tipo vehiculo 00 carro, 01 moto, 02 bicicleta, 04 tractomula*/
 		
-		if(*(buffer_S1_B2+8)!=0)
-		{
-			Buffer_port[j++]='M';													/*moto*/
-		}
-		else
-		{
-			Buffer_port[j++]='C';													/*carro*/
-		}
-		Buffer_port[j++]=ETX;	
+//		if(*(buffer_S1_B2+8)!=0)
+//		{
+//			Buffer_port[j++]='M';													/*moto*/
+//		}
+//		else
+//		{
+//			Buffer_port[j++]='C';													/*carro*/
+//		}
+//		Buffer_port[j++]=ETX;	
 	
 		
-		ready=0;
-			while(busy==0);
-		send_port(Buffer_port,j);													/*trama transmitida pto paralelo*/
+//		ready=0;
+//			while(busy==0);
+//		send_port(Buffer_port,j);													/*trama transmitida pto paralelo*/
 		
-			Debug_Dividir_texto();																							/*division del texto */
+//			Debug_Dividir_texto();																							/*division del texto */
 							
-			DebugBufferMF(Buffer_port,j,1);		
-			Debug_Dividir_texto();	
-}
+//			DebugBufferMF(Buffer_port,j,1);		
+//			Debug_Dividir_texto();	
+//}
 
 
 
@@ -514,8 +518,11 @@ void load_and_send_id_cod()
 unsigned char buffer_info[11];
 unsigned char buf[4];
 unsigned char i,k;
-k=0;
-
+unsigned char ID_CLIENTE;
+unsigned char COD_PARK;			
+		k=0;
+		ID_CLIENTE=rd_eeprom(0xa8,EE_ID_CLIENTE);	
+		COD_PARK=rd_eeprom(0xa8,EE_ID_PARK);
 		buffer_info[0]=STX; 											//STX
 		buffer_info[1]='D';												// nombre del comando de id_cliente, cod_park
 		sprintf(buf,"%d",ID_CLIENTE);							/*ID_CLIENTE lo paso a strim */

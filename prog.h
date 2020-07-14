@@ -29,5 +29,14 @@ void tipo_pantalla();
 unsigned char *hash_id(unsigned char *clave);
 void Prog_tarjeta_automatica_o_boton();
 void Prog_AntiPassBack();
+void Prog_Placa();
+void Prog_Address_High_Board();
+void Prog_Horarios();
+void Prog_Validar_Tipo_Vehiculo_Mensual();
+void Prog_Apb_Mensual();
+unsigned char *Addr_Horarios();
+unsigned char Prog_Horarios_on_off(unsigned int addr);
+void Prog_Horario_Desde_Hasta(unsigned int addr);
+void  First_Clave();
 
 #endif	/* _PROG_H_ */

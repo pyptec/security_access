@@ -10,3 +10,5 @@ void Dwload_EEprom (void);
 void RD_MF(unsigned char Sector, unsigned char Bloque);
 void WR_MF(unsigned char Sector, unsigned char Bloque,unsigned char *buffer);	
 void LoadVerify_EEprom(void);
+void Clave_Seguridad_S2(void);
+void Unique_Identifier_UID(void);

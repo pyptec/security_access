@@ -29,5 +29,8 @@ void graba_serie(unsigned char *buffer);
 unsigned char *Lee_No_Ticket();
 unsigned long int  Read_EEprom_Ticket();
 void Incremente_Ticket();
+void Write_EEprom_Ticket(unsigned char *buffer);
+void LeerMemoria(unsigned int addres, unsigned char *res);
+void EscribirMemoria(unsigned int addres,unsigned char *res);
 
 #endif	/* _EEPROM_H_ */

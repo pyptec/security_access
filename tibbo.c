@@ -12,7 +12,8 @@ extern unsigned char Debug_Tibbo;
 sbit rx_ip = P0^0;					//		
 sbit txd2 = P1^0;					//Transmision Aux Datos	IP								*
 
-
+#define True										0x01
+#define False										0x00
 /*------------------------------------------------------------------------------
 ------------------------------------------------------------------------------*/
 void time_bit()
@@ -61,8 +62,8 @@ void tx_aux(unsigned char caracter)
 {
 	unsigned char j, temporal, bitTX;
 
-	EA=0;
-	txd2=0;
+	EA=False;
+	txd2=False;
 	time_bit();
 		_nop_();
 		_nop_();
@@ -70,11 +71,11 @@ void tx_aux(unsigned char caracter)
 	bitTX=caracter&0x01;
 	if (bitTX==0x00)
 	{
-	 	txd2=0;
+	 	txd2=False;
 	}
 	else
 	{
-	   	txd2=1;
+	   	txd2=True;
 	}
 	time_bit();
 	for (j=1; j<=7; j++)
@@ -83,19 +84,19 @@ void tx_aux(unsigned char caracter)
 		bitTX=temporal&(0x01);
 		if (bitTX==0x00)
 		{
-	 		txd2=0;
+	 		txd2=False;
 		}
 		else
 		{
-	   		txd2=1;
+	   		txd2=True;
 		}
 		time_bit();
 	}
-	txd2=1;
+	txd2=True;
 	time_bit();
 	time_bit(); 
 
-	EA=1;
+	EA=True;
 }
 
 
@@ -134,7 +135,7 @@ Transmito un caracter pasandolo a ascii
 void Debug_chr_Tibbo(unsigned char Dat)
 {
 	unsigned char temp;
-	if (Debug_Tibbo==1)
+	if (Debug_Tibbo==True)
 	{
 		temp=(Dat&0xf0)>>4;
 		(temp>0x09)?(temp=temp+0x37):(temp=temp+0x30);
@@ -159,9 +160,9 @@ void DebugBufferMF(unsigned char *str,unsigned char num_char,char io)
   unsigned char j;
  
   
-  if (Debug_Tibbo==1)
+  if (Debug_Tibbo==True)
   {
-		if(io!=0)
+		if(io!=False)
 		{
   	Debug_txt_Tibbo((unsigned char *) "Datos Recibidos del Transporte: ");
 		}else Debug_txt_Tibbo((unsigned char *) "Datos Enviados al Transporte: ");
@@ -184,7 +185,7 @@ void Debug_txt_Tibbo(unsigned char * str)
 	unsigned char i;
 	i=0;
 	
-	if (Debug_Tibbo==1)
+	if (Debug_Tibbo==True)
 	{
 		for (i=0; str[i] != '\0'; i++)
 		{
@@ -205,7 +206,7 @@ Recibe la trama del tibbo a 9600bd
 unsigned char rx_Data(void)
 {
 	unsigned char temporal;
-	
+		
 		temporal=0xff;
 		time_mbit();
 //--------------------------------------------------------------------------------------------------
@@ -251,32 +252,33 @@ unsigned char rx_Data(void)
 	  	while (rx_ip==0)
 		{
 		}
+		
 //------------------------------------------------------------------------------------
  	return temporal; 
 
 }	
-void Debug_Fecha_actual(unsigned char *buffer)
-{
-	Debug_txt_Tibbo((unsigned char *) "Fecha Actual en Board: ");
-			Debug_chr_Tibbo(hex_bcd(*buffer));														/*año*/
-			tx_aux('/');
-			Debug_chr_Tibbo(hex_bcd(*(buffer+1)));												/*mes*/
-			tx_aux('/');
-			Debug_chr_Tibbo(hex_bcd(*(buffer+2)));												/*dia*/
-			tx_aux(' ');
-			Debug_chr_Tibbo(hex_bcd(*(buffer+3)));												/*hora*/
-			tx_aux(':');
-			Debug_chr_Tibbo(hex_bcd(*(buffer+4)));												/*minutos*/
-			Debug_txt_Tibbo((unsigned char *) "\r\n\r\n");
-}
+//void Debug_Fecha_actual(unsigned char *buffer)
+//{
+//	Debug_txt_Tibbo((unsigned char *) "Fecha Actual en Board: ");
+//			Debug_chr_Tibbo(hex_bcd(*buffer));														/*año*/
+//			tx_aux('/');
+//			Debug_chr_Tibbo(hex_bcd(*(buffer+1)));												/*mes*/
+//			tx_aux('/');
+//			Debug_chr_Tibbo(hex_bcd(*(buffer+2)));												/*dia*/
+//			tx_aux(' ');
+//			Debug_chr_Tibbo(hex_bcd(*(buffer+3)));												/*hora*/
+//			tx_aux(':');
+//			Debug_chr_Tibbo(hex_bcd(*(buffer+4)));												/*minutos*/
+//			Debug_txt_Tibbo((unsigned char *) "\r\n\r\n");
+//}
 /*------------------------------------------------------------------------------
 Condiciones iniciales de los pines
 ------------------------------------------------------------------------------*/
 void cond_ini_tibbo(void)
 {
 
-	txd2=1;
-	rx_ip=1;
+	txd2=True;
+	rx_ip=True;
 }
 void Debug_pto_paralelo(unsigned char *buffer, unsigned char Length_trama )
 {
@@ -301,80 +303,3 @@ void Debug_monitor(unsigned char *buffer, unsigned char Length_trama )
 	Debug_txt_Tibbo((unsigned char *) "\n\r");				
 	Debug_Dividir_texto();	
 }	
-/*------------------------------------------------------------------------------
-------------------------------------------------------------------------------*/
-/*
-void DebugRtaStatus(unsigned char Tipo)	 			// 1='N'  0='P'
-{
-
-	if ((Tipo=='N')&&(Debug_Tibbo==1)) 					
-	{
-		Debug_txt_Tibbo(0,(unsigned char *) "Respuesta Incorrecta: N ");
-
-		if ((Buffer_Rta_Lintech[3]=='0')&&(Buffer_Rta_Lintech[4]=='0'))
-		{
-			Debug_txt_Tibbo(1,(unsigned char *) "Error No definido");
-		}					
-		else if ((Buffer_Rta_Lintech[3]=='0')&&(Buffer_Rta_Lintech[4]=='1'))
-		{
-		 	Debug_txt_Tibbo(1,(unsigned char *) "CMD con Error de Parametro");
-		}
-		else if ((Buffer_Rta_Lintech[3]=='0')&&(Buffer_Rta_Lintech[4]=='2'))
-		{
-		 	Debug_txt_Tibbo(1,(unsigned char *) "Error secuencia de ejecucion del CMD");
-		}
-		else if ((Buffer_Rta_Lintech[3]=='0')&&(Buffer_Rta_Lintech[4]=='3'))
-		{
-		 	Debug_txt_Tibbo(1,(unsigned char *) "CMD no soportado por Hardware");
-		}
-		else if ((Buffer_Rta_Lintech[3]=='1')&&(Buffer_Rta_Lintech[4]=='0'))
-		{
-		 	Debug_txt_Tibbo(1,(unsigned char *) "Tarjeta Atascada / Overtimme");
-		}
- 		else if ((Buffer_Rta_Lintech[3]=='A')&&(Buffer_Rta_Lintech[4]=='0'))
-		{
-		 	Debug_txt_Tibbo(1,(unsigned char *) "Dispensador Vacio");
-		}
- 		else if ((Buffer_Rta_Lintech[3]=='A')&&(Buffer_Rta_Lintech[4]=='1'))
-		{
-		 	Debug_txt_Tibbo(1,(unsigned char *) "Colector Lleno");
-		}
-	}
-	else if ((Tipo=='P')&&(Debug_Tibbo==1))   						// valido st0	 0 canal libre, 1 tarjeta en la boca, 2 tarjeta en rf
-	{
-		
-		if (Buffer_Rta_Lintech[3]=='0')
-		{
-			if (Buffer_Rta_Lintech[3]!=Notify)
-			{
-				Debug_txt_Tibbo(1,(unsigned char *) "Canal Libre");
-				Notify=Buffer_Rta_Lintech[3];
-			}
-		}					
-		else if (Buffer_Rta_Lintech[3]=='1')
-		{
-			if (Buffer_Rta_Lintech[3]!=Notify)
-			{
-				Debug_txt_Tibbo(1,(unsigned char *) "Tarjeta en Bezel");
-				Notify=Buffer_Rta_Lintech[3];
-			}		 	
-		}
-		else if (Buffer_Rta_Lintech[3]=='2')
-		{
-			if (Buffer_Rta_Lintech[3]!=Notify)
-			{
-		 		Debug_txt_Tibbo(1,(unsigned char *) "Tarjeta en RF");
-				Notify=Buffer_Rta_Lintech[3];
-			}
-		}
-		else
-		{
-			if (Buffer_Rta_Lintech[3]!=Notify)
-			{
-				Debug_txt_Tibbo(1,(unsigned char *) "P: Status Incorrecto...");
-				Notify=Buffer_Rta_Lintech[3];
-			}
- 		}
-  	}
-		
-}*/

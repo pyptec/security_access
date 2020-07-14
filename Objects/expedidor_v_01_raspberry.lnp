@@ -10,6 +10,7 @@
 ".\Objects\tibbo.obj",
 ".\Objects\uart.obj",
 ".\Objects\lintech.obj",
-".\Objects\verificador.obj" 
+".\Objects\verificador.obj",
+".\Objects\Monitor.obj" 
 TO ".\Objects\expedidor_v_01_raspberry" 
 PRINT(".\Listings\expedidor_v_01_raspberry.m51") RAMSIZE(256) 

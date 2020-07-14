@@ -22,13 +22,17 @@ extern void Debug_chr_Tibbo(unsigned char Dat);
 #define SIN_INGRESO							0XE6
 #define SIN_PAGO								0XE7
 #define EXCEDE_GRACIA						0XE8
+#define SIN_SALIDA							0XE9
 #define FUERA_DE_LINEA					0XB6
 #define LECTURA_DE_TARJETAS			0xB0
+
 
 #define AUDIO_CAJA				0XA1
 #define TARJETA_VENCIDA			0XEC
 #define TARJETA_ATASCADA		0XEF
 
+
+#define ERROR_TIPO_VEHICULO			0XF8
 #define BIENVENIDO							0XFE
 #define GRACIAS									0XFF
 
@@ -314,18 +318,16 @@ unsigned char num_chr;
                 
 									Raspberry_data((unsigned char  *) "a;28;EXCEDE TIEMPO DE GRACIA \n\r\0");
                   break;
-            case 0xe9:
-                
-									Raspberry_data((unsigned char  *) "a;98;ERROR: GRABACION DE DATOS \n\r\0");
-                  break;
+           
             case 0xeb:
                 
 									Raspberry_data((unsigned char  *) "a;27;DIRIJASE A CAJA \n\r\0");
                   break;
             case TARJETA_VENCIDA:
-                 // Raspberry_txt((unsigned char  *) "a;07;");
-									Raspberry_data((unsigned char  *) "  MENSUALIDAD VENCIDA !   ");
+               //   Raspberry_txt((unsigned char  *) "a;07;");
+									Raspberry_data((unsigned char  *) "a;07;MENSUALIDAD VENCIDA !   ");
                   Raspberry_data((unsigned char  *) "  VENCIO : 20");
+						
          // falta la parte alta del vencimiento
                   break;
             case 0xed:
@@ -364,6 +366,11 @@ unsigned char num_chr;
 						case 	'a':		/*Mensualidad cancelada*/
             Raspberry_data((unsigned char  *) "a;99;NIVEL BAJO DE TARJETAS\n\r\0");
                   break;
+						case 	SIN_SALIDA:		/*Mensualidad cancelada*/
+            Raspberry_data((unsigned char  *) "a;99;SIN SALIDA\n\r\0");
+                  break;
+						
+						
          }
          sel_com=1;   
       }

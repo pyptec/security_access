@@ -28,7 +28,7 @@ unsigned char l_chr;
 /*define posiciones de memoria*/
 #define EE_ID_CLIENTE		0x0000
 
-#define EE_TICKET_ID					0X0100
+#define EE_TICKET_ID					0X0200
 
 
 //*******************************************************************************************
@@ -253,11 +253,12 @@ Noticket= variable de 32 bits tiene el numero del ticket
 void graba_serie(unsigned char *buffer)
 {
 	
-	unsigned char  j,cod_3,cod_2,cod_1,cod_0;
+	unsigned char  j;
 	unsigned char error=0;
-	unsigned long int Noticket,Bnoticket=0;
+	
 	
 /*valido q los datos recibidos sean numericos*/
+	
 	*(buffer+10)=0;
 	
 	for (j=0; j<=9; j++)
@@ -277,32 +278,8 @@ void graba_serie(unsigned char *buffer)
 	/* son numericos*/
 		if (error==0)
 		{
-			Debug_txt_Tibbo((unsigned char *) "Numero de ticket:");
-			Debug_txt_Tibbo((unsigned char *) buffer);
-			Debug_txt_Tibbo((unsigned char *) "\n\r");
-			Noticket= atol(buffer);
-			
-			Debug_txt_Tibbo((unsigned char *) "No de ticket HEX:");
-			Bnoticket=Noticket>>24;
-			cod_3=Bnoticket;
-			Debug_chr_Tibbo(cod_3);
-			
-			Bnoticket=Noticket >>16;
-			cod_2=Bnoticket;
-			Debug_chr_Tibbo(cod_2);
-			
-			Bnoticket=Noticket >>8;
-			cod_1=Bnoticket;
-			Debug_chr_Tibbo(cod_1);
-			
-			cod_0=Noticket;
-			Debug_chr_Tibbo(cod_0);
-			Debug_txt_Tibbo((unsigned char *) "\n\r");
-			
-			wr_eeprom(0xa8,EE_TICKET_ID,cod_3);
-			wr_eeprom(0xa8,EE_TICKET_ID+1,cod_2);
-			wr_eeprom(0xa8,EE_TICKET_ID+2,cod_1);
-			wr_eeprom(0xa8,EE_TICKET_ID+3,cod_0);	
+			Write_EEprom_Ticket(buffer);
+				
 		}
 		else
 		{
@@ -312,6 +289,37 @@ void graba_serie(unsigned char *buffer)
 			wr_eeprom(0xa8,EE_TICKET_ID+3,00);	
 			
 		}
+}
+void Write_EEprom_Ticket(unsigned char *buffer)
+{
+	unsigned char  cod_3,cod_2,cod_1,cod_0;
+	unsigned long int Noticket,Bnoticket=0;
+	Debug_txt_Tibbo((unsigned char *) "Numero de ticket:");
+	Debug_txt_Tibbo((unsigned char *) buffer);
+	Debug_txt_Tibbo((unsigned char *) "\n\r");
+	Noticket= atol(buffer);
+		
+	Debug_txt_Tibbo((unsigned char *) "No de ticket HEX:");
+	Bnoticket=Noticket>>24;
+	cod_3=Bnoticket;
+	Debug_chr_Tibbo(cod_3);
+		
+	Bnoticket=Noticket >>16;
+	cod_2=Bnoticket;
+	Debug_chr_Tibbo(cod_2);
+			
+	Bnoticket=Noticket >>8;
+	cod_1=Bnoticket;
+	Debug_chr_Tibbo(cod_1);
+			
+	cod_0=Noticket;
+	Debug_chr_Tibbo(cod_0);
+	Debug_txt_Tibbo((unsigned char *) "\n\r");
+			
+	wr_eeprom(0xa8,EE_TICKET_ID,cod_3);
+	wr_eeprom(0xa8,EE_TICKET_ID+1,cod_2);
+	wr_eeprom(0xa8,EE_TICKET_ID+2,cod_1);
+	wr_eeprom(0xa8,EE_TICKET_ID+3,cod_0);	
 }
 /*----------------------------------------------------------------------------------
 Procedimiento que lee el No de Ticket en EEprom y lo retorna en un strint
@@ -355,5 +363,35 @@ void Incremente_Ticket()
 	Noticket=Read_EEprom_Ticket();
 	Noticket=Noticket+1;
 	sprintf( Lee_No_Ticket,"%lu",Noticket);
-	graba_serie(Lee_No_Ticket);
+	Write_EEprom_Ticket(Lee_No_Ticket);
+}
+
+//***********************************************************************************************
+//Rutina que lee la eeprom 
+//***********************************************************************************************
+void LeerMemoria(unsigned int addres, unsigned char *res)
+	{
+unsigned char i;
+do {
+ 	*res=rd_eeprom(0xa8,addres);;
+	i=*res;
+	addres++;
+	res++;
+}while(i !='\0');
+ 	*res='\0';
+	}
+void EscribirMemoria(unsigned int addres,unsigned char *res)
+	{
+
+
+while(*res !='\0'){
+	if(*res =='\r'){*res='\0';}  
+	wr_eeprom(0xa8,addres,*res);
+ //  write_eeprom(addres,*res);         //Escibe el fin de la cadena (0)
+    addres++;
+		res++;
+	}
+ wr_eeprom(0xa8,addres,*res);
+// write_eeprom(addres,*res); 
+
 }

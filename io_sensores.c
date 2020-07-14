@@ -20,8 +20,10 @@ sbit busy = P3^3;  					/*bussy de Entrada Interrupcion del Procesador principal
 
 #define AUTOMOVIL						0X00
 #define MOTO								0X01
-
+/*datos en eeprom*/
 #define EE_CPRCN_ACTIVA				0x000C
+#define EE_ADDRESS_HIGH_BOARD		0X0012
+
 extern bit COMPARACION_ACTIVA;
 extern  unsigned char Tipo_Vehiculo;
 
@@ -96,8 +98,8 @@ Funcion q debuelve la direccion de la tarjeta
 ------------------------------------------------------------------------------*/
 unsigned char Dir_board()
 {
-	char Board=0x31;
-	
+	unsigned char Board=0x01;
+	unsigned char Board_High;
 	sel_Dir1();
 	if (DataIn==1)
 	{
@@ -108,36 +110,44 @@ unsigned char Dir_board()
 	{
 		Board=Board+2;
 	}
-	return (Board);
+	if(Board == 0x01)
+	{	
+	Board_High=rd_eeprom(0xa8,EE_ADDRESS_HIGH_BOARD);
+	
+		if(Board_High != 0)
+		{
+			if(Board_High == 0xff)
+			{
+				Board=0x01;
+			}
+			else 	Board= Board_High ;
+		}	
+	
+	}
+	return (Board+0x30);
 }
 /*------------------------------------------------------------------------------
-Detecto la activacion de los sensores de salida
+Funcion q debuelve la direccion de la tarjeta
 ------------------------------------------------------------------------------*/
-
-unsigned char  ValidaSensoresPaso(void)
+unsigned char Valida_Sensor1_Auto()
 {
- 
-		sel_Sensor2();																//garantiso q la barrera se encuentre en posicion baja	
-   		if ((DataIn==1))				
-		{  
-			if (ValidaSensor()==1)
-			{
-			sel_Sensor1();	
+	unsigned char sensor; 
+				sel_Sensor1();	
 				if (DataIn==0)														// sensor1  se encuentra activo puede ser carro, si esta inhabilitado debe ser moto					
 				{  sel_Auto();
 					if (DataIn==0)
 					{					  															// sensor Auto activo es un carro 
 					   Debug_txt_Tibbo((unsigned char *) "Sensores Auto y sensor1 activos.\n\r");
 					   Tipo_Vehiculo=AUTOMOVIL;
-							return 0xff;
+						sensor= 0xff;
 						
 					}
 					else
-						{
+					{
 							Debug_txt_Tibbo((unsigned char *) "Sensor activo sensor1.\n\r");
 							Tipo_Vehiculo=MOTO;
-							return 0xff ;
-						}
+							sensor=  0xff ;
+					}
 						
 				   	
 				}
@@ -148,16 +158,32 @@ unsigned char  ValidaSensoresPaso(void)
 					
 					Debug_txt_Tibbo((unsigned char *) "Detectado. Sensor Auto.\n\r");
 						Tipo_Vehiculo=MOTO;
-						return 0xff;	
+						sensor= 0xff;	
 					}
 					else
 					{
 						Debug_txt_Tibbo((unsigned char *) "Sensores no detectados.\n\r");
-						return 0x00;	
+						sensor=  0x00;	
 					}
 						
 
 				}
+				return sensor;
+}
+/*------------------------------------------------------------------------------
+Detecto la activacion de los sensores de salida
+------------------------------------------------------------------------------*/
+
+unsigned char  ValidaSensoresPaso(void)
+{
+ unsigned char sensor;
+		sel_Sensor2();																//garantiso q la barrera se encuentre en posicion baja	
+   		if ((DataIn==1))				
+		{  
+			if (ValidaSensor()==1)
+			{
+				sensor=Valida_Sensor1_Auto();
+	
 			}
 			else 
 			{
@@ -169,10 +195,11 @@ unsigned char  ValidaSensoresPaso(void)
 		Debug_txt_Tibbo((unsigned char *) "Vehiculo Saliendo. Un momento.\n\r");
 		return 0x00;
 		}
-
+	return sensor;
 }
 
 
+	
 /*------------------------------------------------------------------------------
 funcion de msj en lcd de informacion
 toggle=0		envia por el pto paralelo STX, cmd (i), año, mes, dia, hora, minutos, seg, dia de la semana, ETX
