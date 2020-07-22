@@ -342,12 +342,12 @@ CMD q programa la clave en el verificador o transporte
 	g_scArrTxComSoft[9]=0X00;
 	g_scArrTxComSoft[10]=0X01;
 	g_scArrTxComSoft[11]=0x06;
-	g_scArrTxComSoft[12]='3';
-	g_scArrTxComSoft[13]='V';
- 	g_scArrTxComSoft[14]='0';
-	g_scArrTxComSoft[15]='p';
-	g_scArrTxComSoft[16]='4';
-	g_scArrTxComSoft[17]='r';
+	g_scArrTxComSoft[12]='3'; //33
+	g_scArrTxComSoft[13]='V';//56
+ 	g_scArrTxComSoft[14]='0';//30
+	g_scArrTxComSoft[15]='p';//70
+	g_scArrTxComSoft[16]='4';//34
+	g_scArrTxComSoft[17]='r';//72
 	g_scArrTxComSoft[18]=ETX;
 	
  	for (j=0; j<19; j++)
@@ -538,3 +538,32 @@ unsigned char	g_scArrTxComSoft[10];
 		EscribirCadenaSoft_buffer(g_scArrTxComSoft,11);		/* envio la trama por el pto serie*/
 		ValTimeOutCom=TIME_CARD;
 	}	
+void Power_off(void)
+{
+unsigned char j, bcc;
+unsigned char	g_scArrTxComSoft[10];
+		  bcc=0;
+	
+	Debug_txt_Tibbo((unsigned char *) "POWER OFF UID\r\n");
+ 	
+	g_scArrTxComSoft[0]=STX_LINTECH;
+		g_scArrTxComSoft[1]=0X00;
+		g_scArrTxComSoft[2]=0X00;
+		g_scArrTxComSoft[3]=0X03;
+		g_scArrTxComSoft[4]='C';
+		g_scArrTxComSoft[5]=0x60;
+		g_scArrTxComSoft[6]=0x31;
+		g_scArrTxComSoft[7]=ETX;
+	   	for (j=0; j<8; j++)
+		{
+			bcc=g_scArrTxComSoft[j]^bcc;
+		}
+		g_scArrTxComSoft[8]=bcc;
+		buffer_ready=0;																		/* buffer del pto serie (0) inicia a esperar la trama*/
+		g_cEstadoComSoft=ESPERA_RX;												/* Espera el ASK en el pt o serie para empesar a almacenas*/
+		DebugBufferMF(g_scArrTxComSoft,9,0);								/*muestra la trama enviada al pto serie a debug por tibbo*/
+		EscribirCadenaSoft_buffer(g_scArrTxComSoft,9);		/* envio la trama por el pto serie*/
+		ValTimeOutCom=TIME_CARD;
+
+
+}

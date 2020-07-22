@@ -1,4 +1,4 @@
-C51 COMPILER V9.59.0.0   CLOCK                                                             07/14/2020 08:20:39 PAGE 1   
+C51 COMPILER V9.59.0.0   CLOCK                                                             07/21/2020 12:52:06 PAGE 1   
 
 
 C51 COMPILER V9.59.0.0, COMPILATION OF MODULE CLOCK
@@ -62,7 +62,7 @@ line level    source
   52          //*********************************************************************************
   53          void eb_clk(char dir_clk) {
   54   1        int nbits;
-C51 COMPILER V9.59.0.0   CLOCK                                                             07/14/2020 08:20:39 PAGE 2   
+C51 COMPILER V9.59.0.0   CLOCK                                                             07/21/2020 12:52:06 PAGE 2   
 
   55   1        for (nbits=0; nbits<8; nbits++)
   56   1        {
@@ -126,7 +126,7 @@ line level    source
  114   1        byte_out=byte_h|byte_l;
  115   1        return byte_out;
  116   1      }
-C51 COMPILER V9.59.0.0   CLOCK                                                             07/14/2020 08:20:39 PAGE 3   
+C51 COMPILER V9.59.0.0   CLOCK                                                             07/21/2020 12:52:06 PAGE 3   
 
  117          /*------------------------------------------------------------------------------
  118          
@@ -190,7 +190,7 @@ line level    source
  176   9                        }
  177   8                      }
  178   7                      else
-C51 COMPILER V9.59.0.0   CLOCK                                                             07/14/2020 08:20:39 PAGE 4   
+C51 COMPILER V9.59.0.0   CLOCK                                                             07/21/2020 12:52:06 PAGE 4   
 
  179   7                      {
  180   8                        validador =1;
@@ -254,7 +254,7 @@ line level    source
  238   1            datos_clock++;
  239   1            /*mes*/
  240   1            wr_clk(WMES,two_one(*datos_clock,*(datos_clock+1)));                    //mes
-C51 COMPILER V9.59.0.0   CLOCK                                                             07/14/2020 08:20:39 PAGE 5   
+C51 COMPILER V9.59.0.0   CLOCK                                                             07/21/2020 12:52:06 PAGE 5   
 
  241   1            datos_clock++;
  242   1            datos_clock++;
@@ -318,7 +318,7 @@ line level    source
  300   1        nibble_l=0x00;
  301   1      
  302   1        for (k=0;k<byte;k++)
-C51 COMPILER V9.59.0.0   CLOCK                                                             07/14/2020 08:20:39 PAGE 6   
+C51 COMPILER V9.59.0.0   CLOCK                                                             07/21/2020 12:52:06 PAGE 6   
 
  303   1        {
  304   2          nibble_l=nibble_l+0x01;
@@ -382,7 +382,7 @@ line level    source
  362   2          numero=numero-0x0a;
  363   2          decena=decena+1;
  364   2        }
-C51 COMPILER V9.59.0.0   CLOCK                                                             07/14/2020 08:20:39 PAGE 7   
+C51 COMPILER V9.59.0.0   CLOCK                                                             07/21/2020 12:52:06 PAGE 7   
 
  365   1        *buffer=decena|0x30;
  366   1        buffer++;
@@ -446,7 +446,7 @@ line level    source
  424   2        }
  425   1        *buffer=centena|0x30;
  426   1          buffer++;
-C51 COMPILER V9.59.0.0   CLOCK                                                             07/14/2020 08:20:39 PAGE 8   
+C51 COMPILER V9.59.0.0   CLOCK                                                             07/21/2020 12:52:06 PAGE 8   
 
  427   1        while (numero>=0x0a)        // resto 10
  428   1        {
@@ -510,7 +510,7 @@ line level    source
  486          
  487          void Block_read_Clock_Hex(unsigned char *datos_clock)
  488          {
-C51 COMPILER V9.59.0.0   CLOCK                                                             07/14/2020 08:20:39 PAGE 9   
+C51 COMPILER V9.59.0.0   CLOCK                                                             07/21/2020 12:52:06 PAGE 9   
 
  489   1        
  490   1        /*año*/
@@ -574,7 +574,7 @@ line level    source
  548   1        /*segundos*/  
  549   1        *datos_clock=lee_clk(RSEG);
  550   1        datos_clock++;
-C51 COMPILER V9.59.0.0   CLOCK                                                             07/14/2020 08:20:39 PAGE 10  
+C51 COMPILER V9.59.0.0   CLOCK                                                             07/21/2020 12:52:06 PAGE 10  
 
  551   1        *datos_clock=00;
  552   1          
@@ -638,7 +638,7 @@ line level    source
              -fer+0x0f)==0x00))
  610          {
  611          
-C51 COMPILER V9.59.0.0   CLOCK                                                             07/14/2020 08:20:39 PAGE 11  
+C51 COMPILER V9.59.0.0   CLOCK                                                             07/21/2020 12:52:06 PAGE 11  
 
  612          //--------------------------------------------------------------------------------------------------------
              -------------------------------------
@@ -702,7 +702,7 @@ line level    source
  665            /*          ano_out=*(buffer+0);                        /*año*/
  666            /*        } 
  667                  }
-C51 COMPILER V9.59.0.0   CLOCK                                                             07/14/2020 08:20:39 PAGE 12  
+C51 COMPILER V9.59.0.0   CLOCK                                                             07/21/2020 12:52:06 PAGE 12  
 
  668                  else if ((*(buffer+1)==4)||(*(buffer+1)==6)||(*(buffer+1)==9)||(*(buffer+1)==11))                   // Meses de
              - 30 dias
@@ -766,7 +766,7 @@ line level    source
  725          */
  726          
  727            /*        if ((*(buffer+0)==16)||(*(buffer+0)==20)||(*(buffer+0)==24)||(*(buffer+0)==28)||(*(buffer+0)==32)||
-C51 COMPILER V9.59.0.0   CLOCK                                                             07/14/2020 08:20:39 PAGE 13  
+C51 COMPILER V9.59.0.0   CLOCK                                                             07/21/2020 12:52:06 PAGE 13  
 
              -(*(buffer+0)==36))
  728                    {
@@ -830,7 +830,7 @@ line level    source
  784                ano_out=*(buffer+0);
  785              }
  786            }
-C51 COMPILER V9.59.0.0   CLOCK                                                             07/14/2020 08:20:39 PAGE 14  
+C51 COMPILER V9.59.0.0   CLOCK                                                             07/21/2020 12:52:06 PAGE 14  
 
  787            else
  788            {
@@ -894,7 +894,7 @@ line level    source
  841                      ano_inT=ano_out+2000;
  842                      bisiesto=0;
  843          
-C51 COMPILER V9.59.0.0   CLOCK                                                             07/14/2020 08:20:39 PAGE 15  
+C51 COMPILER V9.59.0.0   CLOCK                                                             07/21/2020 12:52:06 PAGE 15  
 
  844          
  845          /*            division=(ano_inT/4);
@@ -958,7 +958,7 @@ line level    source
  902                          ano_out=ano_out;                          
  903                        }
  904                      }
-C51 COMPILER V9.59.0.0   CLOCK                                                             07/14/2020 08:20:39 PAGE 16  
+C51 COMPILER V9.59.0.0   CLOCK                                                             07/21/2020 12:52:06 PAGE 16  
 
  905            //-------------------------------------------------------------------------------------------------------
              ----------------------------------------

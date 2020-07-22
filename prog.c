@@ -1089,7 +1089,7 @@ unsigned char buffer[20];
 	printf("\r\n\n/>Password:");
 	
 		/*para pruebas*/
-	printf("\r\n\%s ", validacion);
+	//printf("\r\n\%s ", validacion);
 		
 	IngresaDato(buffer,1);					//ingreso el password por teclado 
 	cmd = GetCMD(buffer);					//quita el carri return	
