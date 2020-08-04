@@ -119,7 +119,8 @@ extern unsigned	char 	Tarjeta_on;
 extern unsigned char cnt__ask_off;
 extern  unsigned char Tipo_Vehiculo;
 extern  unsigned char  Debug_Tibbo;																										/*variable q define expedicion de tarjetas 1= automatico 0= a boton configurable en eeprom*/
-extern unsigned char placa[];
+extern idata unsigned char placa[];
+
 /*externo bit*/
 
 extern bit aSk;
@@ -341,23 +342,6 @@ msj de lcd tarjeta y lcd serie
 #define ERROR_MF1								0XE2
 #define HORARIO_NO_PROG					182
 
-#define SIN_INGRESO							0XE6
-#define SIN_PAGO								0XE7
-#define EXCEDE_GRACIA						0XE8
-
-
-
-
-
-
-#define GRACIAS									0XFF
-
-
-
-#define IN_HORARIO	0XB8
-#define EXPIRO	 	0Xb4
-#define HORARIO	 	0Xb5
-#define DiaX		0XB9
 
 
 #define BIENVENIDO							0XFE
@@ -366,7 +350,7 @@ msj de lcd tarjeta y lcd serie
 #define RETIRE_TARJETA					0XA1
 
 #define LOW_CARD								0x01
-#define ATASCADO								0x02
+
 #define AUDIO_ENTRADA			0XA0
 #define AUDIO_CAJA				0XA1
 #define AUDIO_GRACIAS			0XA2
@@ -1171,6 +1155,39 @@ unsigned char Responde_Lectura_Tarjeta_Sector1_Bloque2 (unsigned char *Atributos
 			}
 		return Estado_expedidor;	
 }
+
+unsigned char Responde_Lectura_Tarjeta_Sector1_Bloque0 (unsigned char *Nombre_Mensual)
+{
+	unsigned char temp;
+	unsigned char Estado_expedidor;
+		
+
+			
+			Debug_txt_Tibbo((unsigned char *) "TAREA_LECTURA_TARJETA_SECTOR1_BLOQUE0\r\n");		
+			
+												
+			
+			if (Buffer_Rta_Lintech[Pos_Length] >=0x18)
+			{
+				
+					for (temp=0; temp<16; ++temp)
+					{
+						*(Nombre_Mensual + temp ) =Buffer_Rta_Lintech[Pos_IniDatMF+temp];														/*almaceno la informacion de MF en un arreglo*/
+					}
+					*(Nombre_Mensual + temp )=NULL;
+					Debug_txt_Tibbo((unsigned char *) "Nombre Mensual:");
+					Debug_txt_Tibbo(Nombre_Mensual );
+					Debug_txt_Tibbo((unsigned char *) "\r\n");			
+					Estado_expedidor = SEQ_LPR;						//SEQ_TIPO_TARJETAS;																								// Valida_Tipo_Tarjeta(Atributos_Expedidor,Buffer_Write_MF);
+			
+	
+			}
+			else
+			{
+				Estado_expedidor = Captura_Expulsa(); //momentario
+			}
+		return Estado_expedidor;	
+}
 unsigned char Responde_Write_Tarjeta_Sector1_Bloque2(unsigned char *Atributos_Expedidor,unsigned char *Buffer_Write_MF)
 {
 	unsigned char Estado_expedidor;
@@ -1186,7 +1203,10 @@ unsigned char Responde_Write_Tarjeta_Sector1_Bloque2(unsigned char *Atributos_Ex
 	}
 	else
 	{
-		Estado_expedidor = SEQ_LPR;
+		*(Atributos_Expedidor + Sector) = Sector_1;
+		*(Atributos_Expedidor + Bloque) = Bloque_0;
+		Estado_expedidor = SEQ_READ_SECTOR_BLOQUE;
+		
 	}
 	return Estado_expedidor;
 }
@@ -1208,6 +1228,7 @@ unsigned char Pregunta_Lpr(unsigned char *Atributos_Expedidor)
 	unsigned char Estado_expedidor;
 		if(rd_eeprom(0xa8,EE_USE_LPR)== True)
 			 {
+				 /*monitor trama*/
 				 Debug_txt_Tibbo(Armar_Trama_Monitor(Atributos_Expedidor));
 					if (rd_eeprom(0xa8,EE_DEBUG) == False)
 					 {
@@ -1217,6 +1238,7 @@ unsigned char Pregunta_Lpr(unsigned char *Atributos_Expedidor)
 	
 		if (rd_eeprom(0xa8,EE_PLACA)!= False)
 		{
+			/*espero placa*/
 			Estado_expedidor=SEQ_WAIT_PLACA;
 			ValTimeOutCom=TIME_WAIT	;
 			Timer_wait=False;
@@ -1310,6 +1332,7 @@ void Armar_Trama_Tarjeta_Sector1_Bloque0(unsigned char *Buffer_Write_MF)
 unsigned char *Armar_Trama_Pto_Paralelo_Expedidor()
 {
 	static unsigned char buffer[28];
+	unsigned char ticket[11];
 	unsigned char j;
 	/*la trama esta compuesta de
 	STX,CMD,-,NoTICKET,-,FECHAINT,-,placa,ETX*/
@@ -1317,9 +1340,10 @@ unsigned char *Armar_Trama_Pto_Paralelo_Expedidor()
 	buffer[0]=STX;
 	buffer[1]=CMD_PTO_PARALELO_EXPEDIDOR;
 	buffer[2]=NULL;
-	j=strlen(Lee_No_Ticket());
-	strcat(buffer , Lee_No_Ticket());
-	j=j+2;
+	strcpy(ticket, Lee_No_Ticket());
+	strcat(buffer , ticket);
+	j=strlen(buffer);
+	
 	buffer[j++]= '-';
 	
 	Block_read_Clock_Hex(buffer+j);					//leo la fecha de entrada
@@ -1409,6 +1433,7 @@ unsigned char *Armar_Trama_Pto_Paralelo_Expedidor_Mensual(unsigned char *Atribut
 unsigned char *Armar_Trama_Monitor(unsigned char *Atributos_Expedidor)
 {
 	static unsigned char buffer[24];
+	unsigned char ticket[11];
 	unsigned char j;
 	/*la trama esta compuesta de
 	STX,address_board,CMD,Tipo_Vehiculo,NoTICKET,:,fecha int añomesdishoraminuto,:,ETX*/
@@ -1429,7 +1454,8 @@ unsigned char *Armar_Trama_Monitor(unsigned char *Atributos_Expedidor)
 		if(MenSual !=  True)
 		{
 		buffer[4]=NULL;
-		strcat(buffer , Lee_No_Ticket());
+		strcpy(ticket, Lee_No_Ticket());
+		strcat(buffer , ticket);
 		}
 		else
 		{
@@ -1444,6 +1470,7 @@ unsigned char *Armar_Trama_Monitor(unsigned char *Atributos_Expedidor)
 		j=strlen(buffer);
 		buffer[j]=':';
 		/*fecha de entrada*/
+		
 		Block_read_clock_ascii(buffer+j+1);			//leo la fecha de entrada
 		j=strlen(buffer);
 	
@@ -1473,7 +1500,7 @@ unsigned char Load_Secuencia_Expedidor(unsigned char *Secuencia_Expedidor,unsign
 	*(Secuencia_Expedidor + EstadoFuturo ) = estadofuturo;
 	return estadoactual;
 }
-unsigned char Disparo_Lock_Entrada_Vehiculo()
+unsigned char Disparo_Lock_Entrada_Vehiculo(unsigned char *Nombre_Mensual)
 {
 	unsigned char Estado_expedidor;
 	Debug_txt_Tibbo((unsigned char *) "TAKE CARD\r\n");
@@ -1485,7 +1512,7 @@ unsigned char Disparo_Lock_Entrada_Vehiculo()
 			Debug_txt_Tibbo((unsigned char *) "TAREA_OPEN_BARRERA\r\n");	
 			lock=ON;
 			send_portERR(BIENVENIDO);
-			PantallaLCD(BIENVENIDO);
+			PantallaLCD_LINEA_2(BIENVENIDO,Nombre_Mensual);
 			Estado_expedidor=SEQ_PTO_PARALELO;
 			
 			
@@ -1678,8 +1705,7 @@ unsigned char Tarjeta_Mensual(unsigned char *Atributos_Expedidor,unsigned  char 
 			else 
 			{
 				send_portERR(PRMR_TARJETA_VENCIDA);	
-				//hex_ascii((Atributos_Expedidor + Expira_ano),fecha_asii);
-			
+						
 				PantallaLCD(TARJETA_VENCIDA);
 				Debug_txt_Tibbo((unsigned char *) "MENSUAL EXPIRA\r\n");
 				Estado_expedidor = SEQ_EXPULSAR_CARD;
@@ -2176,6 +2202,7 @@ unsigned char SecuenciaExpedidorMF(unsigned char EstadoActivo)
 	static unsigned char Buffer_Write_MF[17];
 	static unsigned char Atributos_Expedidor[15];
 	static unsigned char Secuencia_Expedidor[4];
+	static unsigned char Nombre_Mensual[17];
 	
 	switch (EstadoActivo)
 	{
@@ -2224,6 +2251,10 @@ unsigned char SecuenciaExpedidorMF(unsigned char EstadoActivo)
 						{
 							EstadoActivo=Responde_Lectura_Tarjeta_Sector1_Bloque1 (Atributos_Expedidor);
 						}
+						else if ((Atributos_Expedidor [ Sector ]== Sector_1)&& (Atributos_Expedidor [ Bloque ]==Bloque_0))
+						{
+							EstadoActivo=Responde_Lectura_Tarjeta_Sector1_Bloque0 (Nombre_Mensual);
+						}
 						else
 						{
 							EstadoActivo=Responde_Lectura_Tarjeta_Sector1_Bloque2(Atributos_Expedidor);
@@ -2246,7 +2277,7 @@ unsigned char SecuenciaExpedidorMF(unsigned char EstadoActivo)
 					}
 			else if (Secuencia_Expedidor [TareadelCmd]==TAREA_OPEN_BARRERA)
 					{		
-						EstadoActivo = Disparo_Lock_Entrada_Vehiculo();
+						EstadoActivo = Disparo_Lock_Entrada_Vehiculo(Nombre_Mensual);
 					}
 			else if (Secuencia_Expedidor [TareadelCmd] == TAREA_WRITE_PLACA_CARD)
 					{		

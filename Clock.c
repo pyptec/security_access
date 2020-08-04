@@ -8,6 +8,8 @@ extern void Delay_20us(unsigned int cnt);
 extern void Debug_Fecha_actual(unsigned char *buffer);
 extern float pow   (float x, float y);
 extern void Debug_chr_Tibbo(unsigned char Dat);
+extern void Debug_txt_Tibbo(unsigned char * str);
+extern void Debug_HexDec(unsigned char xfc);
 /*variables externas */
 extern unsigned char  Debug_Tibbo;
 
@@ -446,21 +448,21 @@ void Block_read_clock_ascii(unsigned char *datos_clock)
 	//dia,mes,año,hora,minutos,segundos,Dia de la semana
 		
 		/*año*/
-		dato=lee_clk(RANO);
+		dato=(lee_clk(RANO));
 		*datos_clock=((dato&0xf0)>>4)| 0x30;			/*dato parte alta*/
 	  datos_clock++;
 		*datos_clock=(dato&0x0f)| 0x30;						/*dato parte bajo*/
 		datos_clock++;
 	
 	/*mes*/
-		dato=lee_clk(RMES);
+		dato=(lee_clk(RMES));
 		*datos_clock=((dato&0xf0)>>4)| 0x30;			/*dato parte alta*/
 	  datos_clock++;
 		*datos_clock=(dato&0x0f)| 0x30;						/*dato parte bajo*/
 		datos_clock++;		
 
 		/*dia*/
-	  dato=lee_clk(RDIA);												//;bcd_hex(lee_clk(DIA));
+	  dato=(lee_clk(RDIA));												//;bcd_hex(lee_clk(DIA));
 		*datos_clock=((dato&0xf0)>>4)| 0x30;			/*dato parte alta*/
 	  datos_clock++;
 		*datos_clock=(dato&0x0f)| 0x30;						/*dato parte bajo*/
@@ -468,14 +470,14 @@ void Block_read_clock_ascii(unsigned char *datos_clock)
 		
 		
 		/*hora*/						
-		dato=lee_clk(RHORA);
+		dato=(lee_clk(RHORA));
 		*datos_clock=((dato&0xf0)>>4)| 0x30;			/*dato parte alta*/
 	  datos_clock++;
 		*datos_clock=(dato&0x0f)| 0x30;						/*dato parte bajo*/
 		datos_clock++;				
 		
 		/*minutos*/		
-		dato=lee_clk(RMIN);		
+		dato=(lee_clk(RMIN));		
 		*datos_clock=((dato&0xf0)>>4)| 0x30;			/*dato parte alta*/
 	  datos_clock++;
 		*datos_clock=(dato&0x0f)| 0x30;						/*dato parte bajo*/

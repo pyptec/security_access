@@ -45,7 +45,7 @@ sbit ready = P3^2;					//Salida. solicitud envio Datos							*
 
 /*definiciones tamaño del buffer 
 ------------------------------------------------------------------------------*/
-#define 	TBUF_SIZE   				50           
+#define 	TBUF_SIZE   				20           
 #define 	RBUF_SIZE   				50
 #define 	TBUF_SIZE_LINTECH   50 
 /*------------------------------------------------------------------------------*
@@ -120,10 +120,10 @@ bit placa_ready = 0;
 #include <pto_paralelo.h>
 
 #include <Accescan.h>
-#include <pantallas.h>
+
 #include <prog.h>
 #include <monitor.h>
-
+#include <pantallas.h>
 /*Definicion de funciones prototipo*/
 void off_Timer0_Interrup(void);
 

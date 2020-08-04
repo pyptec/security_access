@@ -1,4 +1,4 @@
-C51 COMPILER V9.59.0.0   MONITOR                                                           07/21/2020 12:52:07 PAGE 1   
+C51 COMPILER V9.59.0.0   MONITOR                                                           07/29/2020 18:03:03 PAGE 1   
 
 
 C51 COMPILER V9.59.0.0, COMPILATION OF MODULE MONITOR
@@ -19,7 +19,7 @@ line level    source
    9          extern unsigned char  Debug_Tibbo;
   10          extern unsigned char ValTimeOutCom;   
   11          extern unsigned char Tipo_Vehiculo;
-  12          unsigned char placa[]={0x30,0x30,0x30,0x30,0x30,0x30,0x0,0x0,0x0};
+  12          idata unsigned char placa[]={0x30,0x30,0x30,0x30,0x30,0x30,0x0,0x0,0x0};
   13          
   14          /*configuracion bits*/
   15          
@@ -62,7 +62,7 @@ line level    source
   52   1        if (USE_LPR==1)
   53   1        {
   54   2            for (j=0; j<MaxChrRx; j++)
-C51 COMPILER V9.59.0.0   MONITOR                                                           07/21/2020 12:52:07 PAGE 2   
+C51 COMPILER V9.59.0.0   MONITOR                                                           07/29/2020 18:03:03 PAGE 2   
 
   55   2            {
   56   3              contador=0;
@@ -126,7 +126,7 @@ line level    source
  113   1      }
  114          void clear_placa()
  115          {
-C51 COMPILER V9.59.0.0   MONITOR                                                           07/21/2020 12:52:07 PAGE 3   
+C51 COMPILER V9.59.0.0   MONITOR                                                           07/29/2020 18:03:03 PAGE 3   
 
  116   1        unsigned char i;
  117   1        for(i=0;i<6;i++)
@@ -146,12 +146,12 @@ line level    source
 
 
 MODULE INFORMATION:   STATIC OVERLAYABLE
-   CODE SIZE        =    423    ----
+   CODE SIZE        =    404    ----
    CONSTANT SIZE    =   ----    ----
-   XDATA SIZE       =      9      25
+   XDATA SIZE       =   ----      25
    PDATA SIZE       =   ----    ----
    DATA SIZE        =   ----    ----
-   IDATA SIZE       =   ----    ----
+   IDATA SIZE       =      9    ----
    BIT SIZE         =   ----    ----
 END OF MODULE INFORMATION.
 

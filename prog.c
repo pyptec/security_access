@@ -139,7 +139,7 @@ unsigned char *hash_id(unsigned char *clave)
 		strcpy(aleatorio, ":[<%?XT]=)");
 	}
 	len_clave=strlen(clave);											/*longitud de la clave a encriptar*/
-		for (i=0; i<len_clave;i++)
+		for (i=0; i<10;i++)
 		{
 			temp=*(clave+i)+aleatorio[i];								/*el primer caracter de la clave se le suma con el primero de los aleatorios*/
 			temp1=temp & 15;														/*al  resultado se le hace una and con (0x0f)*/
@@ -1050,7 +1050,7 @@ void  First_Clave()
 		strcpy (validacion,hash_id(clave));
 		EscribirMemoria(EE_ID_REGISTER,validacion);
 		validacion[0]=0x14;
-		validacion[0]=0x08;
+		validacion[0]=0x0B;
 		validacion[0]=0x14;
 		validacion[0]=0;
 		

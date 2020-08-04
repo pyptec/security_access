@@ -27,7 +27,7 @@ void Armar_Trama_Tarjeta_Sector1_Bloque0(unsigned char *Buffer_Write_MF);
 void Armar_Trama_Tarjeta_Sector1_Bloque2(unsigned char *Atributos_Expedidor,unsigned char *Buffer_Write_MF);
 unsigned char *Armar_Trama_Pto_Paralelo_Expedidor();
 unsigned char Load_Secuencia_Expedidor(unsigned char *Secuencia_Expedidor,unsigned const  estadoactivo,unsigned const estadoactual,unsigned const estadofuturo);
-unsigned char Disparo_Lock_Entrada_Vehiculo();
+unsigned char Disparo_Lock_Entrada_Vehiculo(unsigned char *Nombre_Mensual);
 unsigned char *Armar_Trama_Monitor(unsigned char *Atributos_Expedidor);
 unsigned char Entrega_Card_Captura();
 unsigned char Send_Pto_Paralelo(unsigned char *Atributos_Expedidor);

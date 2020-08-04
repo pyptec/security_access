@@ -66,7 +66,7 @@ sbit led_err_imp = P0^2;			//Error
 #define	DIREJASE_A_CAJA					90
 #define MENSUAL_NO_PAGO					97
 /*mensaje informativo DE PANTALLAS*/
-#define ERROR_LOOP							171					//0XE0
+#define ERROR_LOOP							170					//0XE0
 #define OFF_LINE								174
 #define UN_MOMENTO							175
 /*direcciones de eeprom*/

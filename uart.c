@@ -36,7 +36,7 @@ If next_in = next_out, the buffer is empty.
 
 (next_in - next_out) % buffer_size = the number of characters in the buffer.
 ------------------------------------------------------------------------------*/
-#define TBUF_SIZE   2           /*** Must be one of these powers of 2 (2,4,8,16,32,64,128) ***/
+#define TBUF_SIZE   2         /*** Must be one of these powers of 2 (2,4,8,16,32,64,128) ***/
 #define RBUF_SIZE   8          /*** Must be one of these powers of 2 (2,4,8,16,32,64,128) ***/
 /*definiciones de los estados de recepcion*/
 #define  ESPERA_RX 					0  					//espera el primer cmd de recepcion del verificado 
@@ -228,15 +228,16 @@ if (TI != 0)
   if (t_in != t_out)
     {
     SBUF = tbuf [t_out & (TBUF_SIZE-1)];
-    t_out++;
+	
+   t_out++;
     ti_restart = 0;
-    }
+   }
   else
     {
     ti_restart = 1;
     }
   }
-
+	
 }
 /*
 void tx_chr (unsigned char data_com)
@@ -318,8 +319,7 @@ TR1 = 1;            /* start timer 1 */
 ------------------------------------------------------------------------------*/
 #pragma disable
 
-char com_putchar (
-  unsigned char c)
+char com_putchar (unsigned char c)
 {
 /*------------------------------------------------
 If the buffer is full, return an error value.
@@ -332,7 +332,8 @@ Add the data to the transmit buffer.  If the
 transmit interrupt is disabled, then enable it.
 ------------------------------------------------*/
 tbuf [t_in & (TBUF_SIZE - 1)] = c;
-t_in++;
+
+	t_in++;
 
 if (ti_restart)
   {
@@ -378,8 +379,10 @@ return (t_in - t_out);
 /*
 void clean_tx()
 {
+	
 	t_in = 0;
 	t_out = 0;
+	ti_restart = 1;
 }
 */
 /*

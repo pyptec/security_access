@@ -141,9 +141,8 @@ void main (void)
 {
 	
 	static unsigned char buffer[40];
-	//unsigned char buffer1[13];
 	unsigned char Estado_Comunicacion_Secuencia_MF=SEQ_INICIO;
-	char Length_trama;
+	unsigned char Length_trama;
 
 	
 ini_timer();																															/* initialize interrupt timer0 */

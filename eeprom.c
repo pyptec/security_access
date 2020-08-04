@@ -328,8 +328,11 @@ unsigned char *Lee_No_Ticket()
 {
 	unsigned long int Noticket;
 	unsigned char Lee_No_Ticket[11];
+	unsigned char num_chr;
 	Noticket=Read_EEprom_Ticket();
 	sprintf( Lee_No_Ticket,"%lu",Noticket);
+	num_chr=strlen(Lee_No_Ticket);
+	Lee_No_Ticket[num_chr] = 0;
 	Debug_txt_Tibbo((unsigned char *) Lee_No_Ticket);
 	Debug_txt_Tibbo((unsigned char *) "\n\r");
 	return Lee_No_Ticket;
@@ -387,11 +390,13 @@ void EscribirMemoria(unsigned int addres,unsigned char *res)
 while(*res !='\0'){
 	if(*res =='\r'){*res='\0';}  
 	wr_eeprom(0xa8,addres,*res);
- //  write_eeprom(addres,*res);         //Escibe el fin de la cadena (0)
+ 
     addres++;
 		res++;
 	}
  wr_eeprom(0xa8,addres,*res);
-// write_eeprom(addres,*res); 
+	 addres++;
+		res++;
+  wr_eeprom(0xa8,addres,0);
 
 }
