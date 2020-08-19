@@ -1,4 +1,4 @@
-C51 COMPILER V9.59.0.0   PANTALLAS                                                         08/19/2020 11:02:08 PAGE 1   
+C51 COMPILER V9.59.0.0   PANTALLAS                                                         08/19/2020 14:41:26 PAGE 1   
 
 
 C51 COMPILER V9.59.0.0, COMPILATION OF MODULE PANTALLAS
@@ -62,7 +62,7 @@ line level    source
   52          #define TARJETA_INVALIDA        177
   53          #define SIN_SALIDA              178
   54          #define REGISTRA_INGRESO        179
-C51 COMPILER V9.59.0.0   PANTALLAS                                                         08/19/2020 11:02:08 PAGE 2   
+C51 COMPILER V9.59.0.0   PANTALLAS                                                         08/19/2020 14:41:26 PAGE 2   
 
   55          #define TARJETA_VENCIDA         180
   56          #define MENSUAL_FUERA_HORARIO   181
@@ -126,7 +126,7 @@ line level    source
  113   3                     
  114   3                    num_chr=strlen((unsigned char  *) "TARJETA SIN INGRESO ");
  115   3                    tx_chrlcd(0x00,0);
-C51 COMPILER V9.59.0.0   PANTALLAS                                                         08/19/2020 11:02:08 PAGE 3   
+C51 COMPILER V9.59.0.0   PANTALLAS                                                         08/19/2020 14:41:26 PAGE 3   
 
  116   3                    tx_chrlcd(num_chr*2,0);
  117   3                    LCD_txt ((unsigned char *)"TARJETA SIN INGRESO ",1);
@@ -190,7 +190,7 @@ line level    source
  173   3                    tx_chrlcd(0x00,0);
  174   3                    tx_chrlcd(num_chr*2,0);
  175   3                    LCD_txt ((unsigned char *)"NO ES MENSUALIDAD NI PREPAGO",1);            
-C51 COMPILER V9.59.0.0   PANTALLAS                                                         08/19/2020 11:02:08 PAGE 4   
+C51 COMPILER V9.59.0.0   PANTALLAS                                                         08/19/2020 14:41:26 PAGE 4   
 
  176   3                    break;
  177   3                         
@@ -254,7 +254,7 @@ line level    source
  235   3                    num_chr=strlen((unsigned char *) "NO ES TARJETA MENSUAL ");
  236   3                    tx_chrlcd(0x00,0);
  237   3                    tx_chrlcd(num_chr*2,0);
-C51 COMPILER V9.59.0.0   PANTALLAS                                                         08/19/2020 11:02:08 PAGE 5   
+C51 COMPILER V9.59.0.0   PANTALLAS                                                         08/19/2020 14:41:26 PAGE 5   
 
  238   3                    LCD_txt((unsigned char *)        "NO ES TARJETA MENSUAL ",1);
  239   3                    break;
@@ -318,7 +318,7 @@ line level    source
  297   3                    
  298   3                    
  299   3                      
-C51 COMPILER V9.59.0.0   PANTALLAS                                                         08/19/2020 11:02:08 PAGE 6   
+C51 COMPILER V9.59.0.0   PANTALLAS                                                         08/19/2020 14:41:26 PAGE 6   
 
  300   3                  
  301   3                  default:
@@ -382,7 +382,7 @@ line level    source
  356   3                        break;
  357   3                    
  358   3                 case EXPIRO:
-C51 COMPILER V9.59.0.0   PANTALLAS                                                         08/19/2020 11:02:08 PAGE 7   
+C51 COMPILER V9.59.0.0   PANTALLAS                                                         08/19/2020 14:41:26 PAGE 7   
 
  359   3                        strcpy(msjpantalla,"\n\ra;94;MENSUALIDAD VENCIDA\n\r\0");
  360   3                        Raspberry_data1 ();
@@ -446,7 +446,7 @@ line level    source
  418   3                    Raspberry_data1 ();
  419   3                    //Raspberry_data((unsigned char  *) "a;08;NO ES TARJETA MENSUAL\n\r\0");
  420   3                    break;
-C51 COMPILER V9.59.0.0   PANTALLAS                                                         08/19/2020 11:02:08 PAGE 8   
+C51 COMPILER V9.59.0.0   PANTALLAS                                                         08/19/2020 14:41:26 PAGE 8   
 
  421   3                  
  422   3                  case TARJETA_INVALIDA:
@@ -510,7 +510,7 @@ line level    source
  480   3                
  481   3                
  482   3               
-C51 COMPILER V9.59.0.0   PANTALLAS                                                         08/19/2020 11:02:08 PAGE 9   
+C51 COMPILER V9.59.0.0   PANTALLAS                                                         08/19/2020 14:41:26 PAGE 9   
 
  483   3                
  484   3            
@@ -574,7 +574,7 @@ line level    source
  539   3            }
  540   2              sel_com=1;  
  541   2          }
-C51 COMPILER V9.59.0.0   PANTALLAS                                                         08/19/2020 11:02:08 PAGE 10  
+C51 COMPILER V9.59.0.0   PANTALLAS                                                         08/19/2020 14:41:26 PAGE 10  
 
  542   1          else
  543   1          {
@@ -638,7 +638,7 @@ line level    source
  601   3                  break;
  602   3                    
  603   3                  case TARJETA_VENCIDA:
-C51 COMPILER V9.59.0.0   PANTALLAS                                                         08/19/2020 11:02:08 PAGE 11  
+C51 COMPILER V9.59.0.0   PANTALLAS                                                         08/19/2020 14:41:26 PAGE 11  
 
  604   3                    strcpy(msjpantalla,"a;07; ¡ MENSUALIDAD VENCIDA ! VENCIO: 20");
  605   3                  num_chr=strlen(buffer);
@@ -702,7 +702,7 @@ line level    source
  663          Transmite una trama por el pto serie con el protocolo para  raspberry
  664          msg= es el apuntador del msj
  665          ------------------------------------------------------------------------------*/
-C51 COMPILER V9.59.0.0   PANTALLAS                                                         08/19/2020 11:02:08 PAGE 12  
+C51 COMPILER V9.59.0.0   PANTALLAS                                                         08/19/2020 14:41:26 PAGE 12  
 
  666          /*
  667          void Raspberry_data (unsigned char * msg)
@@ -766,7 +766,7 @@ line level    source
  725   2                //Debug_Dividir_texto();                                                          /*linea de separacion de texto*/
  726   2                REN = 0;                                                                        /*inhabilita recepcion de datos*/
  727   2                LCD_txt_num_char(Ini_Clock_LCD,13,0);                                           /*cmd de inicializacion del reloj del lcd*
-C51 COMPILER V9.59.0.0   PANTALLAS                                                         08/19/2020 11:02:08 PAGE 13  
+C51 COMPILER V9.59.0.0   PANTALLAS                                                         08/19/2020 14:41:26 PAGE 13  
 
              -/
  728   2                                                            

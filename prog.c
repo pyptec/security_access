@@ -1139,14 +1139,10 @@ void Ver_Horario()
 	addr =addr + Habilita_addr ;
 	dataee = rd_eeprom(0xa8,addr);																					/*se lee el id_cliente actual */
 	sprintf(buffer,"%d",dataee);																									/*se convierte  un entero a un string*/
-		if(dataee==0)
+		if(dataee == 1)
 		{
-		printf("\r\n  HORARIO HABILITADO  = OFF\r\n");														/*se muestra el id_cliente actual en pantalla*/
-		}
-		else
-		{
-		printf("\r\n  HORARIO HABILITADO  = ON\r\n");			
-		}
+		printf("\r\n  HORARIO HABILITADO  = ON\r\n");														/*se muestra el id_cliente actual en pantalla*/
+		
 		printf("\r\n Dias Programados\r\n");
 	addr=temp;
 	Ver_Horario_dias(addr);
@@ -1154,17 +1150,23 @@ void Ver_Horario()
 	Ver_Horario_Desde_Hasta(addr);
 	dataee=rd_eeprom(0xa8,addr+Segundo_Tiempo);																				/*leo el dato grabado*/
 	sprintf(buffer,"%d",dataee);	
-		if(dataee==True)
-		{
+			if(dataee==True)
+			{
 			printf("\r\n  SEGUNDO HORARIO HABILITADO  = ON\r\n");
 			/*la hora de inicio del segundo horario*/
 			addr =addr + Minutos_Low_addr_Desde ;
 			Ver_Horario_Desde_Hasta(addr);
+			}
+			else
+			{
+			printf("\r\n SEGUNDO HORARIO HABILITADO  = OFF\r\n");
+			}
 		}
 		else
 		{
-		printf("\r\n SEGUNDO HORARIO HABILITADO  = OFF\r\n");
+		printf("\r\n  HORARIO HABILITADO  = OFF\r\n");			
 		}
+		
 	}
 	
 		

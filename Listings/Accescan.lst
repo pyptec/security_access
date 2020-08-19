@@ -1,4 +1,4 @@
-C51 COMPILER V9.59.0.0   ACCESCAN                                                          08/19/2020 11:02:08 PAGE 1   
+C51 COMPILER V9.59.0.0   ACCESCAN                                                          08/19/2020 14:41:24 PAGE 1   
 
 
 C51 COMPILER V9.59.0.0, COMPILATION OF MODULE ACCESCAN
@@ -62,7 +62,7 @@ line level    source
   51          #define PRMR_ERROR_LOOP             06          //0XE0
   52          #define PRMR_EXPIRO                 0XB4
   53          #define PRMR_EXCEDE_HORARIO         0X07
-C51 COMPILER V9.59.0.0   ACCESCAN                                                          08/19/2020 11:02:08 PAGE 2   
+C51 COMPILER V9.59.0.0   ACCESCAN                                                          08/19/2020 14:41:24 PAGE 2   
 
   54          #define PRMR_NO_MENSUAL             0XB1
   55          #define PRMR_DIREJASE_A_CAJA        0XA1
@@ -126,7 +126,7 @@ line level    source
  106   2              cont++;
  107   2              if (cont>4)     /* con un tiempo de retardo =((1/(22118400/12)*65535)*30)*/
  108   2              {
-C51 COMPILER V9.59.0.0   ACCESCAN                                                          08/19/2020 11:02:08 PAGE 3   
+C51 COMPILER V9.59.0.0   ACCESCAN                                                          08/19/2020 14:41:24 PAGE 3   
 
  109   3              PantallaLCD(OFF_LINE);
  110   3              led_err_imp=0;                                                                                                  /*error led on*/
@@ -190,7 +190,7 @@ line level    source
  159   2               PantallaLCD(ERROR_LOOP);
  160   2          }
  161   1          
-C51 COMPILER V9.59.0.0   ACCESCAN                                                          08/19/2020 11:02:08 PAGE 4   
+C51 COMPILER V9.59.0.0   ACCESCAN                                                          08/19/2020 14:41:24 PAGE 4   
 
  162   1              /*-------------------------------CMD 07  EXCEDE_HORARIO   --------------------------------------------
              -----------------------*/
@@ -254,7 +254,7 @@ line level    source
  204   3                    if (ValidaSensoresPaso()!= 0xff)
  205   3                    {               
  206   4                      PantallaLCD(ERROR_LOOP);
-C51 COMPILER V9.59.0.0   ACCESCAN                                                          08/19/2020 11:02:08 PAGE 5   
+C51 COMPILER V9.59.0.0   ACCESCAN                                                          08/19/2020 14:41:24 PAGE 5   
 
  207   4                      PantallaLCD_LINEA_2(LECTURA_WIEGAND,buff);                                                                /*msj rasberry*/
  208   4                    }
@@ -318,7 +318,7 @@ line level    source
              -x1D};
  261          //unsigned char S1_B0[]={0x32, 0x31, 0x30, 0x37, 0x31, 0x35, 00, 00, 00, 00, 00, 00, 00, 00, 00, 01};
  262          //unsigned char S_B[]={0xE7, 00, 00, 00, 00, 00, 00, 00, 00, 00, 01};
-C51 COMPILER V9.59.0.0   ACCESCAN                                                          08/19/2020 11:02:08 PAGE 6   
+C51 COMPILER V9.59.0.0   ACCESCAN                                                          08/19/2020 14:41:24 PAGE 6   
 
  263          /*------------------------------------------------------------------------------
  264          Rutina q valida los cmd del pto paralelo
@@ -382,7 +382,7 @@ line level    source
  312          //        Debug_Tibbo=0;
  313          //      }
  314                
-C51 COMPILER V9.59.0.0   ACCESCAN                                                          08/19/2020 11:02:08 PAGE 7   
+C51 COMPILER V9.59.0.0   ACCESCAN                                                          08/19/2020 14:41:24 PAGE 7   
 
  315                
  316          //    } 
@@ -446,7 +446,7 @@ line level    source
  360            //  else if ((length_trama==12)&&(*buffer==STX)&&*(buffer+(length_trama-1))==ETX)
  361            //  {
  362            //    graba_serie(buffer+1);                                                                                          /*graba el No de concecutivo  en e
-C51 COMPILER V9.59.0.0   ACCESCAN                                                          08/19/2020 11:02:08 PAGE 8   
+C51 COMPILER V9.59.0.0   ACCESCAN                                                          08/19/2020 14:41:24 PAGE 8   
 
              -eprom*/
  363                    
@@ -510,7 +510,7 @@ line level    source
  420   1          else
  421   1          {
  422   2            Buffer_Lpr[j++]='C';                                /*carro*/
-C51 COMPILER V9.59.0.0   ACCESCAN                                                          08/19/2020 11:02:08 PAGE 9   
+C51 COMPILER V9.59.0.0   ACCESCAN                                                          08/19/2020 14:41:24 PAGE 9   
 
  423   2          }
  424   1        
@@ -574,7 +574,7 @@ line level    source
  481            //  Buffer_Lpr[j++]=((temp & 0x0f))| 0x30;
  482              
  483            //  temp=hex_bcd(*(buffer_S1_B2+1));                /*mes a ascii*/
-C51 COMPILER V9.59.0.0   ACCESCAN                                                          08/19/2020 11:02:08 PAGE 10  
+C51 COMPILER V9.59.0.0   ACCESCAN                                                          08/19/2020 14:41:24 PAGE 10  
 
  484            //  Buffer_Lpr[j++]=((temp & 0xf0)>>4)| 0x30;
  485            //  Buffer_Lpr[j++]=((temp & 0x0f))| 0x30;
