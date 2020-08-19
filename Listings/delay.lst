@@ -1,4 +1,4 @@
-C51 COMPILER V9.59.0.0   DELAY                                                             07/29/2020 18:03:01 PAGE 1   
+C51 COMPILER V9.59.0.0   DELAY                                                             08/19/2020 11:02:08 PAGE 1   
 
 
 C51 COMPILER V9.59.0.0, COMPILATION OF MODULE DELAY
@@ -62,7 +62,7 @@ line level    source
   52          *****************************************************************************************/
   53          
   54          void Delay_10ms(unsigned int cntd_10ms)
-C51 COMPILER V9.59.0.0   DELAY                                                             07/29/2020 18:03:01 PAGE 2   
+C51 COMPILER V9.59.0.0   DELAY                                                             08/19/2020 11:02:08 PAGE 2   
 
   55          {
   56   1        unsigned int i;

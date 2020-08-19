@@ -1,4 +1,4 @@
-C51 COMPILER V9.59.0.0   LINTECH                                                           07/29/2020 18:03:02 PAGE 1   
+C51 COMPILER V9.59.0.0   LINTECH                                                           08/19/2020 11:02:09 PAGE 1   
 
 
 C51 COMPILER V9.59.0.0, COMPILATION OF MODULE LINTECH
@@ -62,7 +62,7 @@ line level    source
   52          extern unsigned char Dir_board();
   53          
   54          /*atributos */
-C51 COMPILER V9.59.0.0   LINTECH                                                           07/29/2020 18:03:02 PAGE 2   
+C51 COMPILER V9.59.0.0   LINTECH                                                           08/19/2020 11:02:09 PAGE 2   
 
   55          extern unsigned char g_cEstadoComSoft;
   56          extern unsigned char ValTimeOutCom;
@@ -126,7 +126,7 @@ line level    source
  114   1      
  115   1        g_scArrTxComSoft[0]=STX_LINTECH;
  116   1        g_scArrTxComSoft[1]=0X00;
-C51 COMPILER V9.59.0.0   LINTECH                                                           07/29/2020 18:03:02 PAGE 3   
+C51 COMPILER V9.59.0.0   LINTECH                                                           08/19/2020 11:02:09 PAGE 3   
 
  117   1        g_scArrTxComSoft[2]=0X00;
  118   1        g_scArrTxComSoft[3]=0X03;
@@ -190,7 +190,7 @@ line level    source
  176   1      
  177   1        buffer_ready=0;
  178   1        g_cEstadoComSoft=ESPERA_RX;
-C51 COMPILER V9.59.0.0   LINTECH                                                           07/29/2020 18:03:02 PAGE 4   
+C51 COMPILER V9.59.0.0   LINTECH                                                           08/19/2020 11:02:09 PAGE 4   
 
  179   1        DebugBufferMF(g_scArrTxComSoft,9,0);
  180   1        EscribirCadenaSoft_buffer(g_scArrTxComSoft,9);
@@ -254,7 +254,7 @@ line level    source
  237   2          DebugBufferMF(g_scArrTxComSoft,9,0);
  238   2          EscribirCadenaSoft_buffer(g_scArrTxComSoft,9);
  239   2          ValTimeOutCom=TIME_CARD;
-C51 COMPILER V9.59.0.0   LINTECH                                                           07/29/2020 18:03:02 PAGE 5   
+C51 COMPILER V9.59.0.0   LINTECH                                                           08/19/2020 11:02:09 PAGE 5   
 
  240   2        }
  241   1      
@@ -318,7 +318,7 @@ line level    source
  299   1        g_scArrTxComSoft[12]=0x41;
  300   1        g_scArrTxComSoft[13]=0x63;
  301   1        g_scArrTxComSoft[14]=0x53;
-C51 COMPILER V9.59.0.0   LINTECH                                                           07/29/2020 18:03:02 PAGE 6   
+C51 COMPILER V9.59.0.0   LINTECH                                                           08/19/2020 11:02:09 PAGE 6   
 
  302   1          g_scArrTxComSoft[15]=0x45;
  303   1        g_scArrTxComSoft[16]=0x76;
@@ -382,7 +382,7 @@ line level    source
  361   1          EscribirCadenaSoft_buffer(g_scArrTxComSoft,20);   /* envio la trama por el pto serie*/
  362   1          ValTimeOutCom=TIME_CARD;
  363   1      }
-C51 COMPILER V9.59.0.0   LINTECH                                                           07/29/2020 18:03:02 PAGE 7   
+C51 COMPILER V9.59.0.0   LINTECH                                                           08/19/2020 11:02:09 PAGE 7   
 
  364          
  365          /*------------------------------------------------------------------------------
@@ -446,7 +446,7 @@ line level    source
  423   1      
  424   1      
  425   1        g_scArrTxComSoft[0]=0xF2;
-C51 COMPILER V9.59.0.0   LINTECH                                                           07/29/2020 18:03:02 PAGE 8   
+C51 COMPILER V9.59.0.0   LINTECH                                                           08/19/2020 11:02:09 PAGE 8   
 
  426   1        g_scArrTxComSoft[1]=0X00;                   
  427   1        g_scArrTxComSoft[2]=0X00;
@@ -510,7 +510,7 @@ line level    source
  485   1        g_scArrTxComSoft[11]=0x01;
  486   1      
  487   1          for (j=0; j<=16; ++j)
-C51 COMPILER V9.59.0.0   LINTECH                                                           07/29/2020 18:03:02 PAGE 9   
+C51 COMPILER V9.59.0.0   LINTECH                                                           08/19/2020 11:02:09 PAGE 9   
 
  488   1            {
  489   2              g_scArrTxComSoft[j+12]=*(buffer + j); 
@@ -574,7 +574,7 @@ line level    source
  547   1        Debug_txt_Tibbo((unsigned char *) "POWER OFF UID\r\n");
  548   1        
  549   1        g_scArrTxComSoft[0]=STX_LINTECH;
-C51 COMPILER V9.59.0.0   LINTECH                                                           07/29/2020 18:03:02 PAGE 10  
+C51 COMPILER V9.59.0.0   LINTECH                                                           08/19/2020 11:02:09 PAGE 10  
 
  550   1          g_scArrTxComSoft[1]=0X00;
  551   1          g_scArrTxComSoft[2]=0X00;

@@ -60,7 +60,7 @@ unsigned char validacion [11]={"admin"};	//usuario
 #define EE_FECHA_VENCIMIENTO		0X0350
 /* Definicion del tamaño de comando y longitud de cmd*/
 
-#define 	NUMCOMMAND 17
+#define 	NUMCOMMAND 18
 #define 	LONGSIZE 3
 
 #define True										0x01
@@ -132,7 +132,7 @@ unsigned char *hash_id(unsigned char *clave)
 	if (check_fechaOut(vencimiento_password) != True)
 		
 	{
-		strcpy(aleatorio,"@#!\`Fb^&*");
+		strcpy(aleatorio,"@#!$`Fb^&*");
 	}
 	else
 	{
@@ -746,6 +746,31 @@ void Prog_Horario_Desde_Hasta(unsigned int addr)
 	dataee = rd_eeprom(0xa8,addr + Minutos_Low_addr_Hasta);
 	printf("%c",dataee);
 }
+void Ver_Horario_Desde_Hasta(unsigned int addr)
+{
+	unsigned char dataee;
+	printf("\r\n Desde  Hasta\r\n");
+	dataee = rd_eeprom(0xa8,addr + Hora_High_addr_Desde);
+	printf(" %c",dataee);
+	dataee = rd_eeprom(0xa8,addr + Hora_Low_addr_Desde); //
+	printf("%c:",dataee);
+	dataee = rd_eeprom(0xa8,addr + Minutos_High_addr_Desde);
+	printf("%c",dataee);
+	dataee = rd_eeprom(0xa8,addr +  Minutos_Low_addr_Desde);
+	printf("%c   ",dataee);	
+		/*hasta*/
+	dataee = rd_eeprom(0xa8,addr + Hora_High_addr_Hasta);
+	printf("%c",dataee);
+	
+	dataee = rd_eeprom(0xa8,addr + Hora_Low_addr_Hasta);
+	printf("%c:",dataee);
+	
+	dataee = rd_eeprom(0xa8,addr + Minutos_High_addr_Hasta);
+	printf("%c",dataee);
+	
+	dataee = rd_eeprom(0xa8,addr + Minutos_Low_addr_Hasta);
+	printf("%c",dataee);
+}
 void Prog_Horario_dias(unsigned int addr)
 {
 	unsigned char buffer[10];
@@ -820,6 +845,83 @@ void Prog_Horario_dias(unsigned int addr)
 		}
 	}
 	
+}
+void Ver_Horario_dias(unsigned int addr)
+{
+	unsigned char dataee;
+	/*Lunes*/
+	dataee=rd_eeprom(0xa8,addr+Lunes_addr);	
+		if(dataee == Lunes_dato)
+		{
+		printf(" Lunes = Programado\r\n");
+		}
+		else
+		{
+		printf(" Lunes = No programado\r\n");
+		}
+		/*Martes*/
+		
+		dataee=rd_eeprom(0xa8,addr+Martes_addr);	
+		if(dataee == Martes_dato)
+		{
+		printf(" Martes = Programado\r\n");
+		}
+		else
+		{
+		printf(" Martes = No programado\r\n");
+		}
+		
+		/*Miercoles*/
+		dataee=rd_eeprom(0xa8,addr+Miercoles_addr);	
+		if(dataee == Miercoles_dato)
+		{
+		printf(" Miercoles = Programado\r\n");
+		}
+		else
+		{
+		printf(" Miercoles = No programado\r\n");
+		}
+		/*Jueves*/
+			dataee=rd_eeprom(0xa8,addr+Jueves_addr);	
+		if(dataee == Jueves_dato)
+		{
+		printf(" Jueves = Programado\r\n");
+		}
+		else
+		{
+		printf(" Jueves = No programado\r\n");
+		}
+		/*Viernes*/
+			dataee=rd_eeprom(0xa8,addr+Viernes_addr);	
+		if(dataee == Viernes_dato)
+		{
+		printf(" Viernes = Programado\r\n");
+		}
+		else
+		{
+		printf(" Viernes = No programado\r\n");
+		}
+		/*Sabado*/
+		
+			dataee=rd_eeprom(0xa8,addr+Sabado_addr);	
+		if(dataee == Sabado_dato)
+		{
+		printf(" Sabado = Programado\r\n");
+		}
+		else
+		{
+		printf(" Sabado = No programado\r\n");
+		}
+		/*Domingo*/
+		dataee=rd_eeprom(0xa8,addr+Domingo_addr);	
+		if(dataee == Domingo_dato)
+		{
+		printf(" Domingo = Programado\r\n");
+		}
+		else
+		{
+		printf(" Domingo = No programado\r\n");
+		}
 }
 void Prog_Horarios()
 {
@@ -1013,6 +1115,181 @@ void Prog_fecha_vencimiento()
 		printf("\r\n\n ACTUAL FECHA DE VENCIMIENTO PROGRAMADA =%s\r\n\n",fecha);	
 	
 }
+void Ver_Horario()
+{
+	unsigned char buffer[10];
+	unsigned char ee_addr_horario[11];
+	unsigned char conta;
+	
+	unsigned int addr,temp;
+	unsigned char dataee;
+	/*direcciones de memoria de almacenamiento*/
+	
+	strcpy (ee_addr_horario,(Addr_Horarios()));
+	for (conta=0;conta < 10 ; conta++)
+	{
+	
+	printf("\r\n numero del Horario  programado = %c\r\n",conta+49);
+		
+	/*HORARIO HABILITADO O INHABILITADO*/
+	addr= ee_addr_horario[conta];
+	temp= addr;
+		/*habilita o desabilita el uso del horario*/
+	
+	addr =addr + Habilita_addr ;
+	dataee = rd_eeprom(0xa8,addr);																					/*se lee el id_cliente actual */
+	sprintf(buffer,"%d",dataee);																									/*se convierte  un entero a un string*/
+		if(dataee==0)
+		{
+		printf("\r\n  HORARIO HABILITADO  = OFF\r\n");														/*se muestra el id_cliente actual en pantalla*/
+		}
+		else
+		{
+		printf("\r\n  HORARIO HABILITADO  = ON\r\n");			
+		}
+		printf("\r\n Dias Programados\r\n");
+	addr=temp;
+	Ver_Horario_dias(addr);
+	
+	Ver_Horario_Desde_Hasta(addr);
+	dataee=rd_eeprom(0xa8,addr+Segundo_Tiempo);																				/*leo el dato grabado*/
+	sprintf(buffer,"%d",dataee);	
+		if(dataee==True)
+		{
+			printf("\r\n  SEGUNDO HORARIO HABILITADO  = ON\r\n");
+			/*la hora de inicio del segundo horario*/
+			addr =addr + Minutos_Low_addr_Desde ;
+			Ver_Horario_Desde_Hasta(addr);
+		}
+		else
+		{
+		printf("\r\n SEGUNDO HORARIO HABILITADO  = OFF\r\n");
+		}
+	}
+	
+		
+}
+void Ver_Prog()
+{
+	unsigned char buffer[10];
+	unsigned int dataee;
+	unsigned char fecha[7];
+	
+	
+	dataee=rd_eeprom(0xa8,EE_ID_CLIENTE);																					/*se lee el id_cliente actual */
+	sprintf(buffer,"%d",dataee);																									/*se convierte  un entero a un string*/
+	/*ID programado*/
+	printf("\r\n ID_CLIENTE_PROGRAMADO = %s\r\n",buffer);		
+	/*codigo de parkeadero*/
+	dataee=rd_eeprom(0xa8,EE_ID_PARK);																					/*se lee el id_cliente actual */
+	sprintf(buffer,"%d",dataee);																									/*se convierte  un entero a un string*/
+	
+	printf("\r\n COD_PARK_PROGRAMADO = %s\r\n",buffer);			
+	/*estado de debug*/
+	dataee=rd_eeprom(0xa8,EE_DEBUG);																					/*se lee el id_cliente actual */
+	sprintf(buffer,"%d",dataee);																									/*se convierte  un entero a un string*/
+	if(dataee==1)
+	{
+		printf("\r\n PROGRAMADO DEBUG = ON\r\n");	
+	}	
+	else
+	{
+		printf("\r\n PROGRAMADO DEBUG = OFF\r\n");	
+	}	
+	/*Estado del lpr*/
+	dataee=rd_eeprom(0xa8,EE_USE_LPR);																					/*se lee el id_cliente actual */
+	sprintf(buffer,"%d",dataee);																									/*se convierte  un entero a un string*/
+	if(dataee==0)
+	{
+		printf("\r\n USE_LPR = OFF\r\n");														/*se muestra el id_cliente actual en pantalla*/
+	}
+	else
+	{
+		printf("\r\n USE_LPR = ON\r\n");			
+	}
+	/*Tipo de pantalla*/
+	dataee=rd_eeprom(0xa8,EE_TIPO_PANTALLA);																					/*se lee el id_cliente actual */
+	sprintf(buffer,"%d",dataee);																									/*se convierte  un entero a un string*/
+	if(dataee==0)
+	{
+		printf("\r\n PANTALLA LCD PROGRAMADA\r\n");														/*se muestra el id_cliente actual en pantalla*/
+	}
+	else
+	{
+		printf("\r\n PANTALLA RASPBERRY  PROGRAMADA\r\n");			
+	}
+	/*MODOde expedicion de tarjeta*/
+	dataee=rd_eeprom(0xa8,EE_CARD_AUTOMATIC_BOTON);																//se lee LA CONFIGURACION 
+	sprintf(buffer,"%d",dataee);																									/*se convierte  un entero a un string*/
+	if(dataee==0)
+	{
+		printf("\r\n EXPIDE TARJETA PULSANDO BOTON\r\n");														/*se muestra el id_cliente actual en pantalla*/
+	}
+	else
+	{
+		printf("\r\n EXPIDE TARJETA AUTOMATICA\r\n");			
+	}
+	/*APB*/
+	dataee=rd_eeprom(0xa8,EE_HABILITA_APB);																					/*se lee el id_cliente actual */
+	sprintf(buffer,"%d",dataee);																									/*se convierte  un entero a un string*/
+	if(dataee==0)
+	{
+		printf("\r\n  ANTIPASSBACK = OFF\r\n");														/*se muestra el id_cliente actual en pantalla*/
+	}
+	else
+	{
+		printf("\r\n ANTIPASSBACK = ON\r\n");			
+	}
+	/*PLACA*/
+	dataee=rd_eeprom(0xa8,EE_PLACA);																					/*se lee el id_cliente actual */
+	sprintf(buffer,"%d",dataee);																									/*se convierte  un entero a un string*/
+	if(dataee==0)
+	{
+		printf("\r\n PLACA = OFF\r\n");														/*se muestra el id_cliente actual en pantalla*/
+	}
+	else
+	{
+		printf("\r\n PLACA = ON\r\n");			
+	}
+	
+	/*DIRECCION*/
+	dataee=rd_eeprom(0xa8,EE_ADDRESS_HIGH_BOARD);																					/*se lee el id_cliente actual */
+	sprintf(buffer,"%d",dataee);																									/*se convierte  un entero a un string*/
+	
+		printf("\r\n ACTUAL ADDRESS_HIGH_BOARD = %s\r\n",buffer);														/*se muestra el id_cliente actual en pantalla*/
+	/*horarios Programados*/
+	 Ver_Horario();
+	
+	/*VALIDA TIPO DE VEHICULO EN MENSUAL*/
+	
+	dataee=rd_eeprom(0xa8,EE_VALIDA_TIPO_VEHICULO_MENSUAL);																					/*se lee el id_cliente actual */
+	sprintf(buffer,"%d",dataee);																									/*se convierte  un entero a un string*/
+	if(dataee==0)
+	{
+		printf("\r\n TIPO_VEHICULO MENSUAL = OFF\r\n");														/*se muestra el id_cliente actual en pantalla*/
+	}
+	else
+	{
+		printf("\r\n TIPO_VEHICULO MENSUAL = ON\r\n");			
+	}
+	/*APB MENSUAL*/
+	dataee=rd_eeprom(0xa8,EE_HABILITA_APB_MENSUAL);																					/*se lee el id_cliente actual */
+	sprintf(buffer,"%d",dataee);																									/*se convierte  un entero a un string*/
+	if(dataee==0)
+	{
+		printf("\r\n ANTIPASSBACK MENSUAL = OFF\r\n");														/*se muestra el id_cliente actual en pantalla*/
+	}
+	else
+	{
+		printf("\r\n  ANTIPASSBACK MENSUAL = ON\r\n");			
+	}
+	/*Fecha de vencimiento clave*/
+	LeerMemoria(EE_FECHA_VENCIMIENTO,buffer);
+		
+		hex_ascii(buffer,fecha);	
+		printf("\r\n ACTUAL FECHA DE VENCIMIENTO PROGRAMADA =%s\r\n",fecha);	
+}
+
 /*------------------------------------------------------------------------------
 Rutina que muestra la lista de comandos
 ------------------------------------------------------------------------------*/
@@ -1032,8 +1309,9 @@ void Show()
 	 printf("\r\n HORARIO            --- CMD 11 Progama 10 horarios del 1 al 10");
 	 printf("\r\n VALIDA_VEHI_MENSUAL--- CMD 12 Habilitar = 1, Inhabilitar = 0");
 	 printf("\r\n USE_APB_MENSUAL    --- CMD 13 Habilitar = 1, Inhabilitar = 0");
-	 printf("\r\n AYUDA              --- CMD 14 Muestra los comandos");
-   printf("\r\n SALIR              --- CMD 15 Salir de programacion");
+	 printf("\r\n VER_PROGRAMACION   --- CMD 14 Muestra la programacion");
+	 printf("\r\n AYUDA              --- CMD 15 Muestra los comandos");
+   printf("\r\n SALIR              --- CMD 16 Salir de programacion");
 
 }
 
@@ -1178,12 +1456,15 @@ unsigned char buffer[20];
 							Prog_Apb_Mensual();
             break;
 						case 14:  //help me
+           		Ver_Prog();
+            break;
+						case 15:  //help me
            		Show();
             break;
-						case 15:  //salir
+						case 16:  //salir
 							return;
             break;
-						case 16:
+						case 17:
 							Prog_fecha_vencimiento();
 							break;
 		
