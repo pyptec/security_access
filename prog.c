@@ -106,9 +106,10 @@ char comandos[NUMCOMMAND][LONGSIZE]=
 	"11",			// prog horario
 	"12",			// Validar tipo de vehiculo mensual
 	"13",			// habilita apb para mensual
-	"14",     //AYUDA Ayuda!muestra todos los comandos
-	"15",		//SALIRSalir de programacion
-	"16"			//cmd escondido fecha de vencimiento password
+	"14",     // ver comandos programados
+	"15",			//AYUDA Ayuda!muestra todos los comandos
+	"16",			//SALIRSalir de programacion
+	"17"			//cmd escondido fecha de vencimiento password
 };
 
 /*------------------------------------------------------------------------------
@@ -1364,6 +1365,7 @@ unsigned char buffer[20];
   do{
 	printf("\r\n\n/>Id Registro:");
 	LeerMemoria(EE_ID_REGISTER,buffer);
+	buffer[10]=0;
 	printf("%s", buffer);
 	strcpy (validacion,hash_id(buffer));
 	printf("\r\n\n/>Password:");

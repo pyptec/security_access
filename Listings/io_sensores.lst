@@ -1,4 +1,4 @@
-C51 COMPILER V9.59.0.0   IO_SENSORES                                                       08/19/2020 14:41:25 PAGE 1   
+C51 COMPILER V9.59.0.0   IO_SENSORES                                                       08/20/2020 14:46:32 PAGE 1   
 
 
 C51 COMPILER V9.59.0.0, COMPILATION OF MODULE IO_SENSORES
@@ -62,7 +62,7 @@ line level    source
   52          //***************************************************************************************************
   53          void sel_Sensor2(void)
   54          {
-C51 COMPILER V9.59.0.0   IO_SENSORES                                                       08/19/2020 14:41:25 PAGE 2   
+C51 COMPILER V9.59.0.0   IO_SENSORES                                                       08/20/2020 14:46:32 PAGE 2   
 
   55   1        sel_A=0;
   56   1        sel_B=0;
@@ -126,7 +126,7 @@ line level    source
  114   1        { 
  115   2        Board_High=rd_eeprom(0xa8,EE_ADDRESS_HIGH_BOARD);
  116   2        
-C51 COMPILER V9.59.0.0   IO_SENSORES                                                       08/19/2020 14:41:25 PAGE 3   
+C51 COMPILER V9.59.0.0   IO_SENSORES                                                       08/20/2020 14:46:32 PAGE 3   
 
  117   2          if(Board_High != 0)
  118   2          {
@@ -190,7 +190,7 @@ line level    source
  175          ------------------------------------------------------------------------------*/
  176          
  177          unsigned char  ValidaSensoresPaso(void)
-C51 COMPILER V9.59.0.0   IO_SENSORES                                                       08/19/2020 14:41:25 PAGE 4   
+C51 COMPILER V9.59.0.0   IO_SENSORES                                                       08/20/2020 14:46:32 PAGE 4   
 
  178          {
  179   1       unsigned char sensor;
@@ -254,7 +254,7 @@ line level    source
  237   3                {
  238   4                info=1;
  239   4                  if(rd_eeprom(0xa8,EE_CPRCN_ACTIVA)==1)    /*se muestra si hay comparacion activa si o no*/
-C51 COMPILER V9.59.0.0   IO_SENSORES                                                       08/19/2020 14:41:25 PAGE 5   
+C51 COMPILER V9.59.0.0   IO_SENSORES                                                       08/20/2020 14:46:32 PAGE 5   
 
  240   4                  {
  241   5                    send_portERR(SI_NOTIFIQUE_EVP);
