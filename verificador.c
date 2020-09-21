@@ -1329,7 +1329,7 @@ void Armar_Trama_Tarjeta_Sector1_Bloque0(unsigned char *Buffer_Write_MF)
 	/*graba serie de Ticket*/
 	strcpy(Buffer_Write_MF, Lee_No_Ticket());
 }
-unsigned char *Armar_Trama_Pto_Paralelo_Expedidor()
+unsigned char *Armar_Trama_Pto_Paralelo_Expedidor(unsigned char *h)
 {
 	static unsigned char buffer[28];
 	unsigned char ticket[11];
@@ -1379,13 +1379,14 @@ unsigned char *Armar_Trama_Pto_Paralelo_Expedidor()
 	}
 	j=strlen(buffer);
 	buffer[j]= ETX;
-	buffer[j+1]= NULL;
+	*h=j+1;
+	
 	return buffer;
 }
-unsigned char *Armar_Trama_Pto_Paralelo_Expedidor_Mensual(unsigned char *Atributos_Expedidor)
+unsigned char *Armar_Trama_Pto_Paralelo_Expedidor_Mensual(unsigned char *Atributos_Expedidor,unsigned char *j)
 {
 	static unsigned char buffer[28];
-	//unsigned char j;
+
 	/*la trama esta compuesta de
 	STX,CMD,-,NoTICKET,-,FECHAINT,-,placa,ETX*/
 
@@ -1428,6 +1429,7 @@ unsigned char *Armar_Trama_Pto_Paralelo_Expedidor_Mensual(unsigned char *Atribut
 	
 	buffer[18]= ETX;
 	buffer[19]= NULL;
+	*j=19;
 	return buffer;
 }
 unsigned char *Armar_Trama_Monitor(unsigned char *Atributos_Expedidor)
@@ -1534,18 +1536,20 @@ unsigned char Disparo_Lock_Entrada_Vehiculo(unsigned char *Nombre_Mensual)
 unsigned char Send_Pto_Paralelo(unsigned char *Atributos_Expedidor)
 {
 	unsigned char *Trama_Expedidor ;
+	unsigned char leng_trama_pto;
 	if(MenSual == True)
 	{
-	Trama_Expedidor=Armar_Trama_Pto_Paralelo_Expedidor_Mensual(Atributos_Expedidor);
+	Trama_Expedidor=Armar_Trama_Pto_Paralelo_Expedidor_Mensual(Atributos_Expedidor,&leng_trama_pto );
 	}
 	else 
 	{
-		Trama_Expedidor=Armar_Trama_Pto_Paralelo_Expedidor();
+		Trama_Expedidor=Armar_Trama_Pto_Paralelo_Expedidor(&leng_trama_pto);
 		Incremente_Ticket();
 	}
-	send_port(Trama_Expedidor,strlen(Trama_Expedidor));	
+	//send_port(Trama_Expedidor,strlen(Trama_Expedidor));	
+	send_port(Trama_Expedidor,leng_trama_pto);	
 	Debug_txt_Tibbo((unsigned char *) "Trama_pto_paralelo\r\n");
-	DebugBufferMF(Trama_Expedidor,strlen(Trama_Expedidor),ENVIADOS);
+	DebugBufferMF(Trama_Expedidor,leng_trama_pto,ENVIADOS);
 	Debug_txt_Tibbo((unsigned char *) "\r\n");
 	
 	
@@ -1752,7 +1756,7 @@ unsigned char Valida_Tipo_Tarjeta(unsigned char *Atributos_Expedidor,unsigned  c
 				{
 					Debug_txt_Tibbo((unsigned char *) "ERROR: INT ANTIPASSBACK MENSUAL \r\n");
 					send_portERR(PRMR_SIN_SALIDA);
-					PantallaLCD(REGISTRA_INGRESO);
+					//PantallaLCD(REGISTRA_INGRESO);
 					Estado_expedidor = Captura_Expulsa();	
 				} 
 			}

@@ -164,7 +164,7 @@ sel_Funcion();																															/*el pulsador funcion es el cmd q d
 	{
 	menu();																																		/*menu de configuracion*/
 	}
-	//Debug_txt_Tibbo((unsigned char *) "aqui estoy");
+
 
 	variable_inicio();																												/*leo y cargo  las variables de inicio de configuracion*/
 while(Secuencia_inicio_expedidor());																				/* procedimiento de inicio de transporte (reset, y grabar eeprom)*/

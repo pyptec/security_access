@@ -1,4 +1,4 @@
-C51 COMPILER V9.59.0.0   MAIN                                                              08/20/2020 14:46:32 PAGE 1   
+C51 COMPILER V9.59.0.0   MAIN                                                              09/15/2020 15:49:47 PAGE 1   
 
 
 C51 COMPILER V9.59.0.0, COMPILATION OF MODULE MAIN
@@ -62,7 +62,7 @@ line level    source
   52          {
   53   1        ET0=0;                  // enable interrupcion bit 1 del registro IENO
   54   1        
-C51 COMPILER V9.59.0.0   MAIN                                                              08/20/2020 14:46:32 PAGE 2   
+C51 COMPILER V9.59.0.0   MAIN                                                              09/15/2020 15:49:47 PAGE 2   
 
   55   1      }
   56          /*------------------------------------------------------------------------------
@@ -126,7 +126,7 @@ line level    source
  114   1      sel_com=1;                    /*seleccionar el pto serie */
  115   1      lock=0;                       /*barrera off*/ 
  116   1        
-C51 COMPILER V9.59.0.0   MAIN                                                              08/20/2020 14:46:32 PAGE 3   
+C51 COMPILER V9.59.0.0   MAIN                                                              09/15/2020 15:49:47 PAGE 3   
 
  117   1      }
  118          
@@ -179,7 +179,7 @@ line level    source
  164   1        {
  165   2        menu();                                                                   /*menu de configuracion*/
  166   2        }
- 167   1        //Debug_txt_Tibbo((unsigned char *) "aqui estoy");
+ 167   1      
  168   1      
  169   1        variable_inicio();                                                        /*leo y cargo  las variables de inicio de configuracion*/
  170   1      while(Secuencia_inicio_expedidor());                                        /* procedimiento de inicio de transporte (reset, y
@@ -190,7 +190,7 @@ line level    source
  174   1        {   
  175   2        
  176   2              
-C51 COMPILER V9.59.0.0   MAIN                                                              08/20/2020 14:46:32 PAGE 4   
+C51 COMPILER V9.59.0.0   MAIN                                                              09/15/2020 15:49:47 PAGE 4   
 
  177   2              if (rx_ip==0)                                                         /*pregunto si llega datos de monitor pto serie emulado*/
  178   2              {

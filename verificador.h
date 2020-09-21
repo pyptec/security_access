@@ -25,7 +25,8 @@ unsigned char Responde_Write_Tarjeta_Sector1_Bloque2(unsigned char *Atributos_Ex
 unsigned char Responde_Write_Tarjeta_Sector1_Bloque0(unsigned char *Buffer_Write_MF);
 void Armar_Trama_Tarjeta_Sector1_Bloque0(unsigned char *Buffer_Write_MF);
 void Armar_Trama_Tarjeta_Sector1_Bloque2(unsigned char *Atributos_Expedidor,unsigned char *Buffer_Write_MF);
-unsigned char *Armar_Trama_Pto_Paralelo_Expedidor();
+unsigned char *Armar_Trama_Pto_Paralelo_Expedidor(unsigned char *j);
+//unsigned char *Armar_Trama_Pto_Paralelo_Expedidor();
 unsigned char Load_Secuencia_Expedidor(unsigned char *Secuencia_Expedidor,unsigned const  estadoactivo,unsigned const estadoactual,unsigned const estadofuturo);
 unsigned char Disparo_Lock_Entrada_Vehiculo(unsigned char *Nombre_Mensual);
 unsigned char *Armar_Trama_Monitor(unsigned char *Atributos_Expedidor);
@@ -38,7 +39,8 @@ unsigned char Wait_Placa(unsigned char *secuencia_expedidor, unsigned char estad
 unsigned char Analiza_Presencia_Mensual();
 unsigned char Captura_Expulsa();
 unsigned char Valida_Vehiculo_Card_Mensual(unsigned char *Atributos_Expedidor);
-unsigned char *Armar_Trama_Pto_Paralelo_Expedidor_Mensual(unsigned char *Atributos_Expedidor);
+unsigned char *Armar_Trama_Pto_Paralelo_Expedidor_Mensual(unsigned char *Atributos_Expedidor,unsigned char *j);
+//unsigned char *Armar_Trama_Pto_Paralelo_Expedidor_Mensual(unsigned char *Atributos_Expedidor);
 unsigned char Valida_Tipo_Tarjeta(unsigned char *Atributos_Expedidor,unsigned  char *Buffer_Write_MF );
 unsigned char Dia_Pico_Placa(unsigned char * Atributos_Expedidor);
 unsigned char Horarios(unsigned char * Atributos_Expedidor);
