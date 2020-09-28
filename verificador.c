@@ -56,6 +56,7 @@ extern unsigned char Dir_board();
 extern void sel_Pulsa(void);
 void sel_Sensor2(void);
 char ValidaSensor(void);
+unsigned char Dir_Board_Monitor();
 
 /*funciones prototipo del transporte MODULO TIBBO*/
 
@@ -1441,7 +1442,7 @@ unsigned char *Armar_Trama_Monitor(unsigned char *Atributos_Expedidor)
 	STX,address_board,CMD,Tipo_Vehiculo,NoTICKET,:,fecha int añomesdishoraminuto,:,ETX*/
 	Debug_Tibbo=False;
 	buffer[0]=STX;
-	buffer[1]=Dir_board();
+	buffer[1]=Dir_Board_Monitor();
 	buffer[2]=CMD_MONITOR_EXPEDIDOR;
 	if(Tipo_Vehiculo == AUTOMOVIL)
 		{
