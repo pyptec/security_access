@@ -1,4 +1,4 @@
-C51 COMPILER V9.59.0.0   EEPROM                                                            09/28/2020 14:23:55 PAGE 1   
+C51 COMPILER V9.59.0.0   EEPROM                                                            10/01/2020 09:24:06 PAGE 1   
 
 
 C51 COMPILER V9.59.0.0, COMPILATION OF MODULE EEPROM
@@ -62,7 +62,7 @@ line level    source
   52   1        if (memory_flag==1)
   53   1        { 
   54   2      
-C51 COMPILER V9.59.0.0   EEPROM                                                            09/28/2020 14:23:55 PAGE 2   
+C51 COMPILER V9.59.0.0   EEPROM                                                            10/01/2020 09:24:06 PAGE 2   
 
   55   2        }  
   56   1      } 
@@ -126,7 +126,7 @@ line level    source
  114          {
  115   1        scl=0;
  116   1        sda=0;
-C51 COMPILER V9.59.0.0   EEPROM                                                            09/28/2020 14:23:55 PAGE 3   
+C51 COMPILER V9.59.0.0   EEPROM                                                            10/01/2020 09:24:06 PAGE 3   
 
  117   1        scl=1;
  118   1        sda=1;
@@ -190,7 +190,7 @@ line level    source
  176   1        Delay_1ms(13);
  177   1        
  178   1        scl=1;
-C51 COMPILER V9.59.0.0   EEPROM                                                            09/28/2020 14:23:55 PAGE 4   
+C51 COMPILER V9.59.0.0   EEPROM                                                            10/01/2020 09:24:06 PAGE 4   
 
  179   1        sda=1;
  180   1        Delay_20us(98);                   /*wait long*/
@@ -254,7 +254,7 @@ line level    source
  237   1        start();
  238   1        e_d_m(control+0x01);
  239   1        ackd();
-C51 COMPILER V9.59.0.0   EEPROM                                                            09/28/2020 14:23:55 PAGE 5   
+C51 COMPILER V9.59.0.0   EEPROM                                                            10/01/2020 09:24:06 PAGE 5   
 
  240   1        scl=0;
  241   1        l_d_m();
@@ -318,7 +318,7 @@ line level    source
  299   1        Debug_txt_Tibbo((unsigned char *) "\n\r");
  300   1        Noticket= atol(buffer);
  301   1          
-C51 COMPILER V9.59.0.0   EEPROM                                                            09/28/2020 14:23:55 PAGE 6   
+C51 COMPILER V9.59.0.0   EEPROM                                                            10/01/2020 09:24:06 PAGE 6   
 
  302   1        Debug_txt_Tibbo((unsigned char *) "No de ticket HEX:");
  303   1        Bnoticket=Noticket>>24;
@@ -382,7 +382,7 @@ line level    source
  361          void Incremente_Ticket()
  362          {
  363   1        
-C51 COMPILER V9.59.0.0   EEPROM                                                            09/28/2020 14:23:55 PAGE 7   
+C51 COMPILER V9.59.0.0   EEPROM                                                            10/01/2020 09:24:06 PAGE 7   
 
  364   1        unsigned long int Noticket;
  365   1        unsigned char Lee_No_Ticket[11];
