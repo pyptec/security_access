@@ -4,7 +4,7 @@ tiempo de delay entre funciones
 ------------------------------------------------------------------------------*/
 
 #define 	TIME_CARD					100		//50
-
+#define		TIME_MOV					150
 /*----------------------------------------------------------------------------
 definicion de datos de trama lintech
 ------------------------------------------------------------------------------*/
@@ -386,19 +386,19 @@ void LoadVerify_EEprom(void)
   g_scArrTxComSoft[9]=0x00;
 	g_scArrTxComSoft[10]=0x01;
 	g_scArrTxComSoft[11]=ETX;
-	g_scArrTxComSoft[12]=0xc6;
+	
 
 	
 
-	for (j=0; j<13; j++)
+	for (j=0; j<12; j++)
 		{
 			bcc=g_scArrTxComSoft[j]^bcc;
 		}
-		g_scArrTxComSoft[13]=bcc;
+		g_scArrTxComSoft[12]=bcc;
 		buffer_ready=0;																		/* buffer del pto serie (0) inicia a esperar la trama*/
 		g_cEstadoComSoft=ESPERA_RX;												/* Espera el ASK en el pt o serie para empesar a almacenas*/
-		DebugBufferMF(g_scArrTxComSoft,14,0);								/*muestra la trama enviada al pto serie a debug por tibbo*/
-		EscribirCadenaSoft_buffer(g_scArrTxComSoft,14);		/* envio la trama por el pto serie*/
+		DebugBufferMF(g_scArrTxComSoft,13,0);								/*muestra la trama enviada al pto serie a debug por tibbo*/
+		EscribirCadenaSoft_buffer(g_scArrTxComSoft,13);		/* envio la trama por el pto serie*/
 		ValTimeOutCom=TIME_CARD;
 		
 }

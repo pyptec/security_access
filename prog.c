@@ -1373,7 +1373,7 @@ unsigned char buffer[20];
 		/*para pruebas*/
 	//printf("\r\n\%s ", validacion);
 		
-	IngresaDato(buffer,1);					//ingreso el password por teclado 
+	IngresaDato(buffer,0);					//ingreso el password por teclado 
 	cmd = GetCMD(buffer);					//quita el carri return	
 	EscribirMemoria(EE_ID_REGISTER,validacion);
 

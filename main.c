@@ -141,7 +141,7 @@ void main (void)
 {
 	
 	static unsigned char buffer[40];
-	unsigned char Estado_Comunicacion_Secuencia_MF=SEQ_INICIO;
+	static unsigned char Estado_Comunicacion_Secuencia_MF=SEQ_INICIO;
 	unsigned char Length_trama;
 
 	
