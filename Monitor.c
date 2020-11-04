@@ -85,14 +85,16 @@ void Valida_Trama_Monitor(unsigned char *buffer, unsigned char length_trama)
 	unsigned char j=0;
 	unsigned char p=2;
 	length_trama=1;
+			/*habilita relevo abre barrera*/
 		if	((*(buffer+2)==ETX)&&(*(buffer+1)=='P')) 																																						/* APERTURA DE BARRETA*/ 
 				{
 					lock=1;																																																						/*habilita el relevo ON*/
 					Timer_wait=0;
 	 			}
-		else if (*(buffer+1)=='<')
+			/*se recive la placa*/	
+		else if ((*(buffer+1)=='<')|| (*(buffer+1)=='['))
 		{
-			/*placa*/
+			/*placa 0 el cancel borra la fecha del mensual */
 			do
 			{
 				placa[j]=*(buffer+p);
@@ -103,13 +105,11 @@ void Valida_Trama_Monitor(unsigned char *buffer, unsigned char length_trama)
 				placa[j-1]=0;
 			  placa_ready=1;
 			ValTimeOutCom=10;
-			/*placa no play <NO_PLATE>*/ 
+			
 			
 		}
-		else if (*(buffer+1)=='[')
-		{
-			/*cancel*/
-		}
+		
+	
 }
 void clear_placa()
 {

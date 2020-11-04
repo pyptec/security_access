@@ -35,7 +35,7 @@ unsigned char Send_Pto_Paralelo(unsigned char *Atributos_Expedidor);
 unsigned char  Respuesta_Segunda_clave(unsigned char *Atributos_Expedidor,unsigned char *Buffer_Write_MF);
 void Armar_Trama_Placa(unsigned char *Buffer_Write_MF);
 unsigned char Responde_Write_Tarjeta_Sector2_Bloque0(unsigned char *Buffer_Write_MF);
-unsigned char Wait_Placa(unsigned char *secuencia_expedidor, unsigned char estadoactivo);
+unsigned char Wait_Placa(unsigned char *Atributos_Expedidor, unsigned char *Buffer_Write_MF);
 unsigned char Analiza_Presencia_Mensual();
 unsigned char Captura_Expulsa();
 unsigned char Valida_Vehiculo_Card_Mensual(unsigned char *Atributos_Expedidor);
@@ -49,6 +49,7 @@ unsigned int Hora_Maxima(unsigned int addr);
 unsigned char En_Horario(unsigned int HoraNow, unsigned int Hora_Prog,unsigned int addr);
 unsigned char Tarjeta_Mensual(unsigned char *Atributos_Expedidor,unsigned  char *Buffer_Write_MF );
 unsigned char Tarjeta_Rotacion(unsigned char *Atributos_Expedidor,unsigned  char *Buffer_Write_MF );
+void  Armar_Trama_Tarjeta_Sector1_Bloque1_Camcel(unsigned char *Buffer_Write_MF);
 
 
 #endif	/* */

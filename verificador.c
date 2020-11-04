@@ -41,6 +41,7 @@ extern void Delay_10ms(unsigned int cnt);
 extern char  *strcat  (char *s1, const char *s2);
 extern char  *strcpy  (char *s1, const char *s2);
 extern unsigned int strlen  (const char *);
+extern char   strcmp  (const char *s1, const char *s2);
 
 /*funciones prototipo de EEprom*/
 
@@ -156,6 +157,7 @@ Definiciones de sequencias de verificador y expedidor
 #define SEQ_CAPTURE_CARD_LOOP						0X15
 #define SEQ_POWER_OFF										0X16
 #define SEQ_POWER_ON										0X17
+#define SEQ_SECOND_PASSWORD							0X18
 
 /*----------------------------------------------------------------------------
 Definiciones de sequencias de tareas del verificador y expedidor
@@ -695,7 +697,7 @@ if((temp=Trama_Validacion_P_N())!=RSPT_TRP_OK	)
 		{
 			if(temp==ESPR_RSPT_TRP_TRAMA)																													/*no he recibido respuesta espero*/
 			{
-			EstadoComSeqMF= *(secuencia_Expedidor + EstadoActual);										//																	/*SEQ_RTA_CARD_POSno ha respondido*/
+			EstadoComSeqMF= *(secuencia_Expedidor + EstadoActual);									       			/*SEQ_RTA_CARD_POSno ha respondido*/
 			}	
 			else if (temp==ERROR_TRP_TRAMA)
 			{
@@ -1196,6 +1198,15 @@ unsigned char Responde_Lectura_Tarjeta_Sector1_Bloque0 (unsigned char *Nombre_Me
 			}
 		return Estado_expedidor;	
 }
+unsigned char Responde_Write_Tarjeta_Sector1_Bloque1(unsigned char *Buffer_Write_MF)
+{
+	unsigned char Estado_expedidor;
+	Debug_txt_Tibbo((unsigned char *) "TAREA_WRITE_TARJETA_SECTOR1_BLOQUE1\r\n");	
+	Debug_txt_Tibbo((unsigned char *) "Write_s1_b1\r\n");
+	DebugBufferMF(Buffer_Write_MF,16,RESPUESTA);
+	Estado_expedidor = SEQ_TIPO_CARD;
+	return Estado_expedidor;
+}
 unsigned char Responde_Write_Tarjeta_Sector1_Bloque2(unsigned char *Atributos_Expedidor,unsigned char *Buffer_Write_MF)
 {
 	unsigned char Estado_expedidor;
@@ -1271,20 +1282,65 @@ unsigned char Responde_Write_Tarjeta_Sector2_Bloque0(unsigned char *Buffer_Write
 }
 unsigned char  Respuesta_Segunda_clave(unsigned char *Atributos_Expedidor,unsigned char *Buffer_Write_MF)
 {
+	
 	Debug_txt_Tibbo((unsigned char *) "TAREA_SEGUNDA CLAVE\r\n");	
 	DebugBufferMF(Buffer_Write_MF,16,RESPUESTA);
+
+	
 	*(Atributos_Expedidor + Sector) = Sector_2;
 	*(Atributos_Expedidor + Bloque) = Bloque_0;
 	Armar_Trama_Placa(Buffer_Write_MF);
+		
 	return SEQ_WRITE_SECTOR_BLOQUE;
+}
+unsigned char Respuesta_Placa_Cancel(unsigned char *Atributos_Expedidor,unsigned char *Buffer_Write_MF)
+{
+	unsigned char Estado_expedidor;
+	unsigned char *Cancel="CANCEL";
+	Debug_txt_Tibbo((unsigned char *) "RESPUESTA PLACA O CANCEL = ");	
+	Debug_txt_Tibbo((unsigned char *) placa);
+	Debug_txt_Tibbo((unsigned char *) "\r\n");
+	if(strcmp(placa,Cancel)== 0)
+	{
+	*(Atributos_Expedidor + Sector) = Sector_1;
+	*(Atributos_Expedidor + Bloque) = Bloque_1;
+		Armar_Trama_Tarjeta_Sector1_Bloque1_Camcel(Buffer_Write_MF);
+		Estado_expedidor = SEQ_WRITE_SECTOR_BLOQUE;
+	}
+	else
+	{
+	
+	Estado_expedidor = SEQ_FRONT_CARD;						//SEQ_SECOND_PASSWORD;
+	}	
+	return Estado_expedidor;
 }
 /*------------------------------------------------------------------------------
 ------------------------------------------------------------------------------*/
-//void  Armar_Trama_Tarjeta_Sector1_Bloque1(unsigned char *Atributos_Expedidor,unsigned char *Buffer_Write_MF)
-//{
-//	*(Buffer_Write_MF +0) = *(Atributos_Expedidor + Tipo_Tarjeta);
-//	*(Buffer_Write_MF +0) = *(Atributos_Expedidor + Tipo_Tarjeta);
-//}	
+void  Armar_Trama_Tarjeta_Sector1_Bloque1_Camcel(unsigned char *Buffer_Write_MF)
+{
+	unsigned char ID_CLIENTE;
+	unsigned char COD_PARK;	
+		/*cuando se recibe el CAMCEL se bloquea la tarjeta*/
+	clear_placa();
+	ID_CLIENTE=rd_eeprom(0xa8,EE_ID_CLIENTE);	
+	COD_PARK=rd_eeprom(0xa8,EE_ID_PARK);
+
+	*(Buffer_Write_MF + MF_TIPO_TARJETA) 	= MENSUALIDAD;
+	*(Buffer_Write_MF + MF_COD_PARK) 			= COD_PARK;	
+	*(Buffer_Write_MF + MF_COD_PARK+1) 		= NULL;
+	*(Buffer_Write_MF + MF_ID_CLIENTE) 		= ID_CLIENTE;
+	*(Buffer_Write_MF + MF_ID_CLIENTE+1) 	= NULL;
+	*(Buffer_Write_MF +	MF_MENSUAL_ANO) 	= NULL;
+	*(Buffer_Write_MF +	MF_MENSUAL_MES) 	= NULL;
+	*(Buffer_Write_MF +	MF_MENSUAL_DIA) 	= NULL;
+	*(Buffer_Write_MF +	MF_EXPIRA_ANO) 		= NULL;
+	*(Buffer_Write_MF +	MF_EXPIRA_MES) 		= NULL;
+	*(Buffer_Write_MF +	MF_EXPIRA_DIA) 		= NULL;
+	*(Buffer_Write_MF +	MF_EXPIRA_DIA+1) 	= NULL;
+	*(Buffer_Write_MF +	MF_EXPIRA_DIA+2) 	= NULL;
+	*(Buffer_Write_MF +	MF_EXPIRA_DIA+3) 	= NULL;
+	*(Buffer_Write_MF +	MF_EXPIRA_DIA+4) 	= NULL;
+}
 
 /*------------------------------------------------------------------------------
 ------------------------------------------------------------------------------*/
@@ -1616,12 +1672,13 @@ unsigned char Entrega_Card_Captura()
  
 	return Estado_expedidor;
 }
-unsigned char Wait_Placa(unsigned char *secuencia_expedidor, unsigned char estadoactivo)
+unsigned char Wait_Placa(unsigned char *Atributos_Expedidor, unsigned char *Buffer_Write_MF)
 {
 	unsigned char Estado_expedidor;
 	
-	
-while ((ValTimeOutCom != 1) && (ValTimeOutCom <= TIME_WAIT) && (placa_ready == False))
+		Debug_txt_Tibbo((unsigned char *) "Wait_Placa");
+	/*espera la llega de placa o cancel*/
+	while ((ValTimeOutCom != 1) && (ValTimeOutCom <= TIME_WAIT) && (placa_ready == False))
 	{
 		if (rx_ip==0)																													/*pregunto si llega datos de monitor pto serie emulado*/
 				{
@@ -1629,14 +1686,13 @@ while ((ValTimeOutCom != 1) && (ValTimeOutCom <= TIME_WAIT) && (placa_ready == F
 					Rx_Monitor();
 				}
 	}
-	
+		/*llego Cancel o placa*/
 		if(placa_ready!=False)
 			{
-				Clave_Seguridad_S2();
-				Estado_expedidor=Load_Secuencia_Expedidor(secuencia_expedidor,estadoactivo,SEQ_CMD_ACEPTADO,SEQ_RESPUESTA_TRANSPORTE);		
-				*(secuencia_expedidor +TareadelCmd ) = TAREA_WRITE_PLACA_CARD;
+				Estado_expedidor = Respuesta_Placa_Cancel(Atributos_Expedidor,Buffer_Write_MF);
 			}
 			else
+				/*no llego placa o cancel*/
 			{
 					Estado_expedidor=SEQ_WAIT_PLACA;
 			 if ((ValTimeOutCom == 1) || (ValTimeOutCom > TIME_WAIT))
@@ -1747,8 +1803,7 @@ unsigned char Valida_Tipo_Tarjeta(unsigned char *Atributos_Expedidor,unsigned  c
 		Debug_txt_Tibbo((unsigned char *) "TIPO DE TARJETA MENSUALIDAD\r\n ");
 		if(MenSual ==  True)
 		{
-		//Estado_expedidor=SEQ_CAPTURE_CARD;																				
-
+		
 		/*APB Habilitado por software*/
 		
 			if(	(rd_eeprom(0xa8,EE_HABILITA_APB_MENSUAL) == APB_HABILITADO_SOFT) )
@@ -1764,7 +1819,6 @@ unsigned char Valida_Tipo_Tarjeta(unsigned char *Atributos_Expedidor,unsigned  c
 				{
 					Debug_txt_Tibbo((unsigned char *) "ERROR: INT ANTIPASSBACK MENSUAL \r\n");
 					send_portERR(PRMR_SIN_SALIDA);
-					//PantallaLCD(REGISTRA_INGRESO);
 					Estado_expedidor = Captura_Expulsa();	
 				} 
 			}
@@ -2276,7 +2330,7 @@ unsigned char SecuenciaExpedidorMF( unsigned char EstadoActivo)
 			EstadoActivo=Load_Secuencia_Expedidor(Secuencia_Expedidor,EstadoActivo,SEQ_CMD_ACEPTADO,SEQ_EXPULSAR_CARD);
 			break;
 		case SEQ_EXPULSAR_CARD:
-			Mov_Card(MovPos_EjectFront);
+			Mov_Card(MovPos_Front);//MovPos_EjectFront
 			MenSual = False;
 			EstadoActivo=Load_Secuencia_Expedidor(Secuencia_Expedidor,EstadoActivo,SEQ_CMD_ACEPTADO,SEQ_INICIO);		
 			break;
@@ -2302,7 +2356,7 @@ unsigned char SecuenciaExpedidorMF( unsigned char EstadoActivo)
 			
 			break;
 		case SEQ_WAIT_PLACA:
-			EstadoActivo = Wait_Placa(Secuencia_Expedidor,EstadoActivo);
+			EstadoActivo = Wait_Placa(Atributos_Expedidor,Buffer_Write_MF);	//Secuencia_Expedidor,EstadoActivo
 			break;
 		case SEQ_UID:	
 			Unique_Identifier_UID();
@@ -2328,6 +2382,11 @@ unsigned char SecuenciaExpedidorMF( unsigned char EstadoActivo)
 			Power_off();
 				EstadoActivo = Load_Secuencia_Expedidor(Secuencia_Expedidor,EstadoActivo,SEQ_CMD_ACEPTADO,SEQ_LOAD_PASSWORD);
 			break;
+		case SEQ_SECOND_PASSWORD:
+			Clave_Seguridad_S2();
+				EstadoActivo = Load_Secuencia_Expedidor(Secuencia_Expedidor,EstadoActivo,SEQ_CMD_ACEPTADO,SEQ_RESPUESTA_TRANSPORTE);
+				Secuencia_Expedidor [TareadelCmd]  = TAREA_WRITE_PLACA_CARD;
+			break;
 /*------------------------------------------------------------------------------
 		Tareas especificas de cada paso
 ------------------------------------------------------------------------------*/			
@@ -2336,6 +2395,7 @@ unsigned char SecuenciaExpedidorMF( unsigned char EstadoActivo)
 			if (Secuencia_Expedidor [TareadelCmd]==TAREA_PRESENCIA_VEHICULAR)
 			{
 			EstadoActivo=Responde_Estado_Sensores_Transporte();	
+				ValTimeOutCom=TIME_WAIT;
 			
 			}
 			else if (Secuencia_Expedidor [TareadelCmd]==TAREA_TIPO_TARJETA)
@@ -2367,6 +2427,10 @@ unsigned char SecuenciaExpedidorMF( unsigned char EstadoActivo)
 						else if ((Atributos_Expedidor [ Sector ]== Sector_2)&& (Atributos_Expedidor [ Bloque ]==Bloque_0))
 						{
 							EstadoActivo=Responde_Write_Tarjeta_Sector2_Bloque0(Buffer_Write_MF);
+						}
+							else if ((Atributos_Expedidor [ Sector ]== Sector_1)&& (Atributos_Expedidor [ Bloque ]==Bloque_1))
+						{
+							EstadoActivo=Responde_Write_Tarjeta_Sector1_Bloque1(Buffer_Write_MF);
 						}
 						else
 						{

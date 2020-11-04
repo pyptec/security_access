@@ -1,4 +1,4 @@
-C51 COMPILER V9.59.0.0   MONITOR                                                           10/20/2020 16:33:57 PAGE 1   
+C51 COMPILER V9.59.0.0   MONITOR                                                           11/04/2020 14:53:46 PAGE 1   
 
 
 C51 COMPILER V9.59.0.0, COMPILATION OF MODULE MONITOR
@@ -62,7 +62,7 @@ line level    source
   52   1        if (USE_LPR==1)
   53   1        {
   54   2            for (j=0; j<MaxChrRx; j++)
-C51 COMPILER V9.59.0.0   MONITOR                                                           10/20/2020 16:33:57 PAGE 2   
+C51 COMPILER V9.59.0.0   MONITOR                                                           11/04/2020 14:53:46 PAGE 2   
 
   55   2            {
   56   3              contador=0;
@@ -97,36 +97,36 @@ line level    source
   85   1        unsigned char j=0;
   86   1        unsigned char p=2;
   87   1        length_trama=1;
-  88   1          if  ((*(buffer+2)==ETX)&&(*(buffer+1)=='P'))                                                                            /* APERTURA DE BARRETA
+  88   1            /*habilita relevo abre barrera*/
+  89   1          if  ((*(buffer+2)==ETX)&&(*(buffer+1)=='P'))                                                                            /* APERTURA DE BARRETA
              -*/ 
-  89   1              {
-  90   2                lock=1;                                                                                                           /*habilita el relevo ON*/
-  91   2                Timer_wait=0;
-  92   2              }
-  93   1          else if (*(buffer+1)=='<')
-  94   1          {
-  95   2            /*placa*/
-  96   2            do
-  97   2            {
-  98   3              placa[j]=*(buffer+p);
-  99   3              p++;
- 100   3              j++;
- 101   3            }while (*(buffer+p) != ETX);
- 102   2            *(buffer+p)=0;
- 103   2              placa[j-1]=0;
- 104   2              placa_ready=1;
- 105   2            ValTimeOutCom=10;
- 106   2            /*placa no play <NO_PLATE>*/ 
- 107   2            
- 108   2          }
- 109   1          else if (*(buffer+1)=='[')
- 110   1          {
- 111   2            /*cancel*/
- 112   2          }
+  90   1              {
+  91   2                lock=1;                                                                                                           /*habilita el relevo ON*/
+  92   2                Timer_wait=0;
+  93   2              }
+  94   1            /*se recive la placa*/  
+  95   1          else if ((*(buffer+1)=='<')|| (*(buffer+1)=='['))
+  96   1          {
+  97   2            /*placa 0 el cancel borra la fecha del mensual */
+  98   2            do
+  99   2            {
+ 100   3              placa[j]=*(buffer+p);
+ 101   3              p++;
+ 102   3              j++;
+ 103   3            }while (*(buffer+p) != ETX);
+ 104   2            *(buffer+p)=0;
+ 105   2              placa[j-1]=0;
+ 106   2              placa_ready=1;
+ 107   2            ValTimeOutCom=10;
+ 108   2            
+ 109   2            
+ 110   2          }
+ 111   1          
+ 112   1        
  113   1      }
  114          void clear_placa()
  115          {
-C51 COMPILER V9.59.0.0   MONITOR                                                           10/20/2020 16:33:57 PAGE 3   
+C51 COMPILER V9.59.0.0   MONITOR                                                           11/04/2020 14:53:46 PAGE 3   
 
  116   1        unsigned char i;
  117   1        for(i=0;i<6;i++)
@@ -146,7 +146,7 @@ line level    source
 
 
 MODULE INFORMATION:   STATIC OVERLAYABLE
-   CODE SIZE        =    404    ----
+   CODE SIZE        =    410    ----
    CONSTANT SIZE    =   ----    ----
    XDATA SIZE       =   ----      25
    PDATA SIZE       =   ----    ----
