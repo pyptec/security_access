@@ -1,4 +1,4 @@
-C51 COMPILER V9.59.0.0   IO_SENSORES                                                       11/04/2020 14:53:45 PAGE 1   
+C51 COMPILER V9.59.0.0   IO_SENSORES                                                       11/04/2020 15:18:01 PAGE 1   
 
 
 C51 COMPILER V9.59.0.0, COMPILATION OF MODULE IO_SENSORES
@@ -62,7 +62,7 @@ line level    source
   52          //***************************************************************************************************
   53          void sel_Sensor2(void)
   54          {
-C51 COMPILER V9.59.0.0   IO_SENSORES                                                       11/04/2020 14:53:45 PAGE 2   
+C51 COMPILER V9.59.0.0   IO_SENSORES                                                       11/04/2020 15:18:01 PAGE 2   
 
   55   1        sel_A=0;
   56   1        sel_B=0;
@@ -126,7 +126,7 @@ line level    source
  114   1        { 
  115   2        Board_High=rd_eeprom(0xa8,EE_ADDRESS_HIGH_BOARD);
  116   2        
-C51 COMPILER V9.59.0.0   IO_SENSORES                                                       11/04/2020 14:53:45 PAGE 3   
+C51 COMPILER V9.59.0.0   IO_SENSORES                                                       11/04/2020 15:18:01 PAGE 3   
 
  117   2          if(Board_High != 0)
  118   2          {
@@ -190,7 +190,7 @@ line level    source
  175   3                  sensor= 0xff; 
  176   3                }
  177   2                else
-C51 COMPILER V9.59.0.0   IO_SENSORES                                                       11/04/2020 14:53:45 PAGE 4   
+C51 COMPILER V9.59.0.0   IO_SENSORES                                                       11/04/2020 15:18:01 PAGE 4   
 
  178   2                {
  179   3                  Debug_txt_Tibbo((unsigned char *) "Sensores no detectados.\n\r");
@@ -254,7 +254,7 @@ line level    source
  237   4              }
  238   3             }    
  239   2              else if((toggle==1)&&(info==0))
-C51 COMPILER V9.59.0.0   IO_SENSORES                                                       11/04/2020 14:53:45 PAGE 5   
+C51 COMPILER V9.59.0.0   IO_SENSORES                                                       11/04/2020 15:18:01 PAGE 5   
 
  240   2              {
  241   3                if (busy==1)

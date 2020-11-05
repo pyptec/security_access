@@ -1309,8 +1309,14 @@ unsigned char Respuesta_Placa_Cancel(unsigned char *Atributos_Expedidor,unsigned
 	}
 	else
 	{
-	
-	Estado_expedidor = SEQ_FRONT_CARD;						//SEQ_SECOND_PASSWORD;
+		if(MenSual ==  True)
+		{
+			Estado_expedidor = SEQ_FRONT_CARD;	
+		}
+		else
+		{
+			Estado_expedidor = SEQ_SECOND_PASSWORD;
+		} 		
 	}	
 	return Estado_expedidor;
 }
