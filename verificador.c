@@ -1300,10 +1300,11 @@ unsigned char Respuesta_Placa_Cancel(unsigned char *Atributos_Expedidor,unsigned
 	Debug_txt_Tibbo((unsigned char *) "RESPUESTA PLACA O CANCEL = ");	
 	Debug_txt_Tibbo((unsigned char *) placa);
 	Debug_txt_Tibbo((unsigned char *) "\r\n");
+	
 	if(strcmp(placa,Cancel)== 0)
 	{
-	*(Atributos_Expedidor + Sector) = Sector_1;
-	*(Atributos_Expedidor + Bloque) = Bloque_1;
+		*(Atributos_Expedidor + Sector) = Sector_1;
+		*(Atributos_Expedidor + Bloque) = Bloque_1;
 		Armar_Trama_Tarjeta_Sector1_Bloque1_Camcel(Buffer_Write_MF);
 		Estado_expedidor = SEQ_WRITE_SECTOR_BLOQUE;
 	}
@@ -1705,7 +1706,8 @@ unsigned char Wait_Placa(unsigned char *Atributos_Expedidor, unsigned char *Buff
 			 {	
 				if (Timer_wait >= 5)
 				 {
-					 Estado_expedidor=SEQ_FRONT_CARD;
+					 strcpy (placa,"NOPLATE");
+					 Estado_expedidor=SEQ_SECOND_PASSWORD;				//SEQ_FRONT_CARD;
 				 }
 				else if (Timer_wait <= 4)
 				 {
