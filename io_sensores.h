@@ -24,5 +24,7 @@ char ValidaSensor(void);
 void msj_lcd_informativo();
 unsigned char Valida_Sensor1_Auto();
 unsigned char Dir_Board_Monitor();
+void Botton ();
+char ValidaSensor_negado(void);
 
 #endif	/* _IO_SENSORES_H_ */

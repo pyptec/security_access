@@ -9,7 +9,7 @@ extern unsigned char USE_LPR;
 extern unsigned char  Debug_Tibbo;
 extern unsigned char ValTimeOutCom;		
 extern unsigned char Tipo_Vehiculo;
-idata unsigned char placa[]={0x30,0x30,0x30,0x30,0x30,0x30,0x0,0x0,0x0};
+idata unsigned char placa[]={0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0};
 
 /*configuracion bits*/
 
@@ -84,14 +84,16 @@ void Valida_Trama_Monitor(unsigned char *buffer, unsigned char length_trama)
 {		
 	unsigned char j=0;
 	unsigned char p=2;
+	unsigned char cont=0;
 	length_trama=1;
+		
 			/*habilita relevo abre barrera*/
-		if	((*(buffer+2)==ETX)&&(*(buffer+1)=='P')) 																																						/* APERTURA DE BARRETA*/ 
+		if	((*(buffer+2)==ETX)&&(*(buffer+1)=='P')&&(length_trama==3)) 																																						/* APERTURA DE BARRETA*/ 
 				{
 					lock=1;																																																						/*habilita el relevo ON*/
 					Timer_wait=0;
 	 			}
-			/*se recive la placa*/	
+			/*se recive la placa O EL CANCEL Y NO_PLATE*/	
 		else if ((*(buffer+1)=='<')|| (*(buffer+1)=='['))
 		{
 			/*placa 0 el cancel borra la fecha del mensual */
@@ -100,7 +102,7 @@ void Valida_Trama_Monitor(unsigned char *buffer, unsigned char length_trama)
 				placa[j]=*(buffer+p);
 				p++;
 				j++;
-			}while (*(buffer+p) != ETX);
+			}while ((*(buffer+p) != ETX) && (*(buffer+p) != 0) );
 			*(buffer+p)=0;
 				placa[j-1]=0;
 			  placa_ready=1;
@@ -114,9 +116,9 @@ void Valida_Trama_Monitor(unsigned char *buffer, unsigned char length_trama)
 void clear_placa()
 {
 	unsigned char i;
-	for(i=0;i<6;i++)
+	for(i=0;i<9;i++)
 	{
-	 placa[i]=0x30;
+	 placa[i]=0x0;
 	}
 	 placa_ready=0;
 }

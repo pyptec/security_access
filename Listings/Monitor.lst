@@ -1,4 +1,4 @@
-C51 COMPILER V9.59.0.0   MONITOR                                                           11/05/2020 12:20:05 PAGE 1   
+C51 COMPILER V9.59.0.0   MONITOR                                                           11/11/2020 12:18:31 PAGE 1   
 
 
 C51 COMPILER V9.59.0.0, COMPILATION OF MODULE MONITOR
@@ -19,7 +19,7 @@ line level    source
    9          extern unsigned char  Debug_Tibbo;
   10          extern unsigned char ValTimeOutCom;   
   11          extern unsigned char Tipo_Vehiculo;
-  12          idata unsigned char placa[]={0x30,0x30,0x30,0x30,0x30,0x30,0x0,0x0,0x0};
+  12          idata unsigned char placa[]={0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0};
   13          
   14          /*configuracion bits*/
   15          
@@ -62,7 +62,7 @@ line level    source
   52   1        if (USE_LPR==1)
   53   1        {
   54   2            for (j=0; j<MaxChrRx; j++)
-C51 COMPILER V9.59.0.0   MONITOR                                                           11/05/2020 12:20:05 PAGE 2   
+C51 COMPILER V9.59.0.0   MONITOR                                                           11/11/2020 12:18:31 PAGE 2   
 
   55   2            {
   56   3              contador=0;
@@ -96,59 +96,61 @@ line level    source
   84          {   
   85   1        unsigned char j=0;
   86   1        unsigned char p=2;
-  87   1        length_trama=1;
-  88   1            /*habilita relevo abre barrera*/
-  89   1          if  ((*(buffer+2)==ETX)&&(*(buffer+1)=='P'))                                                                            /* APERTURA DE BARRETA
-             -*/ 
-  90   1              {
-  91   2                lock=1;                                                                                                           /*habilita el relevo ON*/
-  92   2                Timer_wait=0;
-  93   2              }
-  94   1            /*se recive la placa*/  
-  95   1          else if ((*(buffer+1)=='<')|| (*(buffer+1)=='['))
-  96   1          {
-  97   2            /*placa 0 el cancel borra la fecha del mensual */
-  98   2            do
-  99   2            {
- 100   3              placa[j]=*(buffer+p);
- 101   3              p++;
- 102   3              j++;
- 103   3            }while (*(buffer+p) != ETX);
- 104   2            *(buffer+p)=0;
- 105   2              placa[j-1]=0;
- 106   2              placa_ready=1;
- 107   2            ValTimeOutCom=10;
- 108   2            
- 109   2            
- 110   2          }
- 111   1          
- 112   1        
- 113   1      }
- 114          void clear_placa()
- 115          {
-C51 COMPILER V9.59.0.0   MONITOR                                                           11/05/2020 12:20:05 PAGE 3   
+  87   1        unsigned char cont=0;
+  88   1        length_trama=1;
+  89   1          
+  90   1            /*habilita relevo abre barrera*/
+  91   1          if  ((*(buffer+2)==ETX)&&(*(buffer+1)=='P')&&(length_trama==3))                                                                             /* 
+             -APERTURA DE BARRETA*/ 
+  92   1              {
+  93   2                lock=1;                                                                                                           /*habilita el relevo ON*/
+  94   2                Timer_wait=0;
+  95   2              }
+  96   1            /*se recive la placa O EL CANCEL Y NO_PLATE*/ 
+  97   1          else if ((*(buffer+1)=='<')|| (*(buffer+1)=='['))
+  98   1          {
+  99   2            /*placa 0 el cancel borra la fecha del mensual */
+ 100   2            do
+ 101   2            {
+ 102   3              placa[j]=*(buffer+p);
+ 103   3              p++;
+ 104   3              j++;
+ 105   3            }while ((*(buffer+p) != ETX) && (*(buffer+p) != 0) );
+ 106   2            *(buffer+p)=0;
+ 107   2              placa[j-1]=0;
+ 108   2              placa_ready=1;
+ 109   2            ValTimeOutCom=10;
+ 110   2            
+ 111   2            
+ 112   2          }
+ 113   1          
+ 114   1        
+ 115   1      }
+C51 COMPILER V9.59.0.0   MONITOR                                                           11/11/2020 12:18:31 PAGE 3   
 
- 116   1        unsigned char i;
- 117   1        for(i=0;i<6;i++)
- 118   1        {
- 119   2         placa[i]=0x30;
- 120   2        }
- 121   1         placa_ready=0;
- 122   1      }
- 123          void Rx_Monitor()
- 124          {
- 125   1        unsigned char Length_trama;
- 126   1        unsigned char buffer1[12];
- 127   1          Length_trama=recibe_cmd_Monitor(buffer1);
- 128   1          Debug_monitor(buffer1,Length_trama);
- 129   1          Valida_Trama_Monitor(buffer1,Length_trama);
- 130   1      }
+ 116          void clear_placa()
+ 117          {
+ 118   1        unsigned char i;
+ 119   1        for(i=0;i<9;i++)
+ 120   1        {
+ 121   2         placa[i]=0x0;
+ 122   2        }
+ 123   1         placa_ready=0;
+ 124   1      }
+ 125          void Rx_Monitor()
+ 126          {
+ 127   1        unsigned char Length_trama;
+ 128   1        unsigned char buffer1[12];
+ 129   1          Length_trama=recibe_cmd_Monitor(buffer1);
+ 130   1          Debug_monitor(buffer1,Length_trama);
+ 131   1          Valida_Trama_Monitor(buffer1,Length_trama);
+ 132   1      }
 
 
 MODULE INFORMATION:   STATIC OVERLAYABLE
-   CODE SIZE        =    410    ----
+   CODE SIZE        =    420    ----
    CONSTANT SIZE    =   ----    ----
-   XDATA SIZE       =   ----      25
+   XDATA SIZE       =   ----      27
    PDATA SIZE       =   ----    ----
    DATA SIZE        =   ----    ----
    IDATA SIZE       =      9    ----

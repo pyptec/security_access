@@ -58,6 +58,7 @@ extern void sel_Pulsa(void);
 void sel_Sensor2(void);
 char ValidaSensor(void);
 unsigned char Dir_Board_Monitor();
+extern void Botton ();
 
 /*funciones prototipo del transporte MODULO TIBBO*/
 
@@ -128,6 +129,7 @@ extern idata unsigned char placa[];
 extern bit aSk;
 extern bit buffer_ready;
 extern bit placa_ready;
+extern bit		PULSADOR_BOTTON;
 
 /*----------------------------------------------------------------------------
 Definiciones de sequencias de verificador y expedidor
@@ -158,6 +160,7 @@ Definiciones de sequencias de verificador y expedidor
 #define SEQ_POWER_OFF										0X16
 #define SEQ_POWER_ON										0X17
 #define SEQ_SECOND_PASSWORD							0X18
+#define	SEQ_PLACA												0X19
 
 /*----------------------------------------------------------------------------
 Definiciones de sequencias de tareas del verificador y expedidor
@@ -308,6 +311,7 @@ tiempo de delay entre funciones
 
 #define 	TIME_CARD					100		//50
 #define 	TIME_WAIT					18
+#define 	TIME_PULSADOR			9
 /*----------------------------------------------------------------------------
 definicion de datos de trama lintech
 ------------------------------------------------------------------------------*/
@@ -799,7 +803,7 @@ unsigned char Analiza_Uid_Card(unsigned char *Atributos_Expedidor )
 				*(Atributos_Expedidor + Uid_1) = buffer_UID [MF_UID_1];			
 				*(Atributos_Expedidor + Uid_2) = buffer_UID [MF_UID_2];			
 				*(Atributos_Expedidor + Uid_3) = buffer_UID [MF_UID_3];	
-				Estado_expedidor=SEQ_LOAD_PASSWORD;																												//SEQ_TIPO_CARD;
+				Estado_expedidor=SEQ_LPR;																					///SEQ_LOAD_PASSWORD;																												//SEQ_TIPO_CARD;
 			}		
 			else
 			{
@@ -826,7 +830,8 @@ unsigned char Ingreso_Vehiculo(void)
 					Estado=SEQ_MOVER_CARD_RF;	  																						// valido el cmd enviado al verificador
 				 }
 			else
-				{			
+				{		
+			/*solo sale el msj pulse el boton una vez*/					
 						if(pulseboton==False)
 						{ PantallaLCD(PULSE_BOTON);	
 						}
@@ -836,17 +841,28 @@ unsigned char Ingreso_Vehiculo(void)
 							
 						 
 						 }
-							sel_Pulsa();																												//se valida el pulsador en hardware
-						 	if (DataIn!=True)  		  
-								{
-									Debug_txt_Tibbo((unsigned char *) "Pulsador Activo\r\n");				//el pulsador fue presionado
-									pulseboton=0;																																//muevo tarjeta hasta el lector de RF
-									Estado=SEQ_MOVER_CARD_RF; 																			//valido el cmd enviado al verificador
-								}
-							else
-									{
-										Estado=SEQ_INICIO;	
-									}
+						 Botton ();
+						 if(PULSADOR_BOTTON == True)
+						 {
+							 PULSADOR_BOTTON = 0;
+							 pulseboton=0;																																//muevo tarjeta hasta el lector de RF
+							 Estado=SEQ_MOVER_CARD_RF;
+						 }
+						 else
+						 {
+							Estado=SEQ_INICIO; 
+						 }
+							//sel_Pulsa();																												//se valida el pulsador en hardware
+						 //	if (DataIn!=True)  		  
+							//	{
+							//		Debug_txt_Tibbo((unsigned char *) "Pulsador Activo\r\n");				//el pulsador fue presionado
+								//	pulseboton=0;																																//muevo tarjeta hasta el lector de RF
+								//	Estado=SEQ_MOVER_CARD_RF; 																			//valido el cmd enviado al verificador
+								//}
+							//else
+								//	{
+									//	Estado=SEQ_INICIO;	
+								//	}
 						
 				}	
 		}
@@ -950,7 +966,7 @@ unsigned char Responde_Tipo_Tarjeta()
 				}
 				else	
 				{
-					Estado_expedidor = SEQ_LOAD_PASSWORD;
+					Estado_expedidor = SEQ_LPR;		//SEQ_LOAD_PASSWORD;
 				}					
 			}
 			else
@@ -1188,7 +1204,7 @@ unsigned char Responde_Lectura_Tarjeta_Sector1_Bloque0 (unsigned char *Nombre_Me
 					Debug_txt_Tibbo((unsigned char *) "Nombre Mensual:");
 					Debug_txt_Tibbo(Nombre_Mensual );
 					Debug_txt_Tibbo((unsigned char *) "\r\n");			
-					Estado_expedidor = SEQ_LPR;						//SEQ_TIPO_TARJETAS;																								// Valida_Tipo_Tarjeta(Atributos_Expedidor,Buffer_Write_MF);
+					Estado_expedidor = SEQ_PLACA;		//SEQ_TIPO_TARJETAS;																								// Valida_Tipo_Tarjeta(Atributos_Expedidor,Buffer_Write_MF);
 			
 	
 			}
@@ -1238,35 +1254,7 @@ unsigned char Responde_Write_Tarjeta_Sector1_Bloque0(unsigned char *Buffer_Write
 	Debug_txt_Tibbo((unsigned char *) "Write_s1_b0\r\n");
 	DebugBufferMF(Buffer_Write_MF,16,RESPUESTA);
 	
-	return SEQ_LPR;
-}
-/*----------------------------------------------------------------------------
-----------------------------------------------------------------------------*/
-unsigned char Pregunta_Lpr(unsigned char *Atributos_Expedidor)
-{
-	unsigned char Estado_expedidor;
-		if(rd_eeprom(0xa8,EE_USE_LPR)== True)
-			 {
-				 /*monitor trama*/
-				 Debug_txt_Tibbo(Armar_Trama_Monitor(Atributos_Expedidor));
-					if (rd_eeprom(0xa8,EE_DEBUG) == False)
-					 {
-						 Debug_Tibbo=False;
-					 }
-			 }
-	
-		if (rd_eeprom(0xa8,EE_PLACA)!= False)
-		{
-			/*espero placa*/
-			Estado_expedidor=SEQ_WAIT_PLACA;
-			ValTimeOutCom=TIME_WAIT	;
-			Timer_wait=False;
-		}
-		else 
-		{
-		Estado_expedidor=SEQ_FRONT_CARD;
-		}
-	return Estado_expedidor;
+	return SEQ_PLACA;					//SEQ_LPR
 }
 /*----------------------------------------------------------------------------
 ----------------------------------------------------------------------------*/
@@ -1279,6 +1267,45 @@ unsigned char Responde_Write_Tarjeta_Sector2_Bloque0(unsigned char *Buffer_Write
 	Debug_txt_Tibbo((unsigned char *) "Write_s2_b0\r\n");
 	DebugBufferMF(Buffer_Write_MF,16,ENVIADOS);
 	return SEQ_FRONT_CARD;
+}
+
+/*----------------------------------------------------------------------------
+----------------------------------------------------------------------------*/
+unsigned char Pregunta_Lpr(unsigned char *Atributos_Expedidor)
+{
+	unsigned char Estado_expedidor;
+	Debug_txt_Tibbo((unsigned char *) "PREGUNTA LPR\r\n");
+		if(rd_eeprom(0xa8,EE_USE_LPR)== True)
+			 {
+				 /*monitor trama*/
+				 Debug_txt_Tibbo(Armar_Trama_Monitor(Atributos_Expedidor));
+					if (rd_eeprom(0xa8,EE_DEBUG) == False)
+					 {
+						 Debug_Tibbo=False;
+					 }
+			 }
+	
+
+		Estado_expedidor=SEQ_LOAD_PASSWORD;					//SEQ_TIPO_TARJETAS;
+
+	return Estado_expedidor;
+}
+unsigned char Pregunta_Placa()
+{
+	unsigned char Estado_expedidor;
+	Debug_txt_Tibbo((unsigned char *) "PREGUNTA PLACA\r\n");
+		if (rd_eeprom(0xa8,EE_PLACA)!= False)
+		{
+			/*espero placa*/
+			Estado_expedidor=SEQ_WAIT_PLACA;
+			ValTimeOutCom=TIME_WAIT	;
+			Timer_wait=False;
+		}
+		else 
+		{
+		Estado_expedidor=SEQ_FRONT_CARD;
+		}
+	return Estado_expedidor;
 }
 unsigned char  Respuesta_Segunda_clave(unsigned char *Atributos_Expedidor,unsigned char *Buffer_Write_MF)
 {
@@ -1316,6 +1343,7 @@ unsigned char Respuesta_Placa_Cancel(unsigned char *Atributos_Expedidor,unsigned
 		}
 		else
 		{
+			
 			Estado_expedidor = SEQ_SECOND_PASSWORD;
 		} 		
 	}	
@@ -1556,12 +1584,13 @@ unsigned char *Armar_Trama_Monitor(unsigned char *Atributos_Expedidor)
 void Armar_Trama_Placa(unsigned char *Buffer_Write_MF)
 {
 	unsigned char j;
-	
-		for(j=0; j<8;j++)
+	unsigned char len_placa;
+	len_placa = strlen(placa);
+		for(j=0; j<len_placa;j++)
 		{
 		*(Buffer_Write_MF +j)=placa[j];
 		}
-			for (j=8; j<16; j++)	 					
+			for (j=len_placa; j<16; j++)	 					
 		{
 			*(Buffer_Write_MF +j)=0x00;
 		}
@@ -2374,6 +2403,9 @@ unsigned char SecuenciaExpedidorMF( unsigned char EstadoActivo)
 		case SEQ_LPR:
 			EstadoActivo = Pregunta_Lpr(Atributos_Expedidor);
 			break;
+			case SEQ_PLACA:
+				EstadoActivo = Pregunta_Placa ();
+				break;
 		case SEQ_TIPO_TARJETAS:
 			EstadoActivo = Valida_Tipo_Tarjeta(Atributos_Expedidor,Buffer_Write_MF);;
 			break;
@@ -2403,7 +2435,7 @@ unsigned char SecuenciaExpedidorMF( unsigned char EstadoActivo)
 			if (Secuencia_Expedidor [TareadelCmd]==TAREA_PRESENCIA_VEHICULAR)
 			{
 			EstadoActivo=Responde_Estado_Sensores_Transporte();	
-				ValTimeOutCom=TIME_WAIT;
+				ValTimeOutCom=TIME_PULSADOR;
 			
 			}
 			else if (Secuencia_Expedidor [TareadelCmd]==TAREA_TIPO_TARJETA)

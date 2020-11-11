@@ -26,6 +26,7 @@ sbit busy = P3^3;  					/*bussy de Entrada Interrupcion del Procesador principal
 
 extern bit COMPARACION_ACTIVA;
 extern  unsigned char Tipo_Vehiculo;
+bit		PULSADOR_BOTTON = 0;
 
 //***************************************************************************************************
 void sel_Funcion(void)
@@ -76,6 +77,16 @@ void sel_Dir2(void)
 	sel_A=1;
 	sel_B=1;
 	sel_C=1;
+}
+void Botton ()
+{
+	sel_Pulsa();
+	if (DataIn != 1)	
+	{
+		Debug_txt_Tibbo((unsigned char *) "Pulsador Activo\r\n");				//el pulsador fue presionado
+		PULSADOR_BOTTON = 1;
+	}
+	
 }
 
 char ValidaSensor(void)
@@ -154,13 +165,14 @@ unsigned char Valida_Sensor1_Auto()
 					   Debug_txt_Tibbo((unsigned char *) "Sensores Auto y sensor1 activos.\n\r");
 					   Tipo_Vehiculo=AUTOMOVIL;
 						sensor= 0xff;
-						
+						Botton ();
 					}
 					else
 					{
 							Debug_txt_Tibbo((unsigned char *) "Sensor activo sensor1.\n\r");
 							Tipo_Vehiculo=MOTO;
 							sensor=  0xff ;
+							Botton ();
 					}
 						
 				   	
@@ -173,6 +185,7 @@ unsigned char Valida_Sensor1_Auto()
 					Debug_txt_Tibbo((unsigned char *) "Detectado. Sensor Auto.\n\r");
 						Tipo_Vehiculo=MOTO;
 						sensor= 0xff;	
+						Botton ();
 					}
 					else
 					{
@@ -182,6 +195,7 @@ unsigned char Valida_Sensor1_Auto()
 						
 
 				}
+				
 				return sensor;
 }
 /*------------------------------------------------------------------------------
