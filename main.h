@@ -99,6 +99,7 @@ const unsigned  char STX_LINTECH= 0xf2	;
 /*definicion de bit*/
 bit buffer_ready = 0;
 bit placa_ready = 0;
+bit pto_paraleo=0;
 /*define posiciones de memoria*/
 #define EE_ID_CLIENTE					0x0000
 #define EE_ID_PARK		  			0x0002

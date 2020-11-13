@@ -37,6 +37,8 @@ Definicion de Lintech en el comando mover tarjeta (Mov_Card)
 #define 	MovPos_EjectFront		'9'
 
 
+#define	SENSOR_DETAIL				0x31
+#define SENSOR_NORMAL				0x30
 /*----------------------------------------------------------------------------
 definicion de recepcion serial 
 ------------------------------------------------------------------------------*/
@@ -108,8 +110,15 @@ void Check_Status(unsigned char Detalle)
 {
 	unsigned char j, bcc;
 	unsigned char	g_scArrTxComSoft[10];
-	Debug_txt_Tibbo((unsigned char *) "Check_Status\r\n");
 
+	if (Detalle == SENSOR_NORMAL)
+		{
+		 	Debug_txt_Tibbo((unsigned char *) "Check_Status SENSOR_NORMAL\r\n");
+		}
+		else
+		{
+			Debug_txt_Tibbo((unsigned char *) "Check_Status SENSOR_DETAIL\r\n");
+		}
 	bcc=0;
 
 	g_scArrTxComSoft[0]=STX_LINTECH;

@@ -130,6 +130,7 @@ extern bit aSk;
 extern bit buffer_ready;
 extern bit placa_ready;
 extern bit		PULSADOR_BOTTON;
+extern bit pto_paraleo;
 
 /*----------------------------------------------------------------------------
 Definiciones de sequencias de verificador y expedidor
@@ -311,7 +312,8 @@ tiempo de delay entre funciones
 
 #define 	TIME_CARD					100		//50
 #define 	TIME_WAIT					18
-#define 	TIME_PULSADOR			9
+#define 	TIME_PULSADOR			5
+
 /*----------------------------------------------------------------------------
 definicion de datos de trama lintech
 ------------------------------------------------------------------------------*/
@@ -559,7 +561,7 @@ char Trama_Validacion_P_N()
 {
 	char Trama_Validacion_P_N=ESPR_RSPT_TRP_TRAMA;																/*espera respuesta del transporte*/
 			
-			if ((ValTimeOutCom==1)||(buffer_ready==1) )
+			if ((ValTimeOutCom==1)||(buffer_ready==1)|| (ValTimeOutCom > TIME_CARD) )
 			{
 				if (buffer_ready==1)
 				{
@@ -1611,7 +1613,9 @@ unsigned char Disparo_Lock_Entrada_Vehiculo(unsigned char *Nombre_Mensual)
 	
 	if (Buffer_Rta_Lintech[Pos_St0]==NO_CARDS_IN_MCNSM)																	  // CANAL LIBRE	  no tiene tarjetas en el mecanismo
 		{
-			Debug_txt_Tibbo((unsigned char *) "TAREA_OPEN_BARRERA\r\n");	
+			
+			Debug_txt_Tibbo((unsigned char *) "TAREA_OPEN_BARRERA\r\n");
+					
 			lock=ON;
 			send_portERR(BIENVENIDO);
 			PantallaLCD_LINEA_2(BIENVENIDO,Nombre_Mensual);
@@ -1623,6 +1627,7 @@ unsigned char Disparo_Lock_Entrada_Vehiculo(unsigned char *Nombre_Mensual)
 	{
 		if(Valida_Sensor1_Auto()!= False)
 		{
+			ValTimeOutCom=TIME_PULSADOR;
 			Estado_expedidor=SEQ_DETAIL_CARD;
 		}
 		else
@@ -1673,7 +1678,8 @@ unsigned char Entrega_Card_Captura()
 		if (ValidaSensor()==0)
 		{
 			lock=OFF;
-			Debug_txt_Tibbo((unsigned char *) "Vehiculo Entrando");
+			pto_paraleo=False;
+			Debug_txt_Tibbo((unsigned char *) "Vehiculo Entrando OFF_BARRERA\r\n");
 			Estado_expedidor=SEQ_INICIO;
 		}
 		
@@ -1689,6 +1695,9 @@ unsigned char Entrega_Card_Captura()
 				{
 						if (Timer_wait >= 5)
 				 {
+					 pto_paraleo=False;
+					 Debug_txt_Tibbo((unsigned char *) "Vehiculo TIEMPO OFF_BARRERA\r\n");
+					
 					 lock=OFF;
 					 Estado_expedidor=SEQ_INICIO;;
 				 }
@@ -1701,6 +1710,8 @@ unsigned char Entrega_Card_Captura()
 			}
 			else
 			{
+			pto_paraleo=False;
+			Debug_txt_Tibbo((unsigned char *) "Vehiculo NO LOOP OFF_BARRERA\r\n");
 			lock=OFF;
 			Estado_expedidor=SEQ_INICIO;
 			}
@@ -2367,7 +2378,7 @@ unsigned char SecuenciaExpedidorMF( unsigned char EstadoActivo)
 			EstadoActivo=Load_Secuencia_Expedidor(Secuencia_Expedidor,EstadoActivo,SEQ_CMD_ACEPTADO,SEQ_EXPULSAR_CARD);
 			break;
 		case SEQ_EXPULSAR_CARD:
-			Mov_Card(MovPos_Front);//MovPos_EjectFront
+			Mov_Card(MovPos_Front);
 			MenSual = False;
 			EstadoActivo=Load_Secuencia_Expedidor(Secuencia_Expedidor,EstadoActivo,SEQ_CMD_ACEPTADO,SEQ_INICIO);		
 			break;
@@ -2376,9 +2387,12 @@ unsigned char SecuenciaExpedidorMF( unsigned char EstadoActivo)
 		 	EstadoActivo=Load_Secuencia_Expedidor(Secuencia_Expedidor,EstadoActivo,SEQ_CMD_ACEPTADO,SEQ_DETAIL_CARD);		
 			break;
 		case SEQ_DETAIL_CARD:
-			Check_Status(SENSOR_DETAIL);
+			if ((ValTimeOutCom==True)|| (ValTimeOutCom > TIME_PULSADOR))
+			{
+			Check_Status(SENSOR_DETAIL);		
 			EstadoActivo=Load_Secuencia_Expedidor(Secuencia_Expedidor,EstadoActivo,SEQ_CMD_ACEPTADO,SEQ_RESPUESTA_TRANSPORTE);		
 			Secuencia_Expedidor[TareadelCmd ] = TAREA_OPEN_BARRERA;
+			}
 			break;
 		case SEQ_LOAD_EEPROM:
 			Dwload_EEprom();
@@ -2390,7 +2404,6 @@ unsigned char SecuenciaExpedidorMF( unsigned char EstadoActivo)
 			break;
 		case SEQ_PTO_PARALELO:
 			EstadoActivo = Send_Pto_Paralelo(Atributos_Expedidor);
-			
 			break;
 		case SEQ_WAIT_PLACA:
 			EstadoActivo = Wait_Placa(Atributos_Expedidor,Buffer_Write_MF);	//Secuencia_Expedidor,EstadoActivo
@@ -2403,9 +2416,10 @@ unsigned char SecuenciaExpedidorMF( unsigned char EstadoActivo)
 		case SEQ_LPR:
 			EstadoActivo = Pregunta_Lpr(Atributos_Expedidor);
 			break;
-			case SEQ_PLACA:
-				EstadoActivo = Pregunta_Placa ();
-				break;
+		case SEQ_PLACA:
+			pto_paraleo=True;
+			EstadoActivo = Pregunta_Placa ();
+			break;
 		case SEQ_TIPO_TARJETAS:
 			EstadoActivo = Valida_Tipo_Tarjeta(Atributos_Expedidor,Buffer_Write_MF);;
 			break;
@@ -2416,16 +2430,16 @@ unsigned char SecuenciaExpedidorMF( unsigned char EstadoActivo)
 			break;
 		case SEQ_POWER_OFF:
 			Power_off();
-				EstadoActivo = Load_Secuencia_Expedidor(Secuencia_Expedidor,EstadoActivo,SEQ_CMD_ACEPTADO,SEQ_UID);
+			EstadoActivo = Load_Secuencia_Expedidor(Secuencia_Expedidor,EstadoActivo,SEQ_CMD_ACEPTADO,SEQ_UID);
 			break;
 		case SEQ_POWER_ON:
 			Power_off();
-				EstadoActivo = Load_Secuencia_Expedidor(Secuencia_Expedidor,EstadoActivo,SEQ_CMD_ACEPTADO,SEQ_LOAD_PASSWORD);
+			EstadoActivo = Load_Secuencia_Expedidor(Secuencia_Expedidor,EstadoActivo,SEQ_CMD_ACEPTADO,SEQ_LOAD_PASSWORD);
 			break;
 		case SEQ_SECOND_PASSWORD:
 			Clave_Seguridad_S2();
-				EstadoActivo = Load_Secuencia_Expedidor(Secuencia_Expedidor,EstadoActivo,SEQ_CMD_ACEPTADO,SEQ_RESPUESTA_TRANSPORTE);
-				Secuencia_Expedidor [TareadelCmd]  = TAREA_WRITE_PLACA_CARD;
+			EstadoActivo = Load_Secuencia_Expedidor(Secuencia_Expedidor,EstadoActivo,SEQ_CMD_ACEPTADO,SEQ_RESPUESTA_TRANSPORTE);
+			Secuencia_Expedidor [TareadelCmd]  = TAREA_WRITE_PLACA_CARD;
 			break;
 /*------------------------------------------------------------------------------
 		Tareas especificas de cada paso

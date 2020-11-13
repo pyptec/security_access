@@ -186,7 +186,7 @@ while(Secuencia_inicio_expedidor());																				/* procedimiento de inic
 						
 					  																				
 			
-				if (busy==0)																													/*comunicacion con el pto paralelo*/
+				if ((busy==0) && (pto_paraleo==0))																													/*comunicacion con el pto paralelo*/
 				{
 			
 				Length_trama=recibe_port(buffer);																		/*recibe informacion del pto paralelo*/

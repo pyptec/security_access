@@ -1,4 +1,4 @@
-C51 COMPILER V9.59.0.0   IO_SENSORES                                                       11/11/2020 12:18:30 PAGE 1   
+C51 COMPILER V9.59.0.0   IO_SENSORES                                                       11/13/2020 15:29:23 PAGE 1   
 
 
 C51 COMPILER V9.59.0.0, COMPILATION OF MODULE IO_SENSORES
@@ -62,7 +62,7 @@ line level    source
   52          
   53          //***************************************************************************************************
   54          void sel_Sensor2(void)
-C51 COMPILER V9.59.0.0   IO_SENSORES                                                       11/11/2020 12:18:30 PAGE 2   
+C51 COMPILER V9.59.0.0   IO_SENSORES                                                       11/13/2020 15:29:23 PAGE 2   
 
   55          {
   56   1        sel_A=0;
@@ -126,7 +126,7 @@ line level    source
  114   1        sel_Dir1();
  115   1        if (DataIn==1)
  116   1        {
-C51 COMPILER V9.59.0.0   IO_SENSORES                                                       11/11/2020 12:18:30 PAGE 3   
+C51 COMPILER V9.59.0.0   IO_SENSORES                                                       11/13/2020 15:29:23 PAGE 3   
 
  117   2          Board++;
  118   2        }
@@ -190,7 +190,7 @@ line level    source
  175   3                    Botton ();
  176   3                }
  177   2                  
-C51 COMPILER V9.59.0.0   IO_SENSORES                                                       11/11/2020 12:18:30 PAGE 4   
+C51 COMPILER V9.59.0.0   IO_SENSORES                                                       11/13/2020 15:29:23 PAGE 4   
 
  178   2                  
  179   2              }
@@ -254,7 +254,7 @@ line level    source
  237           void msj_lcd_informativo()
  238           {
  239   1       unsigned char info=0;
-C51 COMPILER V9.59.0.0   IO_SENSORES                                                       11/11/2020 12:18:30 PAGE 5   
+C51 COMPILER V9.59.0.0   IO_SENSORES                                                       11/13/2020 15:29:23 PAGE 5   
 
  240   1       static unsigned char toggle=0;
  241   1            sel_Funcion();                                  /*el pulsador funcion es el cmd q visualiza la informacion tres */
