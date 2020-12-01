@@ -318,7 +318,7 @@ tiempo de delay entre funciones
 definicion de datos de trama lintech
 ------------------------------------------------------------------------------*/
 
-//#define 	ETX								03
+
 #define 	STX_LINTECH				0xf2
 
 /*----------------------------------------------------------------------------
@@ -1661,6 +1661,7 @@ unsigned char Send_Pto_Paralelo(unsigned char *Atributos_Expedidor)
 	clear_placa();
 	ValTimeOutCom=TIME_WAIT	;
 	Timer_wait=0;
+	PULSADOR_BOTTON = 0;
 	return SEQ_ESPERA_VEHICULO_ENTRE;
 }
 
@@ -2328,12 +2329,21 @@ unsigned char SecuenciaExpedidorMF( unsigned char EstadoActivo)
 
 			if ((ValTimeOutCom==True)|| (ValTimeOutCom > TIME_CARD))
 			{
+				
+				
 				lock=OFF;																																										/*rele de disparo a la barrera*/
 				Rele_Atasco=OFF;																																					 /*activo el rele de reset del verificador logica negativa*/		
 				Check_Status(SENSOR_NORMAL);																															/* se pregunta al transporte en q estado estan las TI*/
 				EstadoActivo=Load_Secuencia_Expedidor(Secuencia_Expedidor,EstadoActivo,SEQ_CMD_ACEPTADO,SEQ_RESPUESTA_TRANSPORTE);
 				Secuencia_Expedidor [ TareadelCmd  ] = TAREA_PRESENCIA_VEHICULAR;
-			}
+			}else
+				{
+				if (rx_ip==False)																													/*pregunto si llega datos de monitor pto serie emulado*/
+					{
+					 Rx_Monitor();
+					}
+				}
+			
   		break;
 		case	SEQ_CMD_ACEPTADO:
 		/*cmd comun para todos*/

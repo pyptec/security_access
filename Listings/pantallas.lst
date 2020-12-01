@@ -1,4 +1,4 @@
-C51 COMPILER V9.59.0.0   PANTALLAS                                                         11/13/2020 15:29:23 PAGE 1   
+C51 COMPILER V9.59.0.0   PANTALLAS                                                         12/01/2020 12:04:37 PAGE 1   
 
 
 C51 COMPILER V9.59.0.0, COMPILATION OF MODULE PANTALLAS
@@ -62,7 +62,7 @@ line level    source
   52          #define NO_CARD_MENSUAL         176
   53          
   54          #define TARJETA_INVALIDA        177
-C51 COMPILER V9.59.0.0   PANTALLAS                                                         11/13/2020 15:29:23 PAGE 2   
+C51 COMPILER V9.59.0.0   PANTALLAS                                                         12/01/2020 12:04:37 PAGE 2   
 
   55          #define SIN_SALIDA              178
   56          #define REGISTRA_INGRESO        179
@@ -126,7 +126,7 @@ line level    source
  113   3                    tx_chrlcd(0x00,0);
  114   3                    tx_chrlcd(num_chr*2,0);
  115   3                    LCD_txt ((unsigned char *)"INGRESE TARJETA ",1);
-C51 COMPILER V9.59.0.0   PANTALLAS                                                         11/13/2020 15:29:23 PAGE 3   
+C51 COMPILER V9.59.0.0   PANTALLAS                                                         12/01/2020 12:04:37 PAGE 3   
 
  116   3                    break;
  117   3              
@@ -190,7 +190,7 @@ line level    source
  173   3                    tx_chrlcd(num_chr*2,0);
  174   3                    LCD_txt ((unsigned char *)"MENSUALIDAD EXCEDE HORARIO ACERQUESE A CAJA ",1);            
  175   3                    break;
-C51 COMPILER V9.59.0.0   PANTALLAS                                                         11/13/2020 15:29:23 PAGE 4   
+C51 COMPILER V9.59.0.0   PANTALLAS                                                         12/01/2020 12:04:37 PAGE 4   
 
  176   3                         
  177   3               case NO_MENSUAL_NI_PREPAGO:
@@ -254,7 +254,7 @@ line level    source
  235   3                    tx_chrlcd(0x00,0);
  236   3                    tx_chrlcd(num_chr*2,0);
  237   3                    LCD_txt((unsigned char *)        "UN MOMENTO POR FAVOR ",1);
-C51 COMPILER V9.59.0.0   PANTALLAS                                                         11/13/2020 15:29:23 PAGE 5   
+C51 COMPILER V9.59.0.0   PANTALLAS                                                         12/01/2020 12:04:37 PAGE 5   
 
  238   3                    break;
  239   3                 
@@ -318,7 +318,7 @@ line level    source
  297   3                    LCD_txt((unsigned char *)        "NIVEL BAJO DE TARJETAS ",1);
  298   3                    break;
  299   3                  
-C51 COMPILER V9.59.0.0   PANTALLAS                                                         11/13/2020 15:29:23 PAGE 6   
+C51 COMPILER V9.59.0.0   PANTALLAS                                                         12/01/2020 12:04:37 PAGE 6   
 
  300   3                  
  301   3                    
@@ -382,7 +382,7 @@ line level    source
  356   3                        //Raspberry_data((unsigned char  *) "a;91;GRACIAS... \n\r\0");
  357   3                        break;
  358   3                  case NO_IN_PARK:
-C51 COMPILER V9.59.0.0   PANTALLAS                                                         11/13/2020 15:29:23 PAGE 7   
+C51 COMPILER V9.59.0.0   PANTALLAS                                                         12/01/2020 12:04:37 PAGE 7   
 
  359   3                    strcpy(msjpantalla,"a;93;MENSUAL NO ESTA EN PARQUEADERO\n\0");
  360   3                        Raspberry_data (msjpantalla);
@@ -446,7 +446,7 @@ line level    source
  418   3                        Raspberry_data (msjpantalla);
  419   3                        //Raspberry_data((unsigned char  *) "a;98;FUERA DE LINEA\n\r\0");
  420   3                        break;
-C51 COMPILER V9.59.0.0   PANTALLAS                                                         11/13/2020 15:29:23 PAGE 8   
+C51 COMPILER V9.59.0.0   PANTALLAS                                                         12/01/2020 12:04:37 PAGE 8   
 
  421   3                  case UN_MOMENTO:
  422   3                    strcpy(msjpantalla,"a;98;UN MOMENTO POR FAVOR\n\0");
@@ -510,7 +510,7 @@ line level    source
  480   3                    Raspberry_data (msjpantalla);
  481   3                   // Raspberry_data((unsigned char  *) "\n\ra;01;RETIRE SU TARJETA\n\r\0");
  482   3                    break;
-C51 COMPILER V9.59.0.0   PANTALLAS                                                         11/13/2020 15:29:23 PAGE 9   
+C51 COMPILER V9.59.0.0   PANTALLAS                                                         12/01/2020 12:04:37 PAGE 9   
 
  483   3                case BIENVENIDO:
  484   3                  strcpy(msjpantalla,"a;03;BIENVENIDO\n\0");
@@ -574,7 +574,7 @@ line level    source
  540   3                tx_chrlcd(0x00,0);
  541   3                tx_chrlcd(num_chr*2,0);
  542   3                LCD_txt((unsigned char *)        "GRACIAS ",1);                       /*funcion q trasmite el msj al LCD  y el 
-C51 COMPILER V9.59.0.0   PANTALLAS                                                         11/13/2020 15:29:23 PAGE 10  
+C51 COMPILER V9.59.0.0   PANTALLAS                                                         12/01/2020 12:04:37 PAGE 10  
 
              -(1) coloca los caracteres NULL*/
  543   3                LCD_txt(buffer,1);    
@@ -638,7 +638,7 @@ line level    source
  601   4                    //strcat(msjpantalla," PLACA:");
  602   4                    strcat(msjpantalla,placa);  
  603   4                      
-C51 COMPILER V9.59.0.0   PANTALLAS                                                         11/13/2020 15:29:23 PAGE 11  
+C51 COMPILER V9.59.0.0   PANTALLAS                                                         12/01/2020 12:04:37 PAGE 11  
 
  604   4                      strcat(msjpantalla,"\n\0");
  605   4                    }
@@ -702,7 +702,7 @@ line level    source
  663          Escribo el reloj en ascii en bloque 
  664          msg= apuntador del msj
  665          length_char longitud de la tram
-C51 COMPILER V9.59.0.0   PANTALLAS                                                         11/13/2020 15:29:23 PAGE 12  
+C51 COMPILER V9.59.0.0   PANTALLAS                                                         12/01/2020 12:04:37 PAGE 12  
 
  666          enable_char_add = si esta en (1) envia un null (0) adicional, si es (0) no envia caracter adicional
  667          ------------------------------------------------------------------------------*/
@@ -766,7 +766,7 @@ line level    source
  724   2                REN = 1;                                                                        /*habilita recepcion de datos*/
  725   2                sel_com=1;  
  726   2                  /*switch pto serie a verificador o expedidor */
-C51 COMPILER V9.59.0.0   PANTALLAS                                                         11/13/2020 15:29:23 PAGE 13  
+C51 COMPILER V9.59.0.0   PANTALLAS                                                         12/01/2020 12:04:37 PAGE 13  
 
  727   2                }
  728   1                else

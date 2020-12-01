@@ -31,6 +31,12 @@ extern unsigned char hex_bcd (unsigned char byte);
 extern void serie_ascii_siceros_l(unsigned char *serie);
 extern unsigned char rd_eeprom (unsigned char control,unsigned int Dir) ;
 extern void Debug_monitor(unsigned char *buffer, unsigned char Length_trama );
+extern void Debug_txt_Tibbo(unsigned char * str);
+extern void Delay_10ms(unsigned int cntd_10ms);
+extern void tx_aux(unsigned char caracter);
+
+#define True										0x01
+#define False										0x00
 
 #define STX											02 
 #define ETX											03 
@@ -88,10 +94,15 @@ void Valida_Trama_Monitor(unsigned char *buffer, unsigned char length_trama)
 	length_trama=1;
 		
 			/*habilita relevo abre barrera*/
-		if	((*(buffer+2)==ETX)&&(*(buffer+1)=='P')&&(length_trama==3)) 																																						/* APERTURA DE BARRETA*/ 
+		if	((*(buffer+1)=='P')) 																																						/* APERTURA DE BARRETA*/ 
 				{
-					lock=1;																																																						/*habilita el relevo ON*/
-					Timer_wait=0;
+				
+					lock=1;		
+					
+					Delay_10ms(70);					/*habilita el relevo ON*/
+					tx_aux(06);							//ack		
+				//	Timer_wait=0;
+				
 	 			}
 			/*se recive la placa O EL CANCEL Y NO_PLATE*/	
 		else if ((*(buffer+1)=='<')|| (*(buffer+1)=='['))
