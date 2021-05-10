@@ -25,6 +25,7 @@ char check_fechaOut(char *buffer);
 void Block_read_Clock(unsigned char *datos_clock);
 void analiza_tiempo(char *buffer,unsigned int Val_DctoMinutos);
 void Block_read_Clock_Hex(unsigned char *datos_clock);
+void Block_read_clock_ascii_rasberry(unsigned char *datos_clock);
 
 /*rutinas de conversion*/
 void Two_ByteHex_Decimal(unsigned char *buffer,unsigned char id_h,unsigned char id_l);

@@ -14,6 +14,7 @@ sbit txd2 = P1^0;					//Transmision Aux Datos	IP								*
 
 #define True										0x01
 #define False										0x00
+#define SIN_MSJ									0x02
 /*------------------------------------------------------------------------------
 ------------------------------------------------------------------------------*/
 void time_bit()
@@ -154,18 +155,24 @@ void Debug_chr_Tibbo(unsigned char Dat)
 Transmito un Buffer x y lo pasa a ascii 
 io=0 datos enviados
 io=1 datos recibidos
+io=2 no hay texto
 ------------------------------------------------------------------------------*/
 void DebugBufferMF(unsigned char *str,unsigned char num_char,char io)
 {
   unsigned char j;
  
   
-  if (Debug_Tibbo==True)
+  if (Debug_Tibbo == True)
   {
-		if(io!=False)
+		if(io == True)
 		{
   	Debug_txt_Tibbo((unsigned char *) "Datos Recibidos del Transporte: ");
-		}else Debug_txt_Tibbo((unsigned char *) "Datos Enviados al Transporte: ");
+		}
+		else if  (io == False)
+		{
+			Debug_txt_Tibbo((unsigned char *) "Datos Enviados al Transporte: ");
+		}
+		
 		for (j=0; j<num_char; j++)
 		{
 		Debug_chr_Tibbo(*str);
@@ -197,7 +204,7 @@ void Debug_txt_Tibbo(unsigned char * str)
 
 void Debug_Dividir_texto()
 {
-	Debug_txt_Tibbo((unsigned char *) "\n\r/*---------------------------------------*/\n\r");
+	Debug_txt_Tibbo((unsigned char *) "/*---------------------------------------*/\n\r");
 }
 
 /*------------------------------------------------------------------------------
@@ -282,13 +289,12 @@ void cond_ini_tibbo(void)
 }
 void Debug_pto_paralelo(unsigned char *buffer, unsigned char Length_trama )
 {
-	Debug_Dividir_texto();																							/*division del texto */
-	Debug_txt_Tibbo((unsigned char *) "Recibe trama pto paral= ");					/*trama recibida pto paralelo */
-	DebugBufferMF(buffer,Length_trama,1);																/*imprimo la trama recibida*/
-	Debug_txt_Tibbo((unsigned char *) "\n\r");
+	
+	Debug_txt_Tibbo((unsigned char *) "Recibe trama pto paral = ");					/*trama recibida pto paralelo */
+	DebugBufferMF(buffer,Length_trama,SIN_MSJ);																/*imprimo la trama recibida*/
 	Debug_txt_Tibbo((unsigned char *) "longitud de la trama: ");		/*msj longitud de la trama */
 	Debug_chr_Tibbo(Length_trama);																			/*numero de caracteres recibidos*/
-	Debug_txt_Tibbo((unsigned char *) "\n\r");
+	Debug_txt_Tibbo((unsigned char *) "\r\n");
 	Debug_Dividir_texto();																							/*divido el texto*/
 			
 }	
@@ -297,9 +303,9 @@ void Debug_monitor(unsigned char *buffer, unsigned char Length_trama )
 	Debug_Dividir_texto();																							/*se divide el texto */			
 	Debug_txt_Tibbo((unsigned char *) "Recibe trama Monitor= ");				
 	Debug_txt_Tibbo(buffer);
-	Debug_txt_Tibbo((unsigned char *) "\n\r");
+	Debug_txt_Tibbo((unsigned char *) "\r\n");
 	Debug_txt_Tibbo((unsigned char *) "longitud de la trama: ");		/*msj longitud de la trama */
 	Debug_chr_Tibbo(Length_trama);																			/*numero de caracteres recibidos*/
-	Debug_txt_Tibbo((unsigned char *) "\n\r");				
+	Debug_txt_Tibbo((unsigned char *) "\r\n");				
 	Debug_Dividir_texto();	
 }	

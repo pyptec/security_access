@@ -1,4 +1,4 @@
-C51 COMPILER V9.59.0.0   IO_SENSORES                                                       12/01/2020 12:04:37 PAGE 1   
+C51 COMPILER V9.59.0.0   IO_SENSORES                                                       05/02/2021 15:24:49 PAGE 1   
 
 
 C51 COMPILER V9.59.0.0, COMPILATION OF MODULE IO_SENSORES
@@ -18,296 +18,310 @@ line level    source
    8          extern void load_and_send_id_cod();
    9          extern void send_portERR(unsigned char cod_err);
   10          extern unsigned char rd_eeprom (unsigned char control,unsigned int Dir); 
-  11          
-  12          sbit DataIn = P1^1;         //      
-  13          sbit sel_A = P3^5;          //Pulsador                        *
-  14          sbit sel_B = P3^6;          //Entrada Sensor 2                    *
-  15          sbit sel_C = P3^7;          //Entrada Sensor 1                    *
-  16          sbit busy = P3^3;           /*bussy de Entrada Interrupcion del Procesador principal      */
-  17          
-  18          #define NO_TIFIQUE_EVP      'N'
-  19          #define SI_NOTIFIQUE_EVP    'S'
-  20          
-  21          #define AUTOMOVIL           0X00
-  22          #define MOTO                0X01
-  23          /*datos en eeprom*/
-  24          #define EE_CPRCN_ACTIVA       0x000C
-  25          #define EE_ADDRESS_HIGH_BOARD   0X0012
-  26          
-  27          extern bit COMPARACION_ACTIVA;
-  28          extern  unsigned char Tipo_Vehiculo;
-  29          bit   PULSADOR_BOTTON = 0;
-  30          
-  31          //***************************************************************************************************
-  32          void sel_Funcion(void)
-  33          {
-  34   1        sel_A=0;
-  35   1        sel_B=0;
-  36   1        sel_C=0;
-  37   1      }
-  38          //***************************************************************************************************
-  39          void sel_Auto(void)
-  40          {
-  41   1        sel_A=0;
-  42   1        sel_B=1;
-  43   1        sel_C=0;
-  44   1      }
-  45          //***************************************************************************************************
-  46          void sel_Pulsa(void)
-  47          {
-  48   1        sel_A=1;
-  49   1        sel_B=1;
-  50   1        sel_C=0;
-  51   1      }
-  52          
-  53          //***************************************************************************************************
-  54          void sel_Sensor2(void)
-C51 COMPILER V9.59.0.0   IO_SENSORES                                                       12/01/2020 12:04:37 PAGE 2   
+  11          extern void Delay_10ms(unsigned int cntd_10ms);
+  12          
+  13          sbit DataIn = P1^1;         //      
+  14          sbit sel_A = P3^5;          //Pulsador                        *
+  15          sbit sel_B = P3^6;          //Entrada Sensor 2                    *
+  16          sbit sel_C = P3^7;          //Entrada Sensor 1                    *
+  17          sbit busy = P3^3;           /*bussy de Entrada Interrupcion del Procesador principal      */
+  18          
+  19          #define NO_TIFIQUE_EVP      'N'
+  20          #define SI_NOTIFIQUE_EVP    'S'
+  21          
+  22          #define AUTOMOVIL           0X00
+  23          #define MOTO                0X01
+  24          /*datos en eeprom*/
+  25          #define EE_CPRCN_ACTIVA       0x000C
+  26          #define EE_ADDRESS_HIGH_BOARD   0X0012
+  27          
+  28          extern bit COMPARACION_ACTIVA;
+  29          extern  unsigned char Tipo_Vehiculo;
+  30          bit   PULSADOR_BOTTON = 0;
+  31          
+  32          //***************************************************************************************************
+  33          void sel_Funcion(void)
+  34          {
+  35   1        sel_A=0;
+  36   1        sel_B=0;
+  37   1        sel_C=0;
+  38   1      }
+  39          //***************************************************************************************************
+  40          void sel_Auto(void)
+  41          {
+  42   1        sel_A=0;
+  43   1        sel_B=1;
+  44   1        sel_C=0;
+  45   1      }
+  46          //***************************************************************************************************
+  47          void sel_Pulsa(void)
+  48          {
+  49   1        sel_A=1;
+  50   1        sel_B=1;
+  51   1        sel_C=0;
+  52   1      }
+  53          
+  54          //***************************************************************************************************
+C51 COMPILER V9.59.0.0   IO_SENSORES                                                       05/02/2021 15:24:49 PAGE 2   
 
-  55          {
-  56   1        sel_A=0;
-  57   1        sel_B=0;
-  58   1        sel_C=1;
-  59   1      }
-  60          //***************************************************************************************************
-  61          void sel_Sensor1(void)
-  62          {
-  63   1        sel_A=1;
-  64   1        sel_B=0;
-  65   1        sel_C=1;
-  66   1      }
-  67          //***************************************************************************************************
-  68          void sel_Dir1(void)
-  69          {
-  70   1        sel_A=0;
-  71   1        sel_B=1;
-  72   1        sel_C=1;
-  73   1      }
-  74          //***************************************************************************************************
-  75          void sel_Dir2(void)
-  76          {
-  77   1        sel_A=1;
-  78   1        sel_B=1;
-  79   1        sel_C=1;
-  80   1      }
-  81          void Botton ()
-  82          {
-  83   1        sel_Pulsa();
-  84   1        if (DataIn != 1)  
-  85   1        {
-  86   2          Debug_txt_Tibbo((unsigned char *) "Pulsador Activo\r\n");       //el pulsador fue presionado
-  87   2          PULSADOR_BOTTON = 1;
-  88   2        }
-  89   1        
-  90   1      }
-  91          
-  92          char ValidaSensor(void)
-  93          {
-  94   1        
-  95   1      char  Valido=0;
-  96   1      int Tmin=500;
-  97   1        while ((DataIn==1)&&(Valido==0))
-  98   1        {
-  99   2          Tmin--;
- 100   2          if (Tmin==0)
- 101   2          {
- 102   3             Valido=1;
- 103   3          }
- 104   2        }
- 105   1        return Valido;
- 106   1      }
- 107          /*------------------------------------------------------------------------------
- 108          Funcion q debuelve la direccion de la tarjeta
- 109          ------------------------------------------------------------------------------*/
- 110          unsigned char Dir_board()
- 111          {
- 112   1        unsigned char Board=0x01;
- 113   1        unsigned char Board_High;
- 114   1        sel_Dir1();
- 115   1        if (DataIn==1)
- 116   1        {
-C51 COMPILER V9.59.0.0   IO_SENSORES                                                       12/01/2020 12:04:37 PAGE 3   
+  55          void sel_Sensor2(void)
+  56          {
+  57   1        sel_A=0;
+  58   1        sel_B=0;
+  59   1        sel_C=1;
+  60   1      }
+  61          //***************************************************************************************************
+  62          void sel_Sensor1(void)
+  63          {
+  64   1        sel_A=1;
+  65   1        sel_B=0;
+  66   1        sel_C=1;
+  67   1      }
+  68          //***************************************************************************************************
+  69          void sel_Dir1(void)
+  70          {
+  71   1        sel_A=0;
+  72   1        sel_B=1;
+  73   1        sel_C=1;
+  74   1      }
+  75          //***************************************************************************************************
+  76          void sel_Dir2(void)
+  77          {
+  78   1        sel_A=1;
+  79   1        sel_B=1;
+  80   1        sel_C=1;
+  81   1      }
+  82          void Botton ()
+  83          {
+  84   1        sel_Pulsa();
+  85   1        if (DataIn != 1)  
+  86   1        {
+  87   2          Debug_txt_Tibbo((unsigned char *) "Pulsador Activo\r\n");       //el pulsador fue presionado
+  88   2          PULSADOR_BOTTON = 1;
+  89   2        }
+  90   1        
+  91   1      }
+  92          
+  93          char ValidaSensor(void)
+  94          {
+  95   1        
+  96   1      char  Valido=0;
+  97   1      int Tmin=500;
+  98   1        while ((DataIn==1)&&(Valido==0))
+  99   1        {
+ 100   2          Tmin--;
+ 101   2          if (Tmin==0)
+ 102   2          {
+ 103   3             Valido=1;
+ 104   3          }
+ 105   2        }
+ 106   1        return Valido;
+ 107   1      }
+ 108          char ValidaSensor_cero(void)
+ 109          {
+ 110   1        
+ 111   1      char  Valido=1;
+ 112   1      int Tmin=500;
+ 113   1        while ((DataIn==0)&&(Valido==1))
+ 114   1        {
+ 115   2          Tmin--;
+ 116   2          if (Tmin==0)
+C51 COMPILER V9.59.0.0   IO_SENSORES                                                       05/02/2021 15:24:49 PAGE 3   
 
- 117   2          Board++;
- 118   2        }
- 119   1        sel_Dir2();
- 120   1        if (DataIn==1)
- 121   1        {
- 122   2          Board=Board+2;
- 123   2        }
- 124   1        if(Board == 0x01)
- 125   1        { 
- 126   2        Board_High=rd_eeprom(0xa8,EE_ADDRESS_HIGH_BOARD);
- 127   2        
- 128   2          if(Board_High != 0)
- 129   2          {
- 130   3            if(Board_High == 0xff)
- 131   3            {
- 132   4              Board=0x01;
- 133   4            }
- 134   3            else  Board= Board_High ;
- 135   3          } 
- 136   2        
- 137   2        }
- 138   1        return (Board+0x30);
- 139   1      }
- 140          unsigned char Dir_Board_Monitor()
- 141          {
- 142   1          unsigned char Board_High;
- 143   1          
- 144   1          Board_High=rd_eeprom(0xa8,EE_ADDRESS_HIGH_BOARD);
- 145   1          if(Board_High != 0)
- 146   1          {
- 147   2            if(Board_High == 0xff)
- 148   2            {
- 149   3              Board_High=0x01;
- 150   3            }
- 151   2          }
- 152   1          return  Board_High+0x30;
- 153   1      }
- 154          /*------------------------------------------------------------------------------
- 155          Funcion q debuelve la direccion de la tarjeta
- 156          ------------------------------------------------------------------------------*/
- 157          unsigned char Valida_Sensor1_Auto()
- 158          {
- 159   1        unsigned char sensor; 
- 160   1              sel_Sensor1();  
- 161   1              if (DataIn==0)                            // sensor1  se encuentra activo puede ser carro, si esta inhabilitado debe
+ 117   2          {
+ 118   3             Valido=0;
+ 119   3          }
+ 120   2        }
+ 121   1        return Valido;
+ 122   1      }
+ 123          /*------------------------------------------------------------------------------
+ 124          Funcion q debuelve la direccion de la tarjeta
+ 125          ------------------------------------------------------------------------------*/
+ 126          unsigned char Dir_board()
+ 127          {
+ 128   1        unsigned char Board=0x01;
+ 129   1        unsigned char Board_High;
+ 130   1        sel_Dir1();
+ 131   1        if (DataIn==1)
+ 132   1        {
+ 133   2          Board++;
+ 134   2        }
+ 135   1        sel_Dir2();
+ 136   1        if (DataIn==1)
+ 137   1        {
+ 138   2          Board=Board+2;
+ 139   2        }
+ 140   1        if(Board == 0x01)
+ 141   1        { 
+ 142   2        Board_High=rd_eeprom(0xa8,EE_ADDRESS_HIGH_BOARD);
+ 143   2        
+ 144   2          if(Board_High != 0)
+ 145   2          {
+ 146   3            if(Board_High == 0xff)
+ 147   3            {
+ 148   4              Board=0x01;
+ 149   4            }
+ 150   3            else  Board= Board_High ;
+ 151   3          } 
+ 152   2        
+ 153   2        }
+ 154   1        return (Board+0x30);
+ 155   1      }
+ 156          unsigned char Dir_Board_Monitor()
+ 157          {
+ 158   1          unsigned char Board_High;
+ 159   1          
+ 160   1          Board_High=rd_eeprom(0xa8,EE_ADDRESS_HIGH_BOARD);
+ 161   1          if(Board_High != 0)
+ 162   1          {
+ 163   2            if(Board_High == 0xff)
+ 164   2            {
+ 165   3              Board_High=0x01;
+ 166   3            }
+ 167   2          }
+ 168   1          return  Board_High+0x30;
+ 169   1      }
+ 170          /*------------------------------------------------------------------------------
+ 171          Funcion q debuelve la direccion de la tarjeta
+ 172          ------------------------------------------------------------------------------*/
+ 173          unsigned char Valida_Sensor1_Auto()
+ 174          {
+ 175   1        unsigned char sensor; 
+ 176   1              sel_Sensor1();  
+ 177   1              if (DataIn==0)                            // sensor1  se encuentra activo puede ser carro, si esta inhabilitado debe
              - ser moto          
- 162   1              {  sel_Auto();
- 163   2                if (DataIn==0)
- 164   2                {                                         // sensor Auto activo es un carro 
- 165   3                   Debug_txt_Tibbo((unsigned char *) "Sensores Auto y sensor1 activos.\n\r");
- 166   3                   Tipo_Vehiculo=AUTOMOVIL;
- 167   3                  sensor= 0xff;
- 168   3                  Botton ();
- 169   3                }
- 170   2                else
- 171   2                {
- 172   3                    Debug_txt_Tibbo((unsigned char *) "Sensor activo sensor1.\n\r");
- 173   3                    Tipo_Vehiculo=MOTO;
- 174   3                    sensor=  0xff ;
- 175   3                    Botton ();
- 176   3                }
- 177   2                  
-C51 COMPILER V9.59.0.0   IO_SENSORES                                                       12/01/2020 12:04:37 PAGE 4   
+C51 COMPILER V9.59.0.0   IO_SENSORES                                                       05/02/2021 15:24:49 PAGE 4   
 
- 178   2                  
- 179   2              }
- 180   1              else
- 181   1              {   sel_Auto();
- 182   2                if (DataIn==0)
- 183   2                {
- 184   3                
- 185   3                Debug_txt_Tibbo((unsigned char *) "Detectado. Sensor Auto.\n\r");
- 186   3                  Tipo_Vehiculo=MOTO;
- 187   3                  sensor= 0xff; 
- 188   3                  Botton ();
- 189   3                }
- 190   2                else
- 191   2                {
- 192   3                  Debug_txt_Tibbo((unsigned char *) "Sensores no detectados.\n\r");
- 193   3                  sensor=  0x00;  
- 194   3                }
- 195   2                  
- 196   2      
- 197   2              }
- 198   1              
- 199   1              return sensor;
- 200   1      }
- 201          /*------------------------------------------------------------------------------
- 202          Detecto la activacion de los sensores de salida
- 203          ------------------------------------------------------------------------------*/
- 204          
- 205          unsigned char  ValidaSensoresPaso(void)
- 206          {
- 207   1       unsigned char sensor;
- 208   1          sel_Sensor2();                                //garantiso q la barrera se encuentre en posicion baja  
- 209   1            if ((DataIn==1))        
- 210   1          {  
- 211   2            if (ValidaSensor()==1)
- 212   2            {
- 213   3              sensor=Valida_Sensor1_Auto();
- 214   3        
- 215   3            }
- 216   2            else 
- 217   2            {
- 218   3              Debug_txt_Tibbo((unsigned char *) "Vehiculo Esperando Salir.\n\r");
- 219   3              return 0x00;
- 220   3            }
- 221   2          }else 
- 222   1          {
- 223   2          Debug_txt_Tibbo((unsigned char *) "Vehiculo Saliendo. Un momento.\n\r");
- 224   2          return 0x00;
- 225   2          }
- 226   1        return sensor;
- 227   1      }
- 228          
- 229          
- 230            
- 231          /*------------------------------------------------------------------------------
- 232          funcion de msj en lcd de informacion
- 233          toggle=0    envia por el pto paralelo STX, cmd (i), año, mes, dia, hora, minutos, seg, dia de la semana, ETX
- 234          toggle=1    
- 235          toggle=2    envia ID y COD_PARK   por el pto paralelo STX, cmd (D), ID_CLIENTE, COD_CLIENTE, ETX  
- 236          ------------------------------------------------------------------------------*/
- 237           void msj_lcd_informativo()
- 238           {
- 239   1       unsigned char info=0;
-C51 COMPILER V9.59.0.0   IO_SENSORES                                                       12/01/2020 12:04:37 PAGE 5   
+ 178   1              {  sel_Auto();
+ 179   2                if (DataIn==0)
+ 180   2                {                                         // sensor Auto activo es un carro 
+ 181   3                   Debug_txt_Tibbo((unsigned char *) "Sensores Auto y sensor1 activos.\n\r");
+ 182   3                   Tipo_Vehiculo=AUTOMOVIL;
+ 183   3                  sensor= 0xff;
+ 184   3                  Botton ();
+ 185   3                }
+ 186   2                else
+ 187   2                {
+ 188   3                    Debug_txt_Tibbo((unsigned char *) "Sensor activo sensor1.\n\r");
+ 189   3                    Tipo_Vehiculo=MOTO;
+ 190   3                    sensor=  0xff ;
+ 191   3                    Botton ();
+ 192   3                }
+ 193   2                  
+ 194   2                  
+ 195   2              }
+ 196   1              else
+ 197   1              {   sel_Auto();
+ 198   2                if (DataIn==0)
+ 199   2                {
+ 200   3                
+ 201   3                Debug_txt_Tibbo((unsigned char *) "Detectado. Sensor Auto.\n\r");
+ 202   3                  Tipo_Vehiculo=MOTO;
+ 203   3                  sensor= 0xff; 
+ 204   3                  Botton ();
+ 205   3                }
+ 206   2                else
+ 207   2                {
+ 208   3                  Debug_txt_Tibbo((unsigned char *) "Sensores no detectados.\n\r");
+ 209   3                  sensor=  0x00;  
+ 210   3                }
+ 211   2                  
+ 212   2      
+ 213   2              }
+ 214   1              
+ 215   1              return sensor;
+ 216   1      }
+ 217          /*------------------------------------------------------------------------------
+ 218          Detecto la activacion de los sensores de salida
+ 219          ------------------------------------------------------------------------------*/
+ 220          
+ 221          unsigned char  ValidaSensoresPaso(void)
+ 222          {
+ 223   1       unsigned char sensor;
+ 224   1          sel_Sensor2();                                //garantiso q la barrera se encuentre en posicion baja  
+ 225   1            if ((DataIn==1))        
+ 226   1          {  
+ 227   2            if (ValidaSensor()==1)
+ 228   2            {
+ 229   3              sensor=Valida_Sensor1_Auto();
+ 230   3        
+ 231   3            }
+ 232   2            else 
+ 233   2            {
+ 234   3              Debug_txt_Tibbo((unsigned char *) "Vehiculo Esperando Salir.\n\r");
+ 235   3              return 0x00;
+ 236   3            }
+ 237   2          }else 
+ 238   1          {
+ 239   2          Debug_txt_Tibbo((unsigned char *) "Vehiculo Saliendo. Un momento.\n\r");
+C51 COMPILER V9.59.0.0   IO_SENSORES                                                       05/02/2021 15:24:49 PAGE 5   
 
- 240   1       static unsigned char toggle=0;
- 241   1            sel_Funcion();                                  /*el pulsador funcion es el cmd q visualiza la informacion tres */
- 242   1          if (DataIn==0)
- 243   1          {
- 244   2             if ((toggle==0)&&(info==0))                    /*primer pulso de funcion*/
- 245   2            {
- 246   3             if (busy==1)                                   /*habilito transmicion pto paralelo*/
- 247   3              {
- 248   4                info=1;                                     /*incremento info para ser limpiado cuando se suelte el pulsador*/
- 249   4                load_and_send_info_reloj();                 /*se envia el reloj al lcd */
- 250   4                toggle=1;                                   /*incremento a toggle para el proximo pulso sea otra opcion*/
- 251   4              }
- 252   3             }    
- 253   2              else if((toggle==1)&&(info==0))
- 254   2              {
- 255   3                if (busy==1)
- 256   3                {
- 257   4                info=1;
- 258   4                load_and_send_id_cod();                   /*muestro el codigo e id del cliente configurado*/
- 259   4                toggle=2;
- 260   4                }
- 261   3              }
- 262   2              else if ((toggle==2)&&(info==0))
- 263   2              {
- 264   3                if (busy==1)
- 265   3                {
- 266   4                info=1;
- 267   4                  if(rd_eeprom(0xa8,EE_CPRCN_ACTIVA)==1)    /*se muestra si hay comparacion activa si o no*/
- 268   4                  {
- 269   5                    send_portERR(SI_NOTIFIQUE_EVP);
- 270   5                  }else {send_portERR(NO_TIFIQUE_EVP);}
- 271   4                  
- 272   4                toggle=0;
- 273   4                }
- 274   3              
- 275   3              }
- 276   2            
- 277   2            }
- 278   1          
- 279   1          sel_Funcion();                  // el antirebote
- 280   1          if (DataIn==1)
- 281   1          {
- 282   2            info=0;
- 283   2          }
- 284   1      
- 285   1       }
+ 240   2          return 0x00;
+ 241   2          }
+ 242   1        return sensor;
+ 243   1      }
+ 244          
+ 245          
+ 246            
+ 247          /*------------------------------------------------------------------------------
+ 248          funcion de msj en lcd de informacion
+ 249          toggle=0    envia por el pto paralelo STX, cmd (i), año, mes, dia, hora, minutos, seg, dia de la semana, ETX
+ 250          toggle=1    
+ 251          toggle=2    envia ID y COD_PARK   por el pto paralelo STX, cmd (D), ID_CLIENTE, COD_CLIENTE, ETX  
+ 252          ------------------------------------------------------------------------------*/
+ 253           void msj_lcd_informativo()
+ 254           {
+ 255   1        static unsigned char contador=0;
+ 256   1       unsigned char info=0;
+ 257   1       static unsigned char toggle=0;
+ 258   1         contador++;
+ 259   1         if (contador >= 50)
+ 260   1         {
+ 261   2            contador = 0;
+ 262   2            sel_Funcion();
+ 263   2          if ((DataIn==0)&&(info==0))
+ 264   2          {
+ 265   3            if (ValidaSensor_cero()==0)
+ 266   3            {
+ 267   4             if ((toggle==0)&&(info==0))
+ 268   4            {
+ 269   5             if (busy==1)
+ 270   5              {
+ 271   6                info=1;
+ 272   6                load_and_send_info_reloj(); 
+ 273   6                toggle=1; 
+ 274   6              }
+ 275   5                if (ValidaSensor() == 1)
+ 276   5                {
+ 277   6                  Delay_10ms(10);
+ 278   6                }
+ 279   5            }
+ 280   4            else if((toggle==1)&&(info==0))
+ 281   4              {
+ 282   5                if (busy==1)
+ 283   5                {
+ 284   6                info=1;
+ 285   6                load_and_send_id_cod(); 
+ 286   6                toggle=0; 
+ 287   6                }
+ 288   5              }
+ 289   4            }
+ 290   3          }
+ 291   2           sel_Funcion();                   // el antirebote
+ 292   2            if (DataIn==1)
+ 293   2            {
+ 294   3            info=0;
+ 295   3            }
+ 296   2          }
+ 297   1      }
 
 
 MODULE INFORMATION:   STATIC OVERLAYABLE
-   CODE SIZE        =    462    ----
+   CODE SIZE        =    500    ----
+C51 COMPILER V9.59.0.0   IO_SENSORES                                                       05/02/2021 15:24:49 PAGE 6   
+
    CONSTANT SIZE    =    191    ----
-   XDATA SIZE       =      1       4
+   XDATA SIZE       =      2       4
    PDATA SIZE       =   ----    ----
    DATA SIZE        =   ----    ----
    IDATA SIZE       =   ----    ----

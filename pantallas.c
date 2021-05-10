@@ -20,6 +20,7 @@ extern void EscribirCadenaSoft_buffer(unsigned char *buffer,unsigned char tamano
 extern int printf   (const char *, ...);
 extern void clean_tx();
 extern char com_putchar (unsigned char c);
+extern void Block_read_clock_ascii_rasberry(unsigned char *datos_clock);
 void Raspberry_data (unsigned char *msjpantalla);
 /*mensajes de salida desde 85 a 169*/
 
@@ -37,8 +38,13 @@ void Raspberry_data (unsigned char *msjpantalla);
 #define	EXCEDE_HORARIO					95
 #define NO_MENSUAL_NI_PREPAGO		96
 #define MENSUAL_NO_PAGO					97
-
-
+#define HORARIO									98
+#define IN_PARK									99
+#define IN_HORARIO							0x9A
+#define BIENVENIDO_WIEGAN				0x9b
+#define LOTE_FULL								0x9c
+#define	CUPOS										0x9d
+#define NOREAD_CARD							0x9e
 /*mensajes informativos*/
 
 
@@ -82,7 +88,7 @@ extern idata unsigned char placa[];
 extern bit placa_ready;
 extern bit MenSual ;
 
-unsigned char xdata malloc_memoria[0x50];
+//unsigned char xdata malloc_memoria[0x50];
 
 /*------------------------------------------------------------------------------
 Rutina de msj de pantalla
@@ -95,10 +101,10 @@ unsigned char Ini_LCD_Line_one   []={0xaa,0x80,0x18,0x01,0x02,0x00} ;
 //unsigned char Ini_Off_Line []={0xaa,0x80,0x18,0x01,0x03,0x00} ;
 	
 unsigned char num_chr;
-unsigned char xdata  *msjpantalla;
+unsigned char xdata  *msjpantalla = 0;
 
-	init_mempool(malloc_memoria,40);
-	msjpantalla=malloc(40);
+	//init_mempool(malloc_memoria,40);
+	//msjpantalla=malloc(40);
 		sel_com=0;
 	
 		if (Raspberry==0)
@@ -360,7 +366,11 @@ unsigned char xdata  *msjpantalla;
 									Raspberry_data (msjpantalla);
 									//Raspberry_data((unsigned char  *) "a;93;MENSUAL NO ESTA EN PARQUEADERO\n\r\0");
                   break;
-							
+						case IN_PARK:
+									strcpy(msjpantalla,"a;93;MENSUAL ESTA EN PARQUEADERO\n\0");
+									Raspberry_data (msjpantalla);
+									//Raspberry_data((unsigned char  *) "a;93;MENSUAL NO ESTA EN PARQUEADERO\n\r\0");
+                  break;
 					 case EXPIRO:
 						 strcpy(msjpantalla,"a;94;MENSUALIDAD VENCIDA\n\0");
 									Raspberry_data(msjpantalla);
@@ -402,10 +412,7 @@ unsigned char xdata  *msjpantalla;
 					 case PULSE_BOTON:
 						strcpy(msjpantalla,"a;00;BIENVENIDO. PULSE EL BOTON\n\0");
 						Raspberry_data(msjpantalla);
-						//strcpy(msjpantalla,"EL BOTON\n\0");
-					//Raspberry_data(msjpantalla);
-					 //EscribirCadenaSoft_buffer(msjpantalla,strlen(msjpantalla));
-						//Raspberry_data ((unsigned char *)"a;00;BIENVENIDO. PULSE EL BOTON\n");
+					
 					 
 						break;
 					  case TARJETA_SIN_FORMATO:
@@ -472,7 +479,11 @@ unsigned char xdata  *msjpantalla;
 							//Raspberry_data((unsigned char  *)  "a;98;HORARIO NO PROGRAMADO\n\r\0");	
 							break;		
 					
-					
+					case NOREAD_CARD:
+							strcpy(msjpantalla,"a;98;ACERQUE SU TARJETA DE NUEVO\n\0");
+							Raspberry_data (msjpantalla);
+						
+					break;
 				
 						
 					case RETIRE_TARJETA:
@@ -485,9 +496,15 @@ unsigned char xdata  *msjpantalla;
 							Raspberry_data (msjpantalla);
               //Raspberry_data((unsigned char  *) "a;03;BIENVENIDO\n\r\0");
 							break;
-						
+					case LOTE_FULL:
+						strcpy(msjpantalla,"a;99;LOTE ASIGNADO ESTA LLENO\n\0");
+						Raspberry_data (msjpantalla);
+						break;
 			
-					
+					case IN_HORARIO:
+						strcpy(msjpantalla,"a;06;MENSUAL FUERA DE HORARIO\n\0");
+						Raspberry_data (msjpantalla);
+						break;
 					
 				 
 					
@@ -495,7 +512,7 @@ unsigned char xdata  *msjpantalla;
 					default:
 					break;	
          }
-				 free(msjpantalla);
+				// free(msjpantalla);
 				 msjpantalla=0;
          sel_com=1;   
       }
@@ -508,16 +525,16 @@ void PantallaLCD_LINEA_2(unsigned char cod_msg, unsigned char * buffer)
 	
 unsigned char Ini_LCD_Line_one   []={0xaa,0x80,0x18,0x01,0x02,0x00} ;
 unsigned char num_chr;
-unsigned char xdata  *msjpantalla;
+unsigned char msjpantalla [40]= {0};
 
-	init_mempool(malloc_memoria,40);
-	msjpantalla=malloc(40);
+	//init_mempool(malloc_memoria,40);
+//msjpantalla=malloc(40);
 
 
 	
 sel_com=0;
 	
-		if (Raspberry==0)
+		if (Raspberry == 0)
 		{
 		
 			
@@ -554,16 +571,22 @@ sel_com=0;
 		}
 		else
 		{
-			 sel_com=0;   
+			 sel_com=0;  
+			
        switch (cod_msg)
 			 {
 				 case	LECTURA_WIEGAND:
-					
+						
+										 
 						strcpy(msjpantalla,"a;92;WIEGAND ");
+								 
 						strcat(msjpantalla,buffer);
+						
 						strcat(msjpantalla,"\n\0");
+						
+				 
 						Raspberry_data (msjpantalla);
-						//Raspberry_data((unsigned char  *) buf); 
+						
 					
 						break;
 				 
@@ -605,14 +628,21 @@ sel_com=0;
 							}
 							else
 							{
-								strcpy(msjpantalla, "\n\0");	
+								strcpy(msjpantalla, "\n");	
 								//strcat(msjpantalla,"\n\r\0");
 							}	
 							Raspberry_data (msjpantalla);
 						
 						
             break;
-							
+						 case BIENVENIDO_WIEGAN:
+							strcpy(msjpantalla,"a;03;BIENVENIDO ");
+							strcat(msjpantalla,buffer);
+							strcat(msjpantalla,"\n\0");
+					
+							Raspberry_data (msjpantalla);
+						 
+							 break;
 					  case TARJETA_VENCIDA:
 						strcpy(msjpantalla,"a;07; ¡ MENSUALIDAD VENCIDA ! VENCIO 20");
 						num_chr=strlen(buffer);
@@ -622,13 +652,18 @@ sel_com=0;
 						Raspberry_data (msjpantalla);
 						
             break;
-					
+					 case CUPOS:
+						 strcpy(msjpantalla,"c;90;");
+						 strcat(msjpantalla,buffer);
+						 strcat(msjpantalla,"\n\0");
+					   Raspberry_data (msjpantalla);
+						 break;
 				default:
 			
 					break;	
 			 }
-			 free(msjpantalla);
-			 msjpantalla=0;
+			// free(msjpantalla);
+			 msjpantalla [0]=0;
 			 sel_com=1;	
 		}
 	}
@@ -677,10 +712,12 @@ void LCD_txt_num_char(unsigned char * msg,unsigned char length_char, unsigned ch
 
 void Raspberry_data (unsigned char *msjpantalla)
 {
+	
 	unsigned char i;
 	unsigned char lenth_cadena;
 	unsigned char d;
-
+	
+	
 	lenth_cadena=strlen(msjpantalla);
 	
 	for (i=0; i < lenth_cadena ; i++)
@@ -689,7 +726,7 @@ void Raspberry_data (unsigned char *msjpantalla)
 		for (d=0; d<100; d++)
    {
 	 }
-		d=putchar(msjpantalla[i]);
+		d=putchar(*(msjpantalla + i));
 
 	}
 	
@@ -711,8 +748,9 @@ void Reloj_Pantalla_Lcd()
 {
 
  unsigned char Ini_Clock_LCD   []={0xaa,0x80,0x28,0x07,0x20,0x00,0,0,0,0,20,0,0} ;
-					if (Raspberry==0)
-					{	
+
+				if (Raspberry==0)
+				{	
 					sel_com=0;																																			/*switch del pto serie a la pantalla*/
 					Block_read_Clock(Ini_Clock_LCD+5);																							/*Leo el reloj programado*/
 					//Debug_Dividir_texto();																													/*lineas de separacion del texto*/
@@ -724,17 +762,20 @@ void Reloj_Pantalla_Lcd()
 					REN = 1;																																				/*habilita recepcion de datos*/
 					sel_com=1;	
 						/*switch pto serie a verificador o expedidor */
-					}
-					else
-					{
+				}
+				else
+				{
 						sel_com=0;
 						Ini_Clock_LCD [0]=0;
-						Block_read_Clock(Ini_Clock_LCD);
-					//	strcpy(msjpantalla,"d;hora");
-					//	Raspberry_data1 ();
-						//Raspberry_data((unsigned char  *) "d;hora");
+						strcpy(Ini_Clock_LCD,"d;");
+					
+						Block_read_clock_ascii_rasberry(Ini_Clock_LCD+2);
+						strcat(Ini_Clock_LCD,"\n\0");
+					  Raspberry_data (Ini_Clock_LCD);
+							
+			
 						sel_com=1;	
-					}
+				}
 }
 
 		

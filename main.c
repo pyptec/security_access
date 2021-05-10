@@ -110,7 +110,7 @@ void inicia_board(void)
 cond_ini_tibbo();							/* inicia tibbo*/
 cond_ini_clock();							/* inicia clock*/
 cond_ini_pto();								/*Inicializacion del pto*/
-Atascado=0;										/*prendo el verificador*/
+Atascado_GP0_PIN_3 = 0;										/*prendo el verificador*/
 sel_com=1;										/*seleccionar el pto serie */
 lock=0;												/*barrera off*/	
 	
@@ -186,14 +186,17 @@ while(Secuencia_inicio_expedidor());																				/* procedimiento de inic
 						
 					  																				
 			
-				if ((busy==0) && (pto_paraleo==0))																													/*comunicacion con el pto paralelo*/
+				if ((busy == 0) && (pto_paraleo == 0))															/*comunicacion con el pto paralelo*/
 				{
 			
 				Length_trama=recibe_port(buffer);																		/*recibe informacion del pto paralelo*/
-				/*solo de prueba*/		
-				Debug_pto_paralelo(buffer,Length_trama);					
+				
+						/*solo de prueba*/		
+				Debug_pto_paralelo(buffer,Length_trama);				
+					Valida_Trama_Pto(buffer,Length_trama);																/*valido la informacion recibida */
+				
 						
-				Valida_Trama_Pto(buffer,Length_trama);																/*valido la informacion recibida */
+				
 				 
 				}
 		msj_lcd_informativo();																									/*muestra la informacion de  ID cliente, cod parque, fecha,comparacion*/

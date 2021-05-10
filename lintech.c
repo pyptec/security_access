@@ -73,7 +73,7 @@ void Inicializa(unsigned char TipoMovimiento)
 	if ((TipoMovimiento==SIN_MOVIMIENTO)||(TipoMovimiento==TO_FRONT)||(TipoMovimiento==CAPTURE_BOX))
 	{
 		
-		Debug_txt_Tibbo((unsigned char *) "Inicializa Dispensador\r\n\r\n");
+		Debug_txt_Tibbo((unsigned char *) "Inicializa Dispensador\r\n");
 		
 		g_scArrTxComSoft[0]=STX_LINTECH;
 		g_scArrTxComSoft[1]=0X00;

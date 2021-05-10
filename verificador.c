@@ -102,7 +102,7 @@ sbit sel_B = P3^6;					//Entrada Sensor 2										*
 sbit sel_C = P3^7;					//Entrada Sensor 1										*
 
 sbit lock = P1^7;						//Relevo 	
-sbit Rele_Atasco = P0^3;				//Rele de on/off del verificador o transporte
+sbit Atascado_GP0_PIN_3 = P0^3;				//Rele de on/off del verificador o transporte
 sbit led_err_imp = P0^2;			//Error 	
 
 /*pines de ip tibbo*/
@@ -370,6 +370,7 @@ definiciones para, el debuger. saber si la trama es enviada, o la trama es de re
 
 #define 	ENVIADOS					0X0
 #define		RESPUESTA					0X01
+#define 	SIN_MSJ						0X02
 /*
 definicion  de daos del reloj
 					*/
@@ -629,24 +630,24 @@ unsigned char error_rx_pto=ESPERA_MAS_TIEMPO;
 
 		
 					
-			Debug_txt_Tibbo((unsigned char *) "Dispensador No Responde PTO SERIE ...\r\n\r\n");
+			Debug_txt_Tibbo((unsigned char *) "Dispensador No Responde PTO SERIE ...");
 			Debug_chr_Tibbo	(cnt__ask_off);	
 			Debug_chr_Tibbo	(cnt_espera_ask_on);
 			Debug_chr_Tibbo	(error_rx_pto);
-			Debug_txt_Tibbo((unsigned char *) "\r\n\r\n");
+			Debug_txt_Tibbo((unsigned char *) "\r\n");
 			if (aSk==OFF)
 			
 			{	
 					cnt__ask_off++;																																		/*cuento el error*/																																
 				if(cnt__ask_off>=10)
 				{	
-					Debug_txt_Tibbo((unsigned char *) "ATASCADO RESET\r\n\r\n");																																			/*no contesta debe reset el transporte*/
-					Rele_Atasco=ON;																																		/*off el rele de reset del verificador*/		
+					Debug_txt_Tibbo((unsigned char *) "ATASCADO RESET\r\n");																																			/*no contesta debe reset el transporte*/
+					Atascado_GP0_PIN_3 = ON;																																		/*off el rele de reset del verificador*/		
 					Delay_10ms(110);
 					cnt__ask_off=0;																																		/*limpio ls errores*/
 					cnt_espera_ask_on=0;
 					error_rx_pto=ESPERA_MAS_TIEMPO;																										/**/
-					Rele_Atasco=OFF;	
+					Atascado_GP0_PIN_3 = OFF;	
 					Delay_10ms(110);																																	/*On el rele de reset del verificador*/		
 					ValTimeOutCom=TIME_CARD;
 				}
@@ -659,7 +660,7 @@ unsigned char error_rx_pto=ESPERA_MAS_TIEMPO;
 			else
 			{
 					cnt_espera_ask_on++;																															/*cuento n tiempos de ask para recibir el total de la trama*/
-				if(cnt_espera_ask_on>=3)
+				if(cnt_espera_ask_on>=1)
 				{
 					cnt__ask_off=0;																																		/*paso tiempo de espera y no se completo la trama 
 																																														limpio los reg y reenvio la trama y ask=off*/
@@ -819,7 +820,8 @@ Se analiza si expulsa la tarjeta por boton o automatica
 unsigned char Ingreso_Vehiculo(void)
 	{
 		unsigned char CardAutomatic;	
-		static unsigned char pulseboton=0;
+		static unsigned char pulseboton=24;
+		
 	
 	if((ValidaSensoresPaso())!=False)	 																							// valido los sensor de piso
 		{
@@ -833,14 +835,15 @@ unsigned char Ingreso_Vehiculo(void)
 				 }
 			else
 				{		
-			/*solo sale el msj pulse el boton una vez*/					
-						if(pulseboton==False)
+			/*solo sale el msj pulse el boton una vez cada 24 veces */					
+						if(pulseboton >= 24)
 						{ PantallaLCD(PULSE_BOTON);	
+							pulseboton=0;
 						}
 						else
 						 {
 							 pulseboton++;
-							
+						
 						 
 						 }
 						 Botton ();
@@ -854,17 +857,7 @@ unsigned char Ingreso_Vehiculo(void)
 						 {
 							Estado=SEQ_INICIO; 
 						 }
-							//sel_Pulsa();																												//se valida el pulsador en hardware
-						 //	if (DataIn!=True)  		  
-							//	{
-							//		Debug_txt_Tibbo((unsigned char *) "Pulsador Activo\r\n");				//el pulsador fue presionado
-								//	pulseboton=0;																																//muevo tarjeta hasta el lector de RF
-								//	Estado=SEQ_MOVER_CARD_RF; 																			//valido el cmd enviado al verificador
-								//}
-							//else
-								//	{
-									//	Estado=SEQ_INICIO;	
-								//	}
+					
 						
 				}	
 		}
@@ -1653,9 +1646,9 @@ unsigned char Send_Pto_Paralelo(unsigned char *Atributos_Expedidor)
 	}
 	
 	send_port(Trama_Expedidor,leng_trama_pto);	
-	Debug_txt_Tibbo((unsigned char *) "Trama_pto_paralelo\r\n");
-	DebugBufferMF(Trama_Expedidor,leng_trama_pto,ENVIADOS);
-	Debug_txt_Tibbo((unsigned char *) "\r\n");
+	Debug_txt_Tibbo((unsigned char *) "Trama_pto_paralelo: ");
+	DebugBufferMF(Trama_Expedidor,leng_trama_pto,SIN_MSJ	);
+	
 	
 	
 	clear_placa();
@@ -2327,12 +2320,12 @@ unsigned char SecuenciaExpedidorMF( unsigned char EstadoActivo)
 		
 		case SEQ_INICIO:
 
-			if ((ValTimeOutCom==True)|| (ValTimeOutCom > TIME_CARD))
+			if ((ValTimeOutCom == True)|| (ValTimeOutCom > TIME_CARD))
 			{
 				
 				
 				lock=OFF;																																										/*rele de disparo a la barrera*/
-				Rele_Atasco=OFF;																																					 /*activo el rele de reset del verificador logica negativa*/		
+				Atascado_GP0_PIN_3 = OFF;																																					 /*activo el rele de reset del verificador logica negativa*/		
 				Check_Status(SENSOR_NORMAL);																															/* se pregunta al transporte en q estado estan las TI*/
 				EstadoActivo=Load_Secuencia_Expedidor(Secuencia_Expedidor,EstadoActivo,SEQ_CMD_ACEPTADO,SEQ_RESPUESTA_TRANSPORTE);
 				Secuencia_Expedidor [ TareadelCmd  ] = TAREA_PRESENCIA_VEHICULAR;

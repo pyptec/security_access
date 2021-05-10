@@ -13,7 +13,7 @@
 sbit audio_s2 = P0^1;				//
 
 
-sbit Atascado = P0^3;				//Rele de on/off del verificador o transporte
+sbit Atascado_GP0_PIN_3 = P0^3;				//Rele de on/off del verificador o transporte
 
 sbit led_err_imp = P0^2;			//Error 												*
 

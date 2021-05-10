@@ -114,6 +114,7 @@ void stop (void)
 {
  	scl=0;
  	sda=0;
+	_nop_();
  	scl=1;
  	sda=1;
  	return;

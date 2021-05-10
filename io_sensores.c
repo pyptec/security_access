@@ -8,6 +8,7 @@ extern void load_and_send_info_reloj();
 extern void load_and_send_id_cod();
 extern void send_portERR(unsigned char cod_err);
 extern unsigned char rd_eeprom (unsigned char control,unsigned int Dir); 
+extern void Delay_10ms(unsigned int cntd_10ms);
 
 sbit DataIn = P1^1;					//			
 sbit sel_A = P3^5;					//Pulsador												*
@@ -100,6 +101,21 @@ int	Tmin=500;
 		if (Tmin==0)
 		{
 			 Valido=1;
+		}
+	}
+	return Valido;
+}
+char ValidaSensor_cero(void)
+{
+	
+char	Valido=1;
+int	Tmin=500;
+	while ((DataIn==0)&&(Valido==1))
+	{
+		Tmin--;
+		if (Tmin==0)
+		{
+			 Valido=0;
 		}
 	}
 	return Valido;
@@ -236,50 +252,46 @@ toggle=2		envia ID y COD_PARK   por el pto paralelo STX, cmd (D), ID_CLIENTE, CO
 ------------------------------------------------------------------------------*/
  void msj_lcd_informativo()
  {
+	static unsigned char contador=0;
  unsigned char info=0;
  static unsigned char toggle=0;
-   		sel_Funcion();																	/*el pulsador funcion es el cmd q visualiza la informacion tres */
-		if (DataIn==0)
+	 contador++;
+	 if (contador >= 50)
+	 {
+			contador = 0;
+  		sel_Funcion();
+		if ((DataIn==0)&&(info==0))
 		{
- 		   if ((toggle==0)&&(info==0))										/*primer pulso de funcion*/
+			if (ValidaSensor_cero()==0)
 			{
-			 if (busy==1)																		/*habilito transmicion pto paralelo*/
+ 		   if ((toggle==0)&&(info==0))
+			{
+			 if (busy==1)
 				{
-					info=1;																			/*incremento info para ser limpiado cuando se suelte el pulsador*/
-					load_and_send_info_reloj();									/*se envia el reloj al lcd */
-					toggle=1;																		/*incremento a toggle para el proximo pulso sea otra opcion*/
+					info=1;
+					load_and_send_info_reloj();	
+					toggle=1;	
 				}
-			 }		
-				else if((toggle==1)&&(info==0))
+					if (ValidaSensor() == 1)
+					{
+						Delay_10ms(10);
+					}
+			}
+			else if((toggle==1)&&(info==0))
 				{
 					if (busy==1)
 					{
 					info=1;
-					load_and_send_id_cod();										/*muestro el codigo e id del cliente configurado*/
-					toggle=2;
+					load_and_send_id_cod();	
+					toggle=0;	
 					}
 				}
-				else if ((toggle==2)&&(info==0))
-				{
-					if (busy==1)
-					{
-					info=1;
-						if(rd_eeprom(0xa8,EE_CPRCN_ACTIVA)==1)		/*se muestra si hay comparacion activa si o no*/
-						{
-							send_portERR(SI_NOTIFIQUE_EVP);
-						}else {send_portERR(NO_TIFIQUE_EVP);}
-						
-					toggle=0;
-					}
-				
-				}
-			
-		  }
-		
-	  sel_Funcion();   								// el antirebote
-		if (DataIn==1)
-		{
-			info=0;
+			}
 		}
-
- }
+		 sel_Funcion();   								// el antirebote
+			if (DataIn==1)
+			{
+			info=0;
+			}
+		}
+}

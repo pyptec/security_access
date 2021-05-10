@@ -36,22 +36,33 @@ extern unsigned char  Debug_Tibbo;
 	/*bit externos*/
 sbit rx_ip = P0^0;				
 sbit lock = P1^7;						//Relevo 
-sbit Atascado = P0^3;				//Rele de on/off del verificador o transporte
+sbit Atascado_GP0_PIN_3 = P0^3;				//Rele de on/off del verificador o transporte
 sbit led_err_imp = P0^2;			//Error 
 
 #define STX											02 
 #define ETX											03 
 /*MENSAJES PRIMARIO CON CMD DE MSJ*/
-#define PRMR_ON_LINE								0xB7
-#define PRMR_OFF_LINE								0xb6
+
+
 #define PRMR_BIENVENIDO							0X02		//FE
+#define PRMR_LOTE_FULL							0X05
 #define PRMR_SIN_PAGO								0XE7
-#define PRMR_NO_IN_PARK 						0XB2
-#define	PRMR_GRACIAS								'V'
-#define PRMR_ERROR_LOOP							06					//0XE0
-#define PRMR_EXPIRO									0XB4
-#define	PRMR_EXCEDE_HORARIO					0X07
+
 #define PRMR_NO_MENSUAL 						0XB1
+#define PRMR_NO_IN_PARK 						0XB2
+#define PRMR_IN_PARK								0XB3
+#define PRMR_EXPIRO									0XB4
+#define PRMR_MENSUAL_FUERA_HORARIO	0XB5
+#define PRMR_OFF_LINE								0xB6
+#define PRMR_ON_LINE								0xB7
+#define PRMR_IN_HORARIO							0XB8
+#define	PRMR_GRACIAS								'V'
+#define	PRMR_BIENVENIDO_MENSUAL			'O'
+#define	PRMR_CUPOS									'c'
+#define PRMR_NOREAD_CARD						06					//0XE0
+
+#define	PRMR_EXCEDE_HORARIO					0X07
+
 #define	PRMR_DIREJASE_A_CAJA				0XA1
 #define	PRMR_MENSUAL_NO_PAGO				0X08
 #define PRMR_UN_MOMENTO							0X09
@@ -65,10 +76,20 @@ sbit led_err_imp = P0^2;			//Error
 #define NO_MENSUAL_NI_PREPAGO		96
 #define	DIREJASE_A_CAJA					90
 #define MENSUAL_NO_PAGO					97
+#define MENSUAL_FUERA_HORARIO		98
+#define IN_PARK									99
+#define IN_HORARIO							0x9A					///
+#define BIENVENIDO_WIEGAN				0x9b
+#define LOTE_FULL								0x9c
+#define	CUPOS										0x9d
+#define NOREAD_CARD							0x9e		
 /*mensaje informativo DE PANTALLAS*/
 #define ERROR_LOOP							170					//0XE0
 #define OFF_LINE								174
 #define UN_MOMENTO							175
+	
+#define BIENVENIDO							0XFE
+
 /*direcciones de eeprom*/
 #define EE_USE_LPR						0x000A
 #define EE_DEBUG							0x0008
@@ -100,7 +121,33 @@ void Valida_Trama_Pto(unsigned char *buffer, unsigned char length_trama)
 			}	
 			
 		}
-		/*-------------------------------CMD B6 fuera de linea -------------------------------------------------------------*/
+	
+			/*-------------------------------CMD B1 PRMR_NO_MENSUAL_NI PREPAGO -----------------------------------------------------------------*/
+		else if ((*buffer==PRMR_NO_MENSUAL)	)																																								/*ok si llega msj a;96;NO ES MENSUALIDAD NI PREPAGO<LF>*/
+		{
+			PantallaLCD(NO_MENSUAL_NI_PREPAGO);																																														/*MSJ MENSUAL NO EN PARQUEADERO*/
+		}		
+			/*-------------------------------CMD B2 PRMR_NO_IN_PARK   -----------------------------------------------------------------*/
+		else if ((*buffer==PRMR_NO_IN_PARK)	)																																									/*ok MSJ MENSUAL NO EN PARQUEADERO  */
+		{
+			PantallaLCD(NO_IN_PARK);																																														/*MSJ MENSUAL NO EN PARQUEADERO*/
+		}	
+		/*-------------------------------CMD B3 PRMR_IN_PARK   -----------------------------------------------------------------*/
+		else if ((*buffer==PRMR_IN_PARK)	)																																										/*ok msj MENSUAL ESTA EN PARQUEADER*/
+		{
+			PantallaLCD(IN_PARK);																																														/*MSJ MENSUAL ESTA EN PARQUEADER*/
+		}			
+		/*-------------------------------CMD B4  EXPIRO mensualidad vencida ----------------------------------------------------------*/
+		else if ((length_trama==1)&&(*buffer==PRMR_EXPIRO))																																		/*ok msj mensual vencida */
+		{
+				 PantallaLCD(EXPIRO);																																															/*mesualidad vencida*/
+		}
+		/*-------------------------------CMD B5  HORARIO mensualidad FUERA DE HORARIO ----------------------------------------------------------*/
+		else if ((length_trama==1)&&(*buffer==PRMR_MENSUAL_FUERA_HORARIO))																										/* */
+		{
+				 PantallaLCD(MENSUAL_FUERA_HORARIO);																																							/*ok msj mesualidad fuera de horario*/
+		}
+	/*-------------------------------CMD B6 fuera de linea -------------------------------------------------------------*/
 		else if(*buffer==PRMR_OFF_LINE)																																										/*cmd de Accescan que dice q esta fuera de linea*/
 		{
 				cont++;
@@ -110,7 +157,7 @@ void Valida_Trama_Pto(unsigned char *buffer, unsigned char length_trama)
 				led_err_imp=0;																																																	/*error led on*/
 				Timer_wait=0;
 				lock=0;																																																					/*relevo off despues de 1 minuto*/
-				Atascado=0;	
+				Atascado_GP0_PIN_3 = 0;	
 				cont=0;
 				}
 		}
@@ -123,7 +170,7 @@ void Valida_Trama_Pto(unsigned char *buffer, unsigned char length_trama)
 				Timer_wait=0;																																																		/*se inicia el timer*/
 				lock=0;
 				led_err_imp=1;																																																	/*relevo off despues de 1 minuto*/
-				Atascado=0;	
+				Atascado_GP0_PIN_3 = 0;	
 			}	
 			
 			if ((Debug_Tibbo==0)&&(USE_LPR==1)&& (Timer_tivo>=600))
@@ -136,27 +183,25 @@ void Valida_Trama_Pto(unsigned char *buffer, unsigned char length_trama)
 			
 			
 		}	
-		
-			/*-------------------------------CMD B1 PRMR_NO_MENSUAL_NI PREPAGO -----------------------------------------------------------------*/
-		else if ((*buffer==PRMR_NO_MENSUAL)	)																																										/*en linea*/
+	/*-------------------------------CMD B8  IN_HORARIO  mensualidad vencida ----------------------------------------------------------*/
+		else if ((length_trama==1)&&(*buffer==PRMR_IN_HORARIO))																																		/* */
 		{
-			PantallaLCD(NO_MENSUAL_NI_PREPAGO);																																														/*MSJ MENSUAL NO EN PARQUEADERO*/
-		}		
-			/*-------------------------------CMD B2 PRMR_NO_IN_PARK   -----------------------------------------------------------------*/
-		else if ((*buffer==PRMR_NO_IN_PARK)	)																																										/*en linea*/
-		{
-			PantallaLCD(NO_IN_PARK);																																														/*MSJ MENSUAL NO EN PARQUEADERO*/
-		}		
+				 PantallaLCD(IN_HORARIO);																																															/*mesualidad vencida*/
+		}			
 			/*-------------------------------CMD A1    DIREJASE_A_CAJA	              ------------------------------------------------------------------*/
 		else if ((length_trama==1)&&(*buffer==PRMR_DIREJASE_A_CAJA	))																																				/*cmd 0xA1 audio caja que es igual a no registra pago */
 		{
 				 PantallaLCD(DIREJASE_A_CAJA);
 		}
-		
-			/*-------------------------------CMD 06  error de loop    ------------------------------------------------------------------*/
-		else if ((length_trama==1)&&(*buffer==PRMR_ERROR_LOOP))																																		/*cmd 0xA1 audio caja que es igual a no registra pago */
+		/*-------------------------------CMD 05  Lote full   ------------------------------------------------------------------*/
+		else if ((length_trama==1)&&(*buffer==PRMR_LOTE_FULL))																																		/*lote de carros full */
 		{
-				 PantallaLCD(ERROR_LOOP);
+				 PantallaLCD(LOTE_FULL);
+		}
+			/*-------------------------------CMD 06   ACERQUE SU TARJETA DE NUEVO  ------------------------------------------------------------------*/
+		else if ((length_trama==1)&&(*buffer == PRMR_NOREAD_CARD	))																																		/*cmd 0xA1 audio caja que es igual a no registra pago */
+		{
+				 PantallaLCD(NOREAD_CARD); //arregal ERROR_LOOP
 		}
 		
 				/*-------------------------------CMD 07  EXCEDE_HORARIO   ------------------------------------------------------------------*/
@@ -167,25 +212,30 @@ void Valida_Trama_Pto(unsigned char *buffer, unsigned char length_trama)
 		
 
 				/*-------------------------------CMD 08 MENSUAL_NO_PAGO   ------------------------------------------------------------------*/
-		else if ((length_trama==1)&&(*buffer==PRMR_MENSUAL_NO_PAGO))																																		/*cmd 0xA1 audio caja que es igual a no registra pago */
+		else if ((length_trama == 1)&&(*buffer==PRMR_MENSUAL_NO_PAGO))																																		/*cmd 0xA1 audio caja que es igual a no registra pago */
 		{
 				 PantallaLCD(MENSUAL_NO_PAGO);
 		}	
 	
 		/*-------------------------------CMD 09 UN_MOMENTO	   ------------------------------------------------------------------*/
-		else if ((length_trama==1)&&(*buffer==PRMR_UN_MOMENTO	))																																		/*cmd 0xA1 audio caja que es igual a no registra pago */
+		else if ((length_trama == 1)&&(*buffer==PRMR_UN_MOMENTO	))																																		/*cmd 0xA1 audio caja que es igual a no registra pago */
 		{
 				 PantallaLCD(UN_MOMENTO	);
 		}			
-			/*-------------------------------CMD B4  EXPIRO mensualidad vencida ----------------------------------------------------------*/
-		else if ((length_trama==1)&&(*buffer==PRMR_EXPIRO))																																		/*cmd 0xA1 audio caja que es igual a no registra pago */
-		{
-				 PantallaLCD(EXPIRO);																																															/*mesualidad vencida*/
-		}
+	
 		/*-------------------------------CMD 'V'=PRMR_GRACIAS  msj Gracias y nombre del mensual-----------------------------------------*/
-		else if ((length_trama==19)&& (*(buffer+1)==PRMR_GRACIAS)&&*(buffer+(length_trama-1))==ETX)													/*cmd 0xA1 audio caja que es igual a no registra pago */
+		else if ((length_trama == 0x13)&& (*(buffer+1)==PRMR_GRACIAS)&&*(buffer+(length_trama-1))==ETX)													/* */
 		{
+				 *(buffer+(length_trama-1))=0;
 				 PantallaLCD_LINEA_2(GRACIAS,buffer+2);																																			/*SE ENVIA EL MSJ GRACIAS lo q envia el software*/
+		}
+		
+		/*-------------------------------CMD 'O'=PRMR_BIENVENIDO  msj BIENVENIDO  nombre del mensual-----------------------------------------*/
+		else if ((length_trama == 0x13)&& (*(buffer+1) == PRMR_BIENVENIDO_MENSUAL)&&*(buffer+(length_trama-1))==ETX)													/* */
+		{
+			 //Debug_txt_Tibbo(buffer+1);
+				*(buffer+(length_trama-1))=0;
+				 PantallaLCD_LINEA_2(BIENVENIDO_WIEGAN,buffer+2);																																			/*SE ENVIA EL MSJ GRACIAS lo q envia el software*/
 		}
 		
 		/*-------------------------------CMD de wiegand---------------------------------------------------*/
@@ -212,7 +262,6 @@ void Valida_Trama_Pto(unsigned char *buffer, unsigned char length_trama)
 								PantallaLCD_LINEA_2(LECTURA_WIEGAND,buff);																																/*msj rasberry*/
 							}
 					
-							
 																																																												/*transmito el codigo de la tarjeta a la pantalla lcd*/
 													
 				}																																							
@@ -220,16 +269,23 @@ void Valida_Trama_Pto(unsigned char *buffer, unsigned char length_trama)
 				else
 				{
 					 /*-------------------------------mensaje en la pantalla---------------------------------------------------*/
-																															
-							if (ValidaSensoresPaso()!= 0xff)
-							{								
-								PantallaLCD(ERROR_LOOP);
-							}
+								/*modificacion 26/03/2021*/																							
+							//if (ValidaSensoresPaso()!= 0xff)
+							//{								
+							//	PantallaLCD(ERROR_LOOP);
+							//}
+					//posible falla
 							PantallaLCD_LINEA_2(LECTURA_WIEGAND,buff);																																/*transmito el codigo de la tarjeta a la pantalla lcd*/
 																																																		
 					/*--------------------------------------------------------------------------------------------------------*/	
 				
 				}
+		}
+		/*-------------------------------CMD 'c' =PRMR_cupos -----------------------------------------*/
+		else if	 ((length_trama == 7) && (*buffer == STX)&&(*(buffer+1) == PRMR_CUPOS	)&& *(buffer+(length_trama-1)) == ETX)	
+		{
+				*(buffer+(length_trama-1))=0;
+				 PantallaLCD_LINEA_2(CUPOS,buffer+2);		
 		}
 		/*numero de serie del ticket 02 , No serie 10dig,  03*/
 		else if ((length_trama==12)&&(*buffer==STX)&&*(buffer+(length_trama-1))==ETX)
