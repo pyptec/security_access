@@ -162,6 +162,7 @@ Definiciones de sequencias de verificador y expedidor
 #define SEQ_POWER_ON										0X17
 #define SEQ_SECOND_PASSWORD							0X18
 #define	SEQ_PLACA												0X19
+#define SEQ_DETAIL_CARD_TRAMPA					0X1A
 
 /*----------------------------------------------------------------------------
 Definiciones de sequencias de tareas del verificador y expedidor
@@ -741,6 +742,8 @@ if((temp=Trama_Validacion_P_N())!=RSPT_TRP_OK	)
 unsigned char Analiza_Presencia_Mensual()
 {
 	unsigned char Estado_expedidor;
+	
+	
 	if((ValidaSensoresPaso())!=False)	 																							// valido los sensor de piso
 		{
 			MenSual = True;
@@ -748,12 +751,32 @@ unsigned char Analiza_Presencia_Mensual()
 		}
 	else
 		{	
-					/*no hay vehiculo en los sensores se hace el loop otra vez */
+			
 				send_portERR(PRMR_ERROR_LOOP);
 				PantallaLCD(ERROR_LOOP);
-				Estado_expedidor = SEQ_EXPULSAR_CARD;
-							
+				Estado_expedidor = SEQ_DETAIL_CARD_TRAMPA;
 		}
+	return Estado_expedidor;
+}
+unsigned char Analiza_card_mount_rf()
+{
+unsigned char Estado_expedidor;
+	ValTimeOutCom=TIME_WAIT;
+		 if (Buffer_Rta_Lintech[Pos_St0]==CARD_IN_MOUTH)	 																						  //  se detecta la tarjeta en la boca TARJETA EN BEZZEL
+				{
+							/*hay una tarjeta en la boca del verificador */
+							Debug_txt_Tibbo((unsigned char *) "Analiza_card_mount\r\n");																//se envia msj al debuger q hay tarjeta en la boca
+																																																				  //se habilita recepcion de tarjetas por boca
+							Estado_expedidor = SEQ_CARD_INSERCION_ON;																										  //se trabaja mensual				
+				}
+				else if (Buffer_Rta_Lintech[Pos_St0]==CARD_OK_READ_RF	)	 
+						
+				{
+							Debug_txt_Tibbo((unsigned char *)"Analiza_card_rf\r\n");
+							Estado_expedidor=SEQ_EXPULSAR_CARD;
+				}
+				
+
 	return Estado_expedidor;
 }
 unsigned char Analiza_Presencia_rotacion()
@@ -1600,15 +1623,19 @@ unsigned char Load_Secuencia_Expedidor(unsigned char *Secuencia_Expedidor,unsign
 unsigned char Disparo_Lock_Entrada_Vehiculo(unsigned char *Nombre_Mensual)
 {
 	unsigned char Estado_expedidor;
+	static unsigned char take_card=6;
+	
+	
 	Debug_txt_Tibbo((unsigned char *) "TAKE CARD\r\n");
 	
-	PantallaLCD(RETIRE_TARJETA);
+	//PantallaLCD(RETIRE_TARJETA);
 	
 	if (Buffer_Rta_Lintech[Pos_St0]==NO_CARDS_IN_MCNSM)																	  // CANAL LIBRE	  no tiene tarjetas en el mecanismo
 		{
 			
 			Debug_txt_Tibbo((unsigned char *) "TAREA_OPEN_BARRERA\r\n");
-					
+				
+			take_card=6;
 			lock=ON;
 			send_portERR(BIENVENIDO);
 			PantallaLCD_LINEA_2(BIENVENIDO,Nombre_Mensual);
@@ -1620,8 +1647,19 @@ unsigned char Disparo_Lock_Entrada_Vehiculo(unsigned char *Nombre_Mensual)
 	{
 		if(Valida_Sensor1_Auto()!= False)
 		{
+			if(take_card >= 6)
+						{ PantallaLCD(RETIRE_TARJETA);
+							take_card=0;
+						}
+						else
+						 {
+							 take_card++;
+								 
+						 }
+			
 			ValTimeOutCom=TIME_PULSADOR;
 			Estado_expedidor=SEQ_DETAIL_CARD;
+			
 		}
 		else
 		{
@@ -1629,6 +1667,10 @@ unsigned char Disparo_Lock_Entrada_Vehiculo(unsigned char *Nombre_Mensual)
 		}
 	
 	}
+	
+		
+	
+	
 	return Estado_expedidor;
 }
 unsigned char Send_Pto_Paralelo(unsigned char *Atributos_Expedidor)
@@ -2395,6 +2437,13 @@ unsigned char SecuenciaExpedidorMF( unsigned char EstadoActivo)
 			Check_Status(SENSOR_DETAIL);		
 			EstadoActivo=Load_Secuencia_Expedidor(Secuencia_Expedidor,EstadoActivo,SEQ_CMD_ACEPTADO,SEQ_RESPUESTA_TRANSPORTE);		
 			Secuencia_Expedidor[TareadelCmd ] = TAREA_OPEN_BARRERA;
+			}
+			break;
+		case SEQ_DETAIL_CARD_TRAMPA:
+			if ((ValTimeOutCom == True)|| (ValTimeOutCom > TIME_WAIT))
+			{
+			Check_Status(SENSOR_DETAIL);		
+			EstadoActivo=Analiza_card_mount_rf();		
 			}
 			break;
 		case SEQ_LOAD_EEPROM:
