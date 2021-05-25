@@ -163,6 +163,7 @@ Definiciones de sequencias de verificador y expedidor
 #define SEQ_SECOND_PASSWORD							0X18
 #define	SEQ_PLACA												0X19
 #define SEQ_DETAIL_CARD_TRAMPA					0X1A
+#define SEQ_REELER_CARD_SECTOR1_BLOQUE1	0X1B
 
 /*----------------------------------------------------------------------------
 Definiciones de sequencias de tareas del verificador y expedidor
@@ -758,6 +759,9 @@ unsigned char Analiza_Presencia_Mensual()
 		}
 	return Estado_expedidor;
 }
+/*------------------------------------------------------------------------------*/
+// analiza si tiene una tarjeta en la boca o en rf  para debolverla
+/*------------------------------------------------------------------------------*/
 unsigned char Analiza_card_mount_rf()
 {
 unsigned char Estado_expedidor;
@@ -779,6 +783,9 @@ unsigned char Estado_expedidor;
 
 	return Estado_expedidor;
 }
+/*------------------------------------------------------------------------------*/
+
+/*------------------------------------------------------------------------------*/
 unsigned char Analiza_Presencia_rotacion()
 {
 	unsigned char Estado_expedidor;
@@ -879,6 +886,7 @@ unsigned char Ingreso_Vehiculo(void)
 						 else
 						 {
 							Estado=SEQ_INICIO; 
+							 ValTimeOutCom=TIME_PULSADOR;				//ojo
 						 }
 					
 						
@@ -1232,6 +1240,61 @@ unsigned char Responde_Lectura_Tarjeta_Sector1_Bloque0 (unsigned char *Nombre_Me
 			}
 		return Estado_expedidor;	
 }
+unsigned char Responde_ReeLectura_Tarjeta_Sector1_Bloque2 (unsigned char *lectura_anterior, unsigned char *Atributos_Expedidor)
+{
+	unsigned char temp;
+	unsigned char Estado_expedidor;
+	unsigned char *reelectura;
+	static unsigned char error_lectura=0;
+			
+			Debug_txt_Tibbo((unsigned char *) "TAREA_REELECTURA_TARJETA_SECTOR1_BLOQUE2\r\n");		
+														
+			
+			if (Buffer_Rta_Lintech[Pos_Length] >=0x18)
+			{
+				
+					for (temp=0; temp<16; ++temp)
+					{
+						*(reelectura + temp ) =Buffer_Rta_Lintech[Pos_IniDatMF+temp];														/*almaceno la informacion de MF en un arreglo*/
+					}
+					*(reelectura + temp )=NULL;
+					Debug_txt_Tibbo((unsigned char *) "Reeletura sector_1 bloque_2:");
+					DebugBufferMF(reelectura,16,RESPUESTA);
+					Debug_txt_Tibbo((unsigned char *) "\r\n");			
+				
+						if(strcmp(reelectura,lectura_anterior)== 0)
+						{
+							error_lectura=0;
+							Debug_txt_Tibbo((unsigned char *) "Reeletura sector_1 bloque_2 ok");
+							Debug_txt_Tibbo((unsigned char *) "\r\n");			
+							*(Atributos_Expedidor + Sector) = Sector_1;
+							*(Atributos_Expedidor + Bloque) = Bloque_0;
+							Armar_Trama_Tarjeta_Sector1_Bloque0(lectura_anterior);//Buffer_Write_MF
+							Estado_expedidor = SEQ_WRITE_SECTOR_BLOQUE;
+						}
+						else 
+						{
+							error_lectura++;
+							if (error_lectura >=3)
+							{
+								Debug_txt_Tibbo((unsigned char *) "Reeletura sector_1 bloque_2 falla");
+								Estado_expedidor =SEQ_CAPTURE_CARD;
+								
+							}
+							else
+							{
+							Debug_txt_Tibbo((unsigned char *) "Reeletura sector_1 bloque_2 falla");
+							Debug_txt_Tibbo((unsigned char *) "\r\n");			
+							*(Atributos_Expedidor + Sector) = Sector_1;
+							*(Atributos_Expedidor + Bloque) = Bloque_2;
+							Estado_expedidor =SEQ_WRITE_SECTOR_BLOQUE;
+								
+							}
+						}
+										
+			}
+				return Estado_expedidor ;
+}
 unsigned char Responde_Write_Tarjeta_Sector1_Bloque1(unsigned char *Buffer_Write_MF)
 {
 	unsigned char Estado_expedidor;
@@ -1249,10 +1312,12 @@ unsigned char Responde_Write_Tarjeta_Sector1_Bloque2(unsigned char *Atributos_Ex
 	DebugBufferMF(Buffer_Write_MF,16,RESPUESTA);
 	if(MenSual !=  True)
 	{
-	*(Atributos_Expedidor + Sector) = Sector_1;
-	*(Atributos_Expedidor + Bloque) = Bloque_0;
-	Armar_Trama_Tarjeta_Sector1_Bloque0(Buffer_Write_MF);
-		Estado_expedidor = SEQ_WRITE_SECTOR_BLOQUE;
+		Estado_expedidor=SEQ_REELER_CARD_SECTOR1_BLOQUE1;
+		/*se graba locatorios*/
+	//*(Atributos_Expedidor + Sector) = Sector_1;
+	//*(Atributos_Expedidor + Bloque) = Bloque_0;
+	//Armar_Trama_Tarjeta_Sector1_Bloque0(Buffer_Write_MF);
+	//	Estado_expedidor = SEQ_WRITE_SECTOR_BLOQUE;
 	}
 	else
 	{
@@ -2362,7 +2427,7 @@ unsigned char SecuenciaExpedidorMF( unsigned char EstadoActivo)
 		
 		case SEQ_INICIO:
 
-			if ((ValTimeOutCom == True)|| (ValTimeOutCom > TIME_CARD))
+			if ((buffer_ready == True)|| (ValTimeOutCom > TIME_PULSADOR	))				/*TIME_CARD*/
 			{
 				
 				
@@ -2432,7 +2497,7 @@ unsigned char SecuenciaExpedidorMF( unsigned char EstadoActivo)
 		 	EstadoActivo=Load_Secuencia_Expedidor(Secuencia_Expedidor,EstadoActivo,SEQ_CMD_ACEPTADO,SEQ_DETAIL_CARD);		
 			break;
 		case SEQ_DETAIL_CARD:
-			if ((ValTimeOutCom==True)|| (ValTimeOutCom > TIME_PULSADOR))
+			if ((buffer_ready ==True)|| (ValTimeOutCom > TIME_PULSADOR))
 			{
 			Check_Status(SENSOR_DETAIL);		
 			EstadoActivo=Load_Secuencia_Expedidor(Secuencia_Expedidor,EstadoActivo,SEQ_CMD_ACEPTADO,SEQ_RESPUESTA_TRANSPORTE);		
@@ -2440,7 +2505,7 @@ unsigned char SecuenciaExpedidorMF( unsigned char EstadoActivo)
 			}
 			break;
 		case SEQ_DETAIL_CARD_TRAMPA:
-			if ((ValTimeOutCom == True)|| (ValTimeOutCom > TIME_WAIT))
+			if ((buffer_ready == True)|| (ValTimeOutCom > TIME_WAIT))
 			{
 			Check_Status(SENSOR_DETAIL);		
 			EstadoActivo=Analiza_card_mount_rf();		
@@ -2492,6 +2557,12 @@ unsigned char SecuenciaExpedidorMF( unsigned char EstadoActivo)
 			Clave_Seguridad_S2();
 			EstadoActivo = Load_Secuencia_Expedidor(Secuencia_Expedidor,EstadoActivo,SEQ_CMD_ACEPTADO,SEQ_RESPUESTA_TRANSPORTE);
 			Secuencia_Expedidor [TareadelCmd]  = TAREA_WRITE_PLACA_CARD;
+			break;
+		case SEQ_REELER_CARD_SECTOR1_BLOQUE1:
+			
+			RD_MF(Atributos_Expedidor [ Sector ],Atributos_Expedidor [ Bloque ]);
+			EstadoActivo=Load_Secuencia_Expedidor(Secuencia_Expedidor,EstadoActivo,SEQ_CMD_ACEPTADO,SEQ_RESPUESTA_TRANSPORTE);
+			EstadoActivo = Responde_ReeLectura_Tarjeta_Sector1_Bloque2(Buffer_Write_MF,Atributos_Expedidor);
 			break;
 /*------------------------------------------------------------------------------
 		Tareas especificas de cada paso

@@ -1,4 +1,4 @@
-C51 COMPILER V9.59.0.0   UART                                                              05/14/2021 10:23:19 PAGE 1   
+C51 COMPILER V9.59.0.0   UART                                                              05/25/2021 12:29:59 PAGE 1   
 
 
 C51 COMPILER V9.59.0.0, COMPILATION OF MODULE UART
@@ -24,411 +24,410 @@ line level    source
   14          extern unsigned char g_cEstadoComSoft;
   15          extern unsigned char xdata Buffer_Rta_Lintech[];
   16          extern  unsigned char g_cContByteRx;
-  17          extern unsigned char ValTimeOutCom;
-  18          extern unsigned char cont_trama;
-  19          /*constantes globales*/
-  20          extern const unsigned  char ACK;
-  21          extern const unsigned  char ETX;
-  22          extern const unsigned  char STX_LINTECH;
-  23          unsigned char cnt__ask_off=0;
-  24          
-  25          /*externos bits*/
-  26          extern bit buffer_ready;
-  27          bit aSk=0;                  /*indica que llego el 06 = ask de que recivio el msj*/
-  28          /*------------------------------------------------------------------------------
-  29          Notes:
-  30          
-  31          The length of the receive and transmit buffers must be a power of 2.
-  32          
-  33          Each buffer has a next_in and a next_out index.
-  34          
-  35          If next_in = next_out, the buffer is empty.
-  36          
-  37          (next_in - next_out) % buffer_size = the number of characters in the buffer.
-  38          ------------------------------------------------------------------------------*/
-  39          #define TBUF_SIZE   2         /*** Must be one of these powers of 2 (2,4,8,16,32,64,128) ***/
-  40          #define RBUF_SIZE   8          /*** Must be one of these powers of 2 (2,4,8,16,32,64,128) ***/
-  41          /*definiciones de los estados de recepcion*/
-  42          #define  ESPERA_RX          0           //espera el primer cmd de recepcion del verificado 
-  43          #define  ESPERA_INICIO_RTA  1   // se almacena el stx
-  44          #define  LEN_DATA           2
-  45          #define  STORE_DATA         3
+  17          extern unsigned char cont_trama;
+  18          /*constantes globales*/
+  19          extern const unsigned  char ACK;
+  20          extern const unsigned  char ETX;
+  21          extern const unsigned  char STX_LINTECH;
+  22          unsigned char cnt__ask_off=0;
+  23          
+  24          /*externos bits*/
+  25          extern bit buffer_ready;
+  26          bit aSk=0;                  /*indica que llego el 06 = ask de que recivio el msj*/
+  27          /*------------------------------------------------------------------------------
+  28          Notes:
+  29          
+  30          The length of the receive and transmit buffers must be a power of 2.
+  31          
+  32          Each buffer has a next_in and a next_out index.
+  33          
+  34          If next_in = next_out, the buffer is empty.
+  35          
+  36          (next_in - next_out) % buffer_size = the number of characters in the buffer.
+  37          ------------------------------------------------------------------------------*/
+  38          #define TBUF_SIZE   2         /*** Must be one of these powers of 2 (2,4,8,16,32,64,128) ***/
+  39          #define RBUF_SIZE   8          /*** Must be one of these powers of 2 (2,4,8,16,32,64,128) ***/
+  40          /*definiciones de los estados de recepcion*/
+  41          #define  ESPERA_RX          0           //espera el primer cmd de recepcion del verificado 
+  42          #define  ESPERA_INICIO_RTA  1   // se almacena el stx
+  43          #define  LEN_DATA           2
+  44          #define  STORE_DATA         3
+  45          
   46          
   47          
-  48          
-  49          /*tiempo de delay entre funciones*/
-  50          #define TIME_CARD       5     //50
-  51          #define TIME_EJECT        5     //60
-  52          #define RET_MINIMO        3
-  53          
-  54          #define TBUF_SIZE_LINTECH   50  
-C51 COMPILER V9.59.0.0   UART                                                              05/14/2021 10:23:19 PAGE 2   
+  48          /*tiempo de delay entre funciones*/
+  49          #define TIME_CARD       5     //50
+  50          #define TIME_EJECT        5     //60
+  51          #define RET_MINIMO        3
+  52          
+  53          #define TBUF_SIZE_LINTECH   50  
+  54          //#define XTAL   22118400
+C51 COMPILER V9.59.0.0   UART                                                              05/25/2021 12:29:59 PAGE 2   
 
-  55          //#define XTAL   22118400
-  56          //#define TBUF_SPACE  idata       /*** Memory space where the transmit buffer resides ***/
-  57          //#define RBUF_SPACE  idata       /*** Memory space where the receive buffer resides ***/
-  58          
-  59          #define CTRL_SPACE  data        /*** Memory space for the buffer indexes ***/
-  60          
-  61          /*------------------------------------------------------------------------------
-  62          ------------------------------------------------------------------------------*/
-  63          /*
-  64          #if TBUF_SIZE < 2
-  65          #error TBUF_SIZE is too small.  It must be larger than 1.
-  66          #elif TBUF_SIZE > 128
-  67          #error TBUF_SIZE is too large.  It must be smaller than 129.
-  68          #elif ((TBUF_SIZE & (TBUF_SIZE-1)) != 0)
-  69          #error TBUF_SIZE must be a power of 2.
-  70          #endif
-  71          
-  72          #if RBUF_SIZE < 2
-  73          #error RBUF_SIZE is too small.  It must be larger than 1.
-  74          #elif RBUF_SIZE > 128
-  75          #error RBUF_SIZE is too large.  It must be smaller than 129.
-  76          #elif ((RBUF_SIZE & (RBUF_SIZE-1)) != 0)
-  77          #error RBUF_SIZE must be a power of 2.
-  78          #endif
-  79          */
-  80          /*------------------------------------------------------------------------------
-  81          ------------------------------------------------------------------------------*/
-  82          //static idata unsigned char tbuf [TBUF_SIZE];
-  83          //static idata unsigned char rbuf [RBUF_SIZE];
-  84          
-  85          static CTRL_SPACE unsigned char t_in = 0;
-  86          static CTRL_SPACE unsigned char t_out = 0;
-  87          
-  88          static CTRL_SPACE unsigned char r_in = 0;
-  89          static CTRL_SPACE unsigned char r_out = 0;
-  90          
-  91          static bit ti_restart = 0;  /* NZ if TI=1 is required */
+  55          //#define TBUF_SPACE  idata       /*** Memory space where the transmit buffer resides ***/
+  56          //#define RBUF_SPACE  idata       /*** Memory space where the receive buffer resides ***/
+  57          
+  58          #define CTRL_SPACE  data        /*** Memory space for the buffer indexes ***/
+  59          
+  60          /*------------------------------------------------------------------------------
+  61          ------------------------------------------------------------------------------*/
+  62          /*
+  63          #if TBUF_SIZE < 2
+  64          #error TBUF_SIZE is too small.  It must be larger than 1.
+  65          #elif TBUF_SIZE > 128
+  66          #error TBUF_SIZE is too large.  It must be smaller than 129.
+  67          #elif ((TBUF_SIZE & (TBUF_SIZE-1)) != 0)
+  68          #error TBUF_SIZE must be a power of 2.
+  69          #endif
+  70          
+  71          #if RBUF_SIZE < 2
+  72          #error RBUF_SIZE is too small.  It must be larger than 1.
+  73          #elif RBUF_SIZE > 128
+  74          #error RBUF_SIZE is too large.  It must be smaller than 129.
+  75          #elif ((RBUF_SIZE & (RBUF_SIZE-1)) != 0)
+  76          #error RBUF_SIZE must be a power of 2.
+  77          #endif
+  78          */
+  79          /*------------------------------------------------------------------------------
+  80          ------------------------------------------------------------------------------*/
+  81          //static idata unsigned char tbuf [TBUF_SIZE];
+  82          //static idata unsigned char rbuf [RBUF_SIZE];
+  83          
+  84          static CTRL_SPACE unsigned char t_in = 0;
+  85          static CTRL_SPACE unsigned char t_out = 0;
+  86          
+  87          static CTRL_SPACE unsigned char r_in = 0;
+  88          static CTRL_SPACE unsigned char r_out = 0;
+  89          
+  90          static bit ti_restart = 0;  /* NZ if TI=1 is required */
+  91          
   92          
-  93          
-  94          /*------------------------------------------------------------------------------
-  95          ------------------------------------------------------------------------------*/
-  96          static void com_isr (void) interrupt 4 
-  97          {
-  98   1      static xdata unsigned char cDatoRx;
-  99   1      xdata unsigned char k,bcc;
- 100   1      static xdata unsigned char num_datos;
- 101   1      /*------------------------------------------------
- 102   1      Received data interrupt.
- 103   1      ------------------------------------------------*/
- 104   1      if (RI != 0)
- 105   1        {
- 106   2          
- 107   2        RI = 0;
- 108   2        cDatoRx=SBUF;
- 109   2        if (((r_in - r_out) & ~(RBUF_SIZE-1)) == 0)
- 110   2          {
- 111   3          rbuf [r_in & (RBUF_SIZE-1)] = cDatoRx;    //cDatoRx;
- 112   3          r_in++;
- 113   3            
- 114   3          }
- 115   2          if(g_cContByteRx>TBUF_SIZE_LINTECH)
- 116   2            {
-C51 COMPILER V9.59.0.0   UART                                                              05/14/2021 10:23:19 PAGE 3   
+  93          /*------------------------------------------------------------------------------
+  94          ------------------------------------------------------------------------------*/
+  95          static void com_isr (void) interrupt 4 
+  96          {
+  97   1      static xdata unsigned char cDatoRx;
+  98   1      xdata unsigned char k,bcc;
+  99   1      static xdata unsigned char num_datos;
+ 100   1      /*------------------------------------------------
+ 101   1      Received data interrupt.
+ 102   1      ------------------------------------------------*/
+ 103   1      if (RI != 0)
+ 104   1        {
+ 105   2          
+ 106   2        RI = 0;
+ 107   2        cDatoRx=SBUF;
+ 108   2        if (((r_in - r_out) & ~(RBUF_SIZE-1)) == 0)
+ 109   2          {
+ 110   3          rbuf [r_in & (RBUF_SIZE-1)] = cDatoRx;    //cDatoRx;
+ 111   3          r_in++;
+ 112   3            
+ 113   3          }
+ 114   2          if(g_cContByteRx>TBUF_SIZE_LINTECH)
+ 115   2            {
+ 116   3                  g_cEstadoComSoft=ESPERA_RX;
+C51 COMPILER V9.59.0.0   UART                                                              05/25/2021 12:29:59 PAGE 3   
 
- 117   3                  g_cEstadoComSoft=ESPERA_RX;
- 118   3            }
- 119   2          switch (g_cEstadoComSoft)
- 120   2          {
- 121   3      /*------------------------------------------------------------------------------------------------
- 122   3            espera el ASK de respuesta
- 123   3      -------------------------------------------------------------------------------------------------*/     
- 124   3            case ESPERA_RX:
+ 117   3            }
+ 118   2          switch (g_cEstadoComSoft)
+ 119   2          {
+ 120   3      /*------------------------------------------------------------------------------------------------
+ 121   3            espera el ASK de respuesta
+ 122   3      -------------------------------------------------------------------------------------------------*/     
+ 123   3            case ESPERA_RX:
+ 124   3            
  125   3            
- 126   3            
- 127   3            if(cDatoRx==ACK)                // espera el ask
- 128   3            {
- 129   4            aSk=1;                              /*se recibe el caracter 06 y se activa*/
- 130   4            g_cContByteRx=0;r_in=0;r_out=0; 
- 131   4            g_cEstadoComSoft=ESPERA_INICIO_RTA;
- 132   4            
- 133   4            }
- 134   3          break;
- 135   3      /*------------------------------------------------------------------------------------------------
- 136   3            se almacena la trama 
- 137   3      -------------------------------------------------------------------------------------------------*/
- 138   3            case ESPERA_INICIO_RTA:
- 139   3            { 
- 140   4              Buffer_Rta_Lintech[g_cContByteRx++]=cDatoRx;
- 141   4              if(Buffer_Rta_Lintech[0]==STX_LINTECH)
- 142   4              {           
- 143   5                g_cEstadoComSoft=LEN_DATA;
- 144   5              }
- 145   4              else
- 146   4              {
- 147   5                g_cEstadoComSoft=ESPERA_RX;
- 148   5              }
- 149   4            }
- 150   3            break;
- 151   3      /*------------------------------------------------------------------------------------------------
- 152   3            se toma la longitud de la trama a recibir y se le suman 2 caracteres ETX y BCC
- 153   3      -------------------------------------------------------------------------------------------------*/
- 154   3          case LEN_DATA:
- 155   3            
- 156   3          if (g_cContByteRx==3)
- 157   3          {
- 158   4            
- 159   4            num_datos=cDatoRx+2;
- 160   4            Buffer_Rta_Lintech[g_cContByteRx++]=cDatoRx;
- 161   4            g_cEstadoComSoft=STORE_DATA;      //numero de datos a recibir
- 162   4          } 
- 163   3          else
- 164   3          {     
- 165   4            Buffer_Rta_Lintech[g_cContByteRx++]=cDatoRx;
- 166   4            g_cEstadoComSoft=LEN_DATA;
- 167   4          }
- 168   3      
- 169   3          break;
- 170   3      /*------------------------------------------------------------------------------------------------
- 171   3          se almacena los datos 
- 172   3      /*-------------------------------------------------------------------------------------------------*/
- 173   3          case STORE_DATA:
- 174   3            
- 175   3              Buffer_Rta_Lintech[g_cContByteRx++]=cDatoRx;  
- 176   3              num_datos--;
- 177   3              if (num_datos==0)
- 178   3              {
-C51 COMPILER V9.59.0.0   UART                                                              05/14/2021 10:23:19 PAGE 4   
+ 126   3            if(cDatoRx==ACK)                // espera el ask
+ 127   3            {
+ 128   4            aSk=1;                              /*se recibe el caracter 06 y se activa*/
+ 129   4            g_cContByteRx=0;r_in=0;r_out=0; 
+ 130   4            g_cEstadoComSoft=ESPERA_INICIO_RTA;
+ 131   4            
+ 132   4            }
+ 133   3          break;
+ 134   3      /*------------------------------------------------------------------------------------------------
+ 135   3            se almacena la trama 
+ 136   3      -------------------------------------------------------------------------------------------------*/
+ 137   3            case ESPERA_INICIO_RTA:
+ 138   3            { 
+ 139   4              Buffer_Rta_Lintech[g_cContByteRx++]=cDatoRx;
+ 140   4              if(Buffer_Rta_Lintech[0]==STX_LINTECH)
+ 141   4              {           
+ 142   5                g_cEstadoComSoft=LEN_DATA;
+ 143   5              }
+ 144   4              else
+ 145   4              {
+ 146   5                g_cEstadoComSoft=ESPERA_RX;
+ 147   5              }
+ 148   4            }
+ 149   3            break;
+ 150   3      /*------------------------------------------------------------------------------------------------
+ 151   3            se toma la longitud de la trama a recibir y se le suman 2 caracteres ETX y BCC
+ 152   3      -------------------------------------------------------------------------------------------------*/
+ 153   3          case LEN_DATA:
+ 154   3            
+ 155   3          if (g_cContByteRx==3)
+ 156   3          {
+ 157   4            
+ 158   4            num_datos=cDatoRx+2;
+ 159   4            Buffer_Rta_Lintech[g_cContByteRx++]=cDatoRx;
+ 160   4            g_cEstadoComSoft=STORE_DATA;      //numero de datos a recibir
+ 161   4          } 
+ 162   3          else
+ 163   3          {     
+ 164   4            Buffer_Rta_Lintech[g_cContByteRx++]=cDatoRx;
+ 165   4            g_cEstadoComSoft=LEN_DATA;
+ 166   4          }
+ 167   3      
+ 168   3          break;
+ 169   3      /*------------------------------------------------------------------------------------------------
+ 170   3          se almacena los datos 
+ 171   3      /*-------------------------------------------------------------------------------------------------*/
+ 172   3          case STORE_DATA:
+ 173   3            
+ 174   3              Buffer_Rta_Lintech[g_cContByteRx++]=cDatoRx;  
+ 175   3              num_datos--;
+ 176   3              if (num_datos==0)
+ 177   3              {
+ 178   4                if(Buffer_Rta_Lintech[g_cContByteRx-2]==ETX)
+C51 COMPILER V9.59.0.0   UART                                                              05/25/2021 12:29:59 PAGE 4   
 
- 179   4                if(Buffer_Rta_Lintech[g_cContByteRx-2]==ETX)
- 180   4                {
- 181   5                  bcc=0;
- 182   5                  for (k=0; k<g_cContByteRx-1; k++)
- 183   5                  {
- 184   6                    bcc=Buffer_Rta_Lintech[k]^bcc;
- 185   6                  }
- 186   5                    if (bcc==Buffer_Rta_Lintech[g_cContByteRx-1]) 
- 187   5                    {
- 188   6                      aSk=0;
- 189   6                      cnt__ask_off=0;
- 190   6                      buffer_ready=1;
- 191   6                      g_cEstadoComSoft=ESPERA_RX;                     /* bcc ok trama valida*/
- 192   6                                
- 193   6                    }
- 194   5                    else
- 195   5                    {
- 196   6                      g_cEstadoComSoft=ESPERA_RX;                     /* bcc no concuerda  trama no valida*/
- 197   6                    }
- 198   5                } 
- 199   4                else 
- 200   4                {
- 201   5                  g_cEstadoComSoft=ESPERA_RX;                         /*  no concuerda  ETX en la trama no valida*/
- 202   5                } 
- 203   4                      
- 204   4              }
- 205   3              else 
- 206   3              {
- 207   4                g_cEstadoComSoft=STORE_DATA;                          /* espera datos*/
- 208   4              }
- 209   3             
- 210   3          break;    
- 211   3      
- 212   3      /*------------------------------------------------------------------------------------------------
- 213   3          
- 214   3      /*-------------------------------------------------------------------------------------------------*/       
- 215   3          default:
- 216   3            g_cEstadoComSoft=ESPERA_RX;
- 217   3          break;
- 218   3          }
- 219   2        }
- 220   1      
- 221   1      /*------------------------------------------------
- 222   1      Transmitted data interrupt.
- 223   1      ------------------------------------------------*/
- 224   1      if (TI != 0)
- 225   1        {
- 226   2        TI = 0;
- 227   2      
- 228   2        if (t_in != t_out)
- 229   2          {
- 230   3          SBUF = tbuf [t_out & (TBUF_SIZE-1)];
- 231   3        
- 232   3         t_out++;
- 233   3          ti_restart = 0;
- 234   3         }
- 235   2        else
- 236   2          {
- 237   3          ti_restart = 1;
- 238   3          }
- 239   2        }
- 240   1        
-C51 COMPILER V9.59.0.0   UART                                                              05/14/2021 10:23:19 PAGE 5   
+ 179   4                {
+ 180   5                  bcc=0;
+ 181   5                  for (k=0; k<g_cContByteRx-1; k++)
+ 182   5                  {
+ 183   6                    bcc=Buffer_Rta_Lintech[k]^bcc;
+ 184   6                  }
+ 185   5                    if (bcc==Buffer_Rta_Lintech[g_cContByteRx-1]) 
+ 186   5                    {
+ 187   6                      aSk=0;
+ 188   6                      cnt__ask_off=0;
+ 189   6                      buffer_ready=1;
+ 190   6                      g_cEstadoComSoft=ESPERA_RX;                     /* bcc ok trama valida*/
+ 191   6                                
+ 192   6                    }
+ 193   5                    else
+ 194   5                    {
+ 195   6                      g_cEstadoComSoft=ESPERA_RX;                     /* bcc no concuerda  trama no valida*/
+ 196   6                    }
+ 197   5                } 
+ 198   4                else 
+ 199   4                {
+ 200   5                  g_cEstadoComSoft=ESPERA_RX;                         /*  no concuerda  ETX en la trama no valida*/
+ 201   5                } 
+ 202   4                      
+ 203   4              }
+ 204   3              else 
+ 205   3              {
+ 206   4                g_cEstadoComSoft=STORE_DATA;                          /* espera datos*/
+ 207   4              }
+ 208   3             
+ 209   3          break;    
+ 210   3      
+ 211   3      /*------------------------------------------------------------------------------------------------
+ 212   3          
+ 213   3      /*-------------------------------------------------------------------------------------------------*/       
+ 214   3          default:
+ 215   3            g_cEstadoComSoft=ESPERA_RX;
+ 216   3          break;
+ 217   3          }
+ 218   2        }
+ 219   1      
+ 220   1      /*------------------------------------------------
+ 221   1      Transmitted data interrupt.
+ 222   1      ------------------------------------------------*/
+ 223   1      if (TI != 0)
+ 224   1        {
+ 225   2        TI = 0;
+ 226   2      
+ 227   2        if (t_in != t_out)
+ 228   2          {
+ 229   3          SBUF = tbuf [t_out & (TBUF_SIZE-1)];
+ 230   3        
+ 231   3         t_out++;
+ 232   3          ti_restart = 0;
+ 233   3         }
+ 234   2        else
+ 235   2          {
+ 236   3          ti_restart = 1;
+ 237   3          }
+ 238   2        }
+ 239   1        
+ 240   1      }
+C51 COMPILER V9.59.0.0   UART                                                              05/25/2021 12:29:59 PAGE 5   
 
- 241   1      }
- 242          /*
- 243          void tx_chr (unsigned char data_com)
- 244           {
- 245          
- 246            SBUF=data_com;
- 247            sendactive=1;
- 248            while (sendactive==1) 
- 249            {
- 250            }
- 251           }
- 252          */
- 253          /*------------------------------------------------------------------------------
- 254          ------------------------------------------------------------------------------*/
- 255          #pragma disable
- 256          
- 257          void com_initialize (void)
- 258          {
- 259   1      /*------------------------------------------------
- 260   1      Setup TIMER1 to generate the proper baud rate.
- 261   1      ------------------------------------------------*/
- 262   1      com_baudrate ();
- 263   1      
- 264   1      /*------------------------------------------------
- 265   1      Clear com buffer indexes.
- 266   1      ------------------------------------------------*/
- 267   1      t_in = 0;
- 268   1      t_out = 0;
- 269   1      
- 270   1      r_in = 0;
- 271   1      r_out = 0;
- 272   1      
- 273   1      /*------------------------------------------------
- 274   1      Setup serial port registers.
- 275   1      ------------------------------------------------*/
- 276   1      SM0 = 0; SM1 = 1;   /* serial port MODE 1 */
- 277   1      SM2 = 0;
- 278   1      REN = 1;            /* enable serial receiver */
- 279   1      
- 280   1      RI = 0;             /* clear receiver interrupt */
- 281   1      TI = 0;             /* clear transmit interrupt */
- 282   1      ti_restart = 1;
- 283   1      
- 284   1      ES = 1;             /* enable serial interrupts */
- 285   1      PS = 1;             /* set serial interrupts to low priority */
- 286   1      }
- 287          
- 288          /*------------------------------------------------------------------------------
- 289          ------------------------------------------------------------------------------*/
- 290          #pragma disable
- 291          
- 292          void com_baudrate ()
- 293            
- 294          {
- 295   1      /*------------------------------------------------
- 296   1      Clear transmit interrupt and buffer.
- 297   1      ------------------------------------------------*/
- 298   1      TI = 0;             /* clear transmit interrupt */
- 299   1      t_in = 0;           /* empty transmit buffer */
- 300   1      t_out = 0;
- 301   1      
- 302   1      /*------------------------------------------------
-C51 COMPILER V9.59.0.0   UART                                                              05/14/2021 10:23:19 PAGE 6   
+ 241          /*
+ 242          void tx_chr (unsigned char data_com)
+ 243           {
+ 244          
+ 245            SBUF=data_com;
+ 246            sendactive=1;
+ 247            while (sendactive==1) 
+ 248            {
+ 249            }
+ 250           }
+ 251          */
+ 252          /*------------------------------------------------------------------------------
+ 253          ------------------------------------------------------------------------------*/
+ 254          #pragma disable
+ 255          
+ 256          void com_initialize (void)
+ 257          {
+ 258   1      /*------------------------------------------------
+ 259   1      Setup TIMER1 to generate the proper baud rate.
+ 260   1      ------------------------------------------------*/
+ 261   1      com_baudrate ();
+ 262   1      
+ 263   1      /*------------------------------------------------
+ 264   1      Clear com buffer indexes.
+ 265   1      ------------------------------------------------*/
+ 266   1      t_in = 0;
+ 267   1      t_out = 0;
+ 268   1      
+ 269   1      r_in = 0;
+ 270   1      r_out = 0;
+ 271   1      
+ 272   1      /*------------------------------------------------
+ 273   1      Setup serial port registers.
+ 274   1      ------------------------------------------------*/
+ 275   1      SM0 = 0; SM1 = 1;   /* serial port MODE 1 */
+ 276   1      SM2 = 0;
+ 277   1      REN = 1;            /* enable serial receiver */
+ 278   1      
+ 279   1      RI = 0;             /* clear receiver interrupt */
+ 280   1      TI = 0;             /* clear transmit interrupt */
+ 281   1      ti_restart = 1;
+ 282   1      
+ 283   1      ES = 1;             /* enable serial interrupts */
+ 284   1      PS = 1;             /* set serial interrupts to low priority */
+ 285   1      }
+ 286          
+ 287          /*------------------------------------------------------------------------------
+ 288          ------------------------------------------------------------------------------*/
+ 289          #pragma disable
+ 290          
+ 291          void com_baudrate ()
+ 292            
+ 293          {
+ 294   1      /*------------------------------------------------
+ 295   1      Clear transmit interrupt and buffer.
+ 296   1      ------------------------------------------------*/
+ 297   1      TI = 0;             /* clear transmit interrupt */
+ 298   1      t_in = 0;           /* empty transmit buffer */
+ 299   1      t_out = 0;
+ 300   1      
+ 301   1      /*------------------------------------------------
+ 302   1      Set timer 1 up as a baud rate generator.
+C51 COMPILER V9.59.0.0   UART                                                              05/25/2021 12:29:59 PAGE 6   
 
- 303   1      Set timer 1 up as a baud rate generator.
- 304   1      ------------------------------------------------*/
- 305   1      TR1 = 0;            /* stop timer 1 */
- 306   1      ET1 = 0;            /* disable timer 1 interrupt */
- 307   1      
- 308   1      PCON |= 0x80;       /* 0x80=SMOD: set serial baudrate doubler */
- 309   1      
- 310   1      TMOD &= ~0xF0;      /* clear timer 1 mode bits */
- 311   1      TMOD |= 0x20;       /* put timer 1 into MODE 2 */
- 312   1      
- 313   1      TH1 =0xf4;// (unsigned char) (256 - (XTAL / (16L * 12L * baudrate)));
- 314   1      TL1=0xf4;
- 315   1      TR1 = 1;            /* start timer 1 */
- 316   1      }
- 317          
- 318          /*------------------------------------------------------------------------------
- 319          ------------------------------------------------------------------------------*/
- 320          #pragma disable
- 321          
- 322          char com_putchar (unsigned char c)
- 323          {
- 324   1      /*------------------------------------------------
- 325   1      If the buffer is full, return an error value.
- 326   1      ------------------------------------------------*/
- 327   1      if (com_tbuflen () >= TBUF_SIZE)
- 328   1        return (-1);
- 329   1      
- 330   1      /*------------------------------------------------
- 331   1      Add the data to the transmit buffer.  If the
- 332   1      transmit interrupt is disabled, then enable it.
- 333   1      ------------------------------------------------*/
- 334   1      tbuf [t_in & (TBUF_SIZE - 1)] = c;
- 335   1      
- 336   1        t_in++;
- 337   1      
- 338   1      if (ti_restart)
- 339   1        {
- 340   2        ti_restart = 0;
- 341   2        TI = 1;               /* generate transmit interrupt */
- 342   2        }
- 343   1      
- 344   1      return (0);
- 345   1      }
- 346          
- 347          /*------------------------------------------------------------------------------
- 348          ------------------------------------------------------------------------------*/
- 349          #pragma disable
- 350          
- 351          int com_getchar (void)
- 352          {
- 353   1      if (com_rbuflen () == 0)
- 354   1        return (-1);
- 355   1      
- 356   1      return (rbuf [(r_out++) & (RBUF_SIZE - 1)]);
- 357   1      }
- 358          
- 359          /*------------------------------------------------------------------------------
- 360          ------------------------------------------------------------------------------*/
- 361          #pragma disable
- 362          
- 363          unsigned char com_rbuflen (void)
- 364          {
-C51 COMPILER V9.59.0.0   UART                                                              05/14/2021 10:23:19 PAGE 7   
+ 303   1      ------------------------------------------------*/
+ 304   1      TR1 = 0;            /* stop timer 1 */
+ 305   1      ET1 = 0;            /* disable timer 1 interrupt */
+ 306   1      
+ 307   1      PCON |= 0x80;       /* 0x80=SMOD: set serial baudrate doubler */
+ 308   1      
+ 309   1      TMOD &= ~0xF0;      /* clear timer 1 mode bits */
+ 310   1      TMOD |= 0x20;       /* put timer 1 into MODE 2 */
+ 311   1      
+ 312   1      TH1 =0xf4;// (unsigned char) (256 - (XTAL / (16L * 12L * baudrate)));
+ 313   1      TL1=0xf4;
+ 314   1      TR1 = 1;            /* start timer 1 */
+ 315   1      }
+ 316          
+ 317          /*------------------------------------------------------------------------------
+ 318          ------------------------------------------------------------------------------*/
+ 319          #pragma disable
+ 320          
+ 321          char com_putchar (unsigned char c)
+ 322          {
+ 323   1      /*------------------------------------------------
+ 324   1      If the buffer is full, return an error value.
+ 325   1      ------------------------------------------------*/
+ 326   1      if (com_tbuflen () >= TBUF_SIZE)
+ 327   1        return (-1);
+ 328   1      
+ 329   1      /*------------------------------------------------
+ 330   1      Add the data to the transmit buffer.  If the
+ 331   1      transmit interrupt is disabled, then enable it.
+ 332   1      ------------------------------------------------*/
+ 333   1      tbuf [t_in & (TBUF_SIZE - 1)] = c;
+ 334   1      
+ 335   1        t_in++;
+ 336   1      
+ 337   1      if (ti_restart)
+ 338   1        {
+ 339   2        ti_restart = 0;
+ 340   2        TI = 1;               /* generate transmit interrupt */
+ 341   2        }
+ 342   1      
+ 343   1      return (0);
+ 344   1      }
+ 345          
+ 346          /*------------------------------------------------------------------------------
+ 347          ------------------------------------------------------------------------------*/
+ 348          #pragma disable
+ 349          
+ 350          int com_getchar (void)
+ 351          {
+ 352   1      if (com_rbuflen () == 0)
+ 353   1        return (-1);
+ 354   1      
+ 355   1      return (rbuf [(r_out++) & (RBUF_SIZE - 1)]);
+ 356   1      }
+ 357          
+ 358          /*------------------------------------------------------------------------------
+ 359          ------------------------------------------------------------------------------*/
+ 360          #pragma disable
+ 361          
+ 362          unsigned char com_rbuflen (void)
+ 363          {
+ 364   1      return (r_in - r_out);
+C51 COMPILER V9.59.0.0   UART                                                              05/25/2021 12:29:59 PAGE 7   
 
- 365   1      return (r_in - r_out);
- 366   1      }
- 367          
- 368          /*------------------------------------------------------------------------------
- 369          ------------------------------------------------------------------------------*/
- 370          #pragma disable
- 371          
- 372          unsigned char com_tbuflen (void)
- 373          {
- 374   1      return (t_in - t_out);
- 375   1      }
- 376          
- 377          /*------------------------------------------------------------------------------
- 378          ------------------------------------------------------------------------------*/
- 379          /*
- 380          void clean_tx()
- 381          {
- 382            
- 383            t_in = 0;
- 384            t_out = 0;
- 385            ti_restart = 1;
- 386          }
- 387          */
- 388          /*
- 389          void tx_chr (unsigned char data_com)
- 390           {
- 391          
- 392             
- 393             tbuf [t_in & (TBUF_SIZE - 1)]=data_com
- 394             t_in++;
- 395              if (t_in != t_out)
- 396              {
- 397              SBUF = tbuf [t_out & (TBUF_SIZE-1)];
- 398              t_out++;
- 399              ti_restart = 0;
- 400              }
+ 365   1      }
+ 366          
+ 367          /*------------------------------------------------------------------------------
+ 368          ------------------------------------------------------------------------------*/
+ 369          #pragma disable
+ 370          
+ 371          unsigned char com_tbuflen (void)
+ 372          {
+ 373   1      return (t_in - t_out);
+ 374   1      }
+ 375          
+ 376          /*------------------------------------------------------------------------------
+ 377          ------------------------------------------------------------------------------*/
+ 378          /*
+ 379          void clean_tx()
+ 380          {
+ 381            
+ 382            t_in = 0;
+ 383            t_out = 0;
+ 384            ti_restart = 1;
+ 385          }
+ 386          */
+ 387          /*
+ 388          void tx_chr (unsigned char data_com)
+ 389           {
+ 390          
+ 391             
+ 392             tbuf [t_in & (TBUF_SIZE - 1)]=data_com
+ 393             t_in++;
+ 394              if (t_in != t_out)
+ 395              {
+ 396              SBUF = tbuf [t_out & (TBUF_SIZE-1)];
+ 397              t_out++;
+ 398              ti_restart = 0;
+ 399              }
+ 400             
  401             
  402             
- 403             
- 404            SBUF=data_com;
- 405            ti_restart=1;
- 406            while (ti_restart==1) 
- 407            {
- 408            }
- 409           }}*/
+ 403            SBUF=data_com;
+ 404            ti_restart=1;
+ 405            while (ti_restart==1) 
+ 406            {
+ 407            }
+ 408           }}*/
 
 
 MODULE INFORMATION:   STATIC OVERLAYABLE

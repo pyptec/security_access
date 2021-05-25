@@ -232,7 +232,8 @@ void Block_write_clock_ascii(unsigned char *datos_clock)
 {			
 	unsigned char temp;
 //dia,mes,año,hora,minutos,segundos,Dia de la semana 
-		
+		Debug_txt_Tibbo((unsigned char *) "PROGRAMAMOS HORA");
+		Debug_txt_Tibbo((unsigned char *) "\r\n");
 			/*dia*/
 			wr_clk(WDIA,two_one(*datos_clock,*(datos_clock+1)));			 							//dia
 			datos_clock++;

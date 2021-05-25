@@ -14,7 +14,6 @@ extern idata unsigned char rbuf [];
 extern unsigned char g_cEstadoComSoft;
 extern unsigned char xdata Buffer_Rta_Lintech[];
 extern	unsigned char g_cContByteRx;
-extern unsigned char ValTimeOutCom;
 extern unsigned char cont_trama;
 /*constantes globales*/
 extern const unsigned  char ACK;
