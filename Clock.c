@@ -39,7 +39,28 @@ sbit rst = P1^6 ;
 enum Dia_Semana{
 	Domingo=1,Lunes, Martes, Miercoles, Jueves, Viernes, Sabado 
 };
-
+enum expedidor {
+ Sector,				
+ Bloque,				
+ Tipo_Tarjeta,
+ Apb,
+ Horario,
+ Pico_Placa,
+ Type_Vehiculo,
+ Uid_0,
+ Uid_1,
+ Uid_2,
+ Uid_3,
+ Expira_ano,
+ Expira_mes,
+ Expira_dia,
+ DateTime_year,
+ DateTime_month,
+ DateTime_day,
+ DateTime_hour,
+ DateTime_minutes	
+ 
+};
 
 unsigned char data_clk;
 //*********************************************************************************
@@ -562,7 +583,16 @@ void Block_read_Clock_Hex(unsigned char *datos_clock)
 	 datos_clock++;
 
 }
-
+void  hora_entrada_vehiculo(unsigned char *Atributos_Expedidor)
+{
+	
+	*(Atributos_Expedidor + DateTime_year)    =	lee_clk(RANO);
+	*(Atributos_Expedidor + DateTime_month)   = lee_clk(RMES);
+	*(Atributos_Expedidor + DateTime_day)		  = lee_clk(RDIA);	
+	*(Atributos_Expedidor + DateTime_hour)		= lee_clk(RHORA);	
+	*(Atributos_Expedidor + DateTime_minutes) = lee_clk(RMIN);
+	
+}
 /*------------------------------------------------------------------------------
  Lee el dato del reloj en bloque 
 ------------------------------------------------------------------------------*/

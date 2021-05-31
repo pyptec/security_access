@@ -32,6 +32,7 @@ extern char check_fechaOut(char *buffer);
 extern char lee_clk (unsigned char dir_clk);
 extern unsigned char bcd_hex (unsigned char l_data);
 extern void hex_ascii(unsigned char * datos,unsigned char * fecha_asii);
+extern void  hora_entrada_vehiculo(unsigned char *Atributos_Expedidor);
 
 extern void Cmd_Lpr_Int();
 extern void Delay_10ms(unsigned int cnt);
@@ -472,7 +473,12 @@ enum expedidor {
  Uid_3,
  Expira_ano,
  Expira_mes,
- Expira_dia
+ Expira_dia,
+ DateTime_year,
+ DateTime_month,
+ DateTime_day,
+ DateTime_hour,
+ DateTime_minutes	
  
 };
 /*tipos de APB antipassback*/
@@ -1358,6 +1364,7 @@ unsigned char Pregunta_Lpr(unsigned char *Atributos_Expedidor)
 {
 	unsigned char Estado_expedidor;
 	Debug_txt_Tibbo((unsigned char *) "PREGUNTA LPR\r\n");
+	 hora_entrada_vehiculo(Atributos_Expedidor);
 		if(rd_eeprom(0xa8,EE_USE_LPR)== True)
 			 {
 				 /*monitor trama*/
@@ -1373,6 +1380,7 @@ unsigned char Pregunta_Lpr(unsigned char *Atributos_Expedidor)
 
 	return Estado_expedidor;
 }
+
 unsigned char Pregunta_Placa()
 {
 	unsigned char Estado_expedidor;
@@ -1467,9 +1475,13 @@ void  Armar_Trama_Tarjeta_Sector1_Bloque2(unsigned char *Atributos_Expedidor,uns
 {
 	
 	/*fecha de ingreso se lee año,mes,dia,hora y minutos*/
-	
-	Block_read_Clock_Hex(Buffer_Write_MF);
-	
+
+	//Block_read_Clock_Hex(Buffer_Write_MF);
+	*(Buffer_Write_MF + 0)= bcd_hex(*(Atributos_Expedidor +  DateTime_year));
+	*(Buffer_Write_MF + 1)= bcd_hex(*(Atributos_Expedidor +  DateTime_month));
+	*(Buffer_Write_MF + 2)= bcd_hex(*(Atributos_Expedidor +  DateTime_day));
+	*(Buffer_Write_MF + 3)= bcd_hex(*(Atributos_Expedidor +  DateTime_hour));
+	*(Buffer_Write_MF + 4)= bcd_hex(*(Atributos_Expedidor +  DateTime_minutes));
 	/*descuentos los borro*/
 	
 	*(Buffer_Write_MF + 5)=0;
@@ -1511,7 +1523,7 @@ void Armar_Trama_Tarjeta_Sector1_Bloque0(unsigned char *Buffer_Write_MF)
 	/*graba serie de Ticket*/
 	strcpy(Buffer_Write_MF, Lee_No_Ticket());
 }
-unsigned char *Armar_Trama_Pto_Paralelo_Expedidor(unsigned char *h)
+unsigned char *Armar_Trama_Pto_Paralelo_Expedidor(unsigned char *Atributos_Expedidor,unsigned char *longitud_trama_pto_paralelo)
 {
 	static unsigned char buffer[28];
 	unsigned char ticket[11];
@@ -1527,45 +1539,52 @@ unsigned char *Armar_Trama_Pto_Paralelo_Expedidor(unsigned char *h)
 	j=strlen(buffer);
 	
 	buffer[j++]= '-';
+	/*leo fecha de entrada*/
+	buffer[j++]= bcd_hex(*(Atributos_Expedidor +  DateTime_year))   + 0x30;
+	buffer[j++]= bcd_hex(*(Atributos_Expedidor +  DateTime_month))  + 0x30;
+	buffer[j++]= bcd_hex(*(Atributos_Expedidor +  DateTime_day))    + 0x30;
+	buffer[j++]= bcd_hex(*(Atributos_Expedidor +  DateTime_hour))   + 0x30;
+	buffer[j++]= bcd_hex(*(Atributos_Expedidor +  DateTime_minutes))+ 0x30;
+	buffer[j++]= '-';
 	
-	Block_read_Clock_Hex(buffer+j);					//leo la fecha de entrada
-	buffer[j]=buffer[j]+0x030;							/*año de entrada*/
-	buffer[j+1]=buffer[j+1]+0x030;					/*mes de entrada*/
-	buffer[j+2]=buffer[j+2]+0x030;					/*dia de entrada*/
-	buffer[j+3]=buffer[j+3]+0x030;					/*hora de entrada*/
-	buffer[j+4]=buffer[j+4]+0x030;					/*minutos de entrada*/
-	buffer[j+5]= '-';
+	//Block_read_Clock_Hex(buffer+j);					//leo la fecha de entrada
+	//buffer[j]=buffer[j]+0x030;							/*año de entrada*/
+	//buffer[j+1]=buffer[j+1]+0x030;					/*mes de entrada*/
+	//buffer[j+2]=buffer[j+2]+0x030;					/*dia de entrada*/
+	//buffer[j+3]=buffer[j+3]+0x030;					/*hora de entrada*/
+	//buffer[j+4]=buffer[j+4]+0x030;					/*minutos de entrada*/
+	//buffer[j+5]= '-';
 	/*placa*/
 	if (rd_eeprom(0xa8,EE_PLACA)!=0)
 	{		
 		if (placa_ready != False)
 		{
-			buffer[j+6]= placa[0];
-			buffer[j+7]= placa[1];
-			buffer[j+8]= placa[2];
-			buffer[j+9]= placa[3];
-			buffer[j+10]= placa[4];
-			buffer[j+11]= placa[5];
-			buffer[j+12]= NULL;
+			buffer[j++]= placa[0];
+			buffer[j++]= placa[1];
+			buffer[j++]= placa[2];
+			buffer[j++]= placa[3];
+			buffer[j++]= placa[4];
+			buffer[j++]= placa[5];
+			buffer[j++]= NULL;
 		}
 		else
 		{
-			buffer[j+6]= ' ';
-			buffer[j+7]= NULL;
+			buffer[j++]= ' ';
+			buffer[j++]= NULL;
 		}
 	}
 	else 
 	{
-		buffer[j+6]= ' ';
-		buffer[j+7]=NULL;
+		buffer[j++]= ' ';
+		buffer[j++]=NULL;
 	}
 	j=strlen(buffer);
 	buffer[j]= ETX;
-	*h=j+1;
+	*longitud_trama_pto_paralelo=j+1;
 	
 	return buffer;
 }
-unsigned char *Armar_Trama_Pto_Paralelo_Expedidor_Mensual(unsigned char *Atributos_Expedidor,unsigned char *j)
+unsigned char *Armar_Trama_Pto_Paralelo_Expedidor_Mensual(unsigned char *Atributos_Expedidor,unsigned char *longitud_trama_pto_paralelo)
 {
 	static unsigned char buffer[28];
 
@@ -1579,13 +1598,20 @@ unsigned char *Armar_Trama_Pto_Paralelo_Expedidor_Mensual(unsigned char *Atribut
 	buffer[4]=*(Atributos_Expedidor + Uid_2);
 	buffer[5]=*(Atributos_Expedidor + Uid_3);
 	
+	/*leo fecha de entrada*/
 	
-	Block_read_Clock_Hex(buffer+6);					//leo la fecha de entrada
-	buffer[6]=buffer[6]+0x030;							/*año de entrada*/
-	buffer[7]=buffer[7]+0x030;					/*mes de entrada*/
-	buffer[8]=buffer[8]+0x030;					/*dia de entrada*/
-	buffer[9]=buffer[9]+0x030;					/*hora de entrada*/
-	buffer[10]=buffer[10]+0x030;					/*minutos de entrada*/
+	buffer[6]= bcd_hex(*(Atributos_Expedidor +  DateTime_year))   + 0x30;
+	buffer[7]= bcd_hex(*(Atributos_Expedidor +  DateTime_month))  + 0x30;
+	buffer[8]= bcd_hex(*(Atributos_Expedidor +  DateTime_day))    + 0x30;
+	buffer[9]= bcd_hex(*(Atributos_Expedidor +  DateTime_hour))   + 0x30;
+	buffer[10]= bcd_hex(*(Atributos_Expedidor + DateTime_minutes))+ 0x30;
+	
+//	Block_read_Clock_Hex(buffer+6);					//leo la fecha de entrada
+//	buffer[6]=buffer[6]+0x030;							/*año de entrada*/
+//	buffer[7]=buffer[7]+0x030;					/*mes de entrada*/
+//	buffer[8]=buffer[8]+0x030;					/*dia de entrada*/
+//	buffer[9]=buffer[9]+0x030;					/*hora de entrada*/
+//	buffer[10]=buffer[10]+0x030;					/*minutos de entrada*/
 
 	/*placa*/
 	if (rd_eeprom(0xa8,EE_PLACA)!=0)
@@ -1611,7 +1637,7 @@ unsigned char *Armar_Trama_Pto_Paralelo_Expedidor_Mensual(unsigned char *Atribut
 	
 	buffer[18]= ETX;
 	buffer[19]= NULL;
-	*j=19;
+	*longitud_trama_pto_paralelo=19;
 	return buffer;
 }
 unsigned char *Armar_Trama_Monitor(unsigned char *Atributos_Expedidor)
@@ -1652,10 +1678,30 @@ unsigned char *Armar_Trama_Monitor(unsigned char *Atributos_Expedidor)
 			
 		}
 		j=strlen(buffer);
-		buffer[j]=':';
+		buffer[j++]=':';
 		/*fecha de entrada*/
+		/*parte alta del año*/
+		buffer[j++]= (((*(Atributos_Expedidor +  DateTime_year))  & 0xf0) >> 4)    | 0x30;
+		buffer[j++]= ((*(Atributos_Expedidor +   DateTime_year))  & 0x0f)          | 0x30;
+	
+		/* parte alta mes*/
+		buffer[j++]= (((*(Atributos_Expedidor +  DateTime_month))  & 0xf0) >> 4)   | 0x30;
+		buffer[j++]= ((*(Atributos_Expedidor +   DateTime_month))  & 0x0f)         | 0x30;
 		
-		Block_read_clock_ascii(buffer+j+1);			//leo la fecha de entrada
+		/*parte alta dia*/
+		buffer[j++]= (((*(Atributos_Expedidor +  DateTime_day))  & 0xf0) >> 4)     | 0x30;
+		buffer[j++]= ((*(Atributos_Expedidor +   DateTime_day))  & 0x0f)           | 0x30;	
+		
+		/*parte alta horas*/
+		buffer[j++]= (((*(Atributos_Expedidor +  DateTime_hour))  & 0xf0) >> 4)    | 0x30;
+		buffer[j++]= ((*(Atributos_Expedidor +   DateTime_hour))  & 0x0f)          | 0x30;		
+		
+		/*parte alta minutos*/
+		buffer[j++]= (((*(Atributos_Expedidor +  DateTime_minutes))  & 0xf0) >> 4) | 0x30;
+		buffer[j++]= ((*(Atributos_Expedidor +   DateTime_minutes))  & 0x0f)       | 0x30;	
+		buffer[j++]=NULL;
+		
+		//Block_read_clock_ascii(buffer+j+1);			//leo la fecha de entrada
 		j=strlen(buffer);
 	
 		buffer[j]= ':';
@@ -1748,7 +1794,7 @@ unsigned char Send_Pto_Paralelo(unsigned char *Atributos_Expedidor)
 	}
 	else 
 	{
-		Trama_Expedidor=Armar_Trama_Pto_Paralelo_Expedidor(&leng_trama_pto);
+		Trama_Expedidor=Armar_Trama_Pto_Paralelo_Expedidor(Atributos_Expedidor,&leng_trama_pto);
 		Incremente_Ticket();
 	}
 	
@@ -2417,7 +2463,7 @@ g_cEstadoComSeqMF = nos dice en el estado que nos encontramos dentro del seguimi
 unsigned char SecuenciaExpedidorMF( unsigned char EstadoActivo)
 {
 	static unsigned char Buffer_Write_MF[17];
-	static unsigned char Atributos_Expedidor[15];
+	static unsigned char Atributos_Expedidor[20];
 	static unsigned char Secuencia_Expedidor[4];
 	static unsigned char Nombre_Mensual[17];
 	
