@@ -19,7 +19,7 @@ void Cmd_LPR_Salida_wiegand(unsigned char *buffer);
 void Cmd_LPR_Salida(unsigned char *buffer_S1_B0,unsigned char *buffer_S1_B2);
 
 void Cmd_Lpr_Int();
-
+unsigned char Calculo_bcc(unsigned char *buffer, unsigned char leng_trama);
 
 
 #endif	/*_ACCESCAN_H_ */

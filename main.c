@@ -125,9 +125,10 @@ void variable_inicio()
 	
 	T_GRACIA=rd_eeprom(0xa8,EE_TIEMPO_GRACIA);
 	SIN_COBRO=rd_eeprom(0xa8,EE_SIN_COBRO);
-	Debug_Tibbo=rd_eeprom(0xa8,EE_DEBUG);
+	//Debug_Tibbo=rd_eeprom(0xa8,EE_DEBUG);
 	USE_LPR=rd_eeprom(0xa8,EE_USE_LPR);
 	Raspberry = rd_eeprom(0xa8,EE_TIPO_PANTALLA);
+	Debug_Tibbo = 1;
 	
 }
 /*------------------------------------------------------------------------------
@@ -167,7 +168,7 @@ sel_Funcion();																															/*el pulsador funcion es el cmd q d
 
 
 	variable_inicio();																												/*leo y cargo  las variables de inicio de configuracion*/
-while(Secuencia_inicio_expedidor());																				/* procedimiento de inicio de transporte (reset, y grabar eeprom)*/
+//while(Secuencia_inicio_expedidor());																				/* procedimiento de inicio de transporte (reset, y grabar eeprom)*/
 	ValTimeOutCom=TIME_CARD;
 																							
 	while (1) 																																/* Loop Principal								*/	
@@ -181,7 +182,7 @@ while(Secuencia_inicio_expedidor());																				/* procedimiento de inic
 				
 			
 					
-				Estado_Comunicacion_Secuencia_MF=SecuenciaExpedidorMF(Estado_Comunicacion_Secuencia_MF);					//SecuenciaExpedidor();
+			//	Estado_Comunicacion_Secuencia_MF=SecuenciaExpedidorMF(Estado_Comunicacion_Secuencia_MF);					//SecuenciaExpedidor();
 				
 						
 					  																				

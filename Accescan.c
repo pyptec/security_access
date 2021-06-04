@@ -25,6 +25,8 @@ extern unsigned char validar_clk(unsigned char *datos_clock);
 extern void graba_serie(unsigned char *buffer);
 extern unsigned char *Lee_No_Ticket();
 extern char  *strcpy  (char *s1, const char *s2);
+extern void Debug_chr_Tibbo(unsigned char Dat);
+extern void  send_port(unsigned char *buffer_port, unsigned char length_char);
 /*------------------------------------------------------------------------------*/
 			/*variables externas */
 extern unsigned int Timer_tivo;
@@ -33,6 +35,8 @@ extern unsigned char Tipo_Vehiculo;
 extern unsigned char USE_LPR;
 extern unsigned char  Debug_Tibbo;
 /*------------------------------------------------------------------------------*/
+/*definicion funciones*/
+
 	/*bit externos*/
 sbit rx_ip = P0^0;				
 sbit lock = P1^7;						//Relevo 
@@ -107,18 +111,50 @@ void Valida_Trama_Pto(unsigned char *buffer, unsigned char length_trama)
 {
 	
 	 static unsigned char cont;
+		unsigned char bcc=0;
 	 unsigned char buff[11];
+	unsigned buffer_port[4];
 	//USE_LPR=rd_eeprom(0xa8,EE_USE_LPR);
 	/*-------------------------------CMD H reloj para el board y la pantalla lcd------------------------------------------*/
-		if((length_trama==25)&&(*buffer==STX)&&(*(buffer+2)=='H')&&*(buffer+(length_trama-1))==ETX)													/*cmd de Accescan que me envia el reloj actualizado*/
+		if((length_trama==26)&&(*buffer==STX)&&(*(buffer+2)=='H')&&*(buffer+(length_trama-2))==ETX)													/*cmd de Accescan que me envia el reloj actualizado*/
 		{ 
-			if(validar_clk(buffer+3)==0)
+			Debug_txt_Tibbo((unsigned char *) "primario BCC= ");
+			Debug_chr_Tibbo(*(buffer+25));
+			Debug_txt_Tibbo((unsigned char *) "\r\n");
+			bcc=Calculo_bcc(buffer,length_trama-1);
+			Debug_txt_Tibbo((unsigned char *) "calculo BCC= ");
+			Debug_chr_Tibbo(bcc);
+			Debug_txt_Tibbo((unsigned char *) "\r\n");
+			if (bcc == *(buffer+25))
 			{
-			Block_write_clock_ascii(buffer+3);																																								/* se escribe el reloj de hardware*/
+					Debug_txt_Tibbo((unsigned char *) "BCC= ");
+					Debug_chr_Tibbo(bcc);
+					Debug_txt_Tibbo((unsigned char *) "\r\n");
+				if(validar_clk(buffer+3)==0)
+				{
+					Block_write_clock_ascii(buffer+3);																																								/* se escribe el reloj de hardware*/
 		
-			Reloj_Pantalla_Lcd();																																															/* Escribo el reloj en la pantalla lcd*/
+					Reloj_Pantalla_Lcd();																																															/* Escribo el reloj en la pantalla lcd*/
 			
-			}	
+				}	
+					
+						
+			}
+			else
+			{
+				buffer_port[0]=02;
+				buffer_port[1]=05;
+				buffer_port[2]=03;
+				
+				 send_port(buffer_port,3);
+				
+				Debug_txt_Tibbo((unsigned char *) "REENVIAR trama Hora: ");
+				Debug_chr_Tibbo(buffer_port[0]);
+				Debug_chr_Tibbo(buffer_port[1]);
+				Debug_chr_Tibbo(buffer_port[2]);
+				Debug_txt_Tibbo((unsigned char *) "\r\n");
+			}
+			
 			
 		}
 	
@@ -495,6 +531,17 @@ void Cmd_LPR_Salida_wiegand(unsigned char *buffer)
 					
 		
 			Monitor_chr(Buffer_Lpr,j+12);												/*rutina de envio de la trama a monitor*/
+}
+unsigned char Calculo_bcc(unsigned char *buffer, unsigned char leng_trama)
+{
+	unsigned char bcc=0;
+	unsigned char j;
+	
+	for (j=0; j<leng_trama; j++)
+	{
+				bcc=*(buffer+j) ^ bcc;
+	}
+	return bcc;
 }
 /*------------------------------------------------------------------------------
 

@@ -1,4 +1,4 @@
-C51 COMPILER V9.59.0.0   MAIN                                                              05/31/2021 13:02:52 PAGE 1   
+C51 COMPILER V9.59.0.0   MAIN                                                              06/04/2021 16:31:57 PAGE 1   
 
 
 C51 COMPILER V9.59.0.0, COMPILATION OF MODULE MAIN
@@ -62,7 +62,7 @@ line level    source
   52          {
   53   1        ET0=0;                  // enable interrupcion bit 1 del registro IENO
   54   1        
-C51 COMPILER V9.59.0.0   MAIN                                                              05/31/2021 13:02:52 PAGE 2   
+C51 COMPILER V9.59.0.0   MAIN                                                              06/04/2021 16:31:57 PAGE 2   
 
   55   1      }
   56          /*------------------------------------------------------------------------------
@@ -126,7 +126,7 @@ line level    source
  114   1      sel_com=1;                    /*seleccionar el pto serie */
  115   1      lock=0;                       /*barrera off*/ 
  116   1        
-C51 COMPILER V9.59.0.0   MAIN                                                              05/31/2021 13:02:52 PAGE 3   
+C51 COMPILER V9.59.0.0   MAIN                                                              06/04/2021 16:31:57 PAGE 3   
 
  117   1      }
  118          
@@ -139,101 +139,103 @@ line level    source
  125   1        
  126   1        T_GRACIA=rd_eeprom(0xa8,EE_TIEMPO_GRACIA);
  127   1        SIN_COBRO=rd_eeprom(0xa8,EE_SIN_COBRO);
- 128   1        Debug_Tibbo=rd_eeprom(0xa8,EE_DEBUG);
+ 128   1        //Debug_Tibbo=rd_eeprom(0xa8,EE_DEBUG);
  129   1        USE_LPR=rd_eeprom(0xa8,EE_USE_LPR);
  130   1        Raspberry = rd_eeprom(0xa8,EE_TIPO_PANTALLA);
- 131   1        
- 132   1      }
- 133          /*------------------------------------------------------------------------------
- 134          Note that the two function above, _getkey and putchar, replace the library
- 135          functions of the same name.  These functions use the interrupt-driven serial
- 136          I/O routines in SIO.C.
- 137          ------------------------------------------------------------------------------*/
- 138          
+ 131   1        Debug_Tibbo = 1;
+ 132   1        
+ 133   1      }
+ 134          /*------------------------------------------------------------------------------
+ 135          Note that the two function above, _getkey and putchar, replace the library
+ 136          functions of the same name.  These functions use the interrupt-driven serial
+ 137          I/O routines in SIO.C.
+ 138          ------------------------------------------------------------------------------*/
  139          
- 140          void main (void)
- 141          {
- 142   1        
- 143   1        static unsigned char buffer[40];
- 144   1        static unsigned char Estado_Comunicacion_Secuencia_MF=SEQ_INICIO;
- 145   1        unsigned char Length_trama;
- 146   1      
- 147   1        
- 148   1      ini_timer();                                                              /* initialize interrupt timer0 */
- 149   1      on_Timer0_Interrup();                                                     /* habilita el  timer0 */
- 150   1      com_initialize ();                                                        /* initialize pto serie */
- 151   1      com_baudrate ();                                                          /* setup for 9600 baud */
- 152   1      inicia_board();                                                           /*Rutina de las condiciones iniciales del board*/
- 153   1      EA = 1;                                                                   /* Enable Interrupts global*/
- 154   1      
- 155   1      time_bit();                                                               /*solo para pruebas*/
- 156   1      Delay_20us(33);
- 157   1      time_mbit();
- 158   1      //  Debug_txt_Tibbo((unsigned char *) "pqui estoy");  
- 159   1      tx_aux('a');  
- 160   1      
- 161   1      sel_Funcion();                                                              /*el pulsador funcion es el cmd q da la entrada a programacio
+ 140          
+ 141          void main (void)
+ 142          {
+ 143   1        
+ 144   1        static unsigned char buffer[40];
+ 145   1        static unsigned char Estado_Comunicacion_Secuencia_MF=SEQ_INICIO;
+ 146   1        unsigned char Length_trama;
+ 147   1      
+ 148   1        
+ 149   1      ini_timer();                                                              /* initialize interrupt timer0 */
+ 150   1      on_Timer0_Interrup();                                                     /* habilita el  timer0 */
+ 151   1      com_initialize ();                                                        /* initialize pto serie */
+ 152   1      com_baudrate ();                                                          /* setup for 9600 baud */
+ 153   1      inicia_board();                                                           /*Rutina de las condiciones iniciales del board*/
+ 154   1      EA = 1;                                                                   /* Enable Interrupts global*/
+ 155   1      
+ 156   1      time_bit();                                                               /*solo para pruebas*/
+ 157   1      Delay_20us(33);
+ 158   1      time_mbit();
+ 159   1      //  Debug_txt_Tibbo((unsigned char *) "pqui estoy");  
+ 160   1      tx_aux('a');  
+ 161   1      
+ 162   1      sel_Funcion();                                                              /*el pulsador funcion es el cmd q da la entrada a programacio
              -n */
- 162   1        
- 163   1        if (DataIn==0)              
- 164   1        {
- 165   2        menu();                                                                   /*menu de configuracion*/
- 166   2        }
- 167   1      
+ 163   1        
+ 164   1        if (DataIn==0)              
+ 165   1        {
+ 166   2        menu();                                                                   /*menu de configuracion*/
+ 167   2        }
  168   1      
- 169   1        variable_inicio();                                                        /*leo y cargo  las variables de inicio de configuracion*/
- 170   1      while(Secuencia_inicio_expedidor());                                        /* procedimiento de inicio de transporte (reset, y
-             - grabar eeprom)*/
- 171   1        ValTimeOutCom=TIME_CARD;
- 172   1                                                    
- 173   1        while (1)                                                                 /* Loop Principal               */  
- 174   1        {   
- 175   2        
- 176   2              
-C51 COMPILER V9.59.0.0   MAIN                                                              05/31/2021 13:02:52 PAGE 4   
+ 169   1      
+ 170   1        variable_inicio();                                                        /*leo y cargo  las variables de inicio de configuracion*/
+ 171   1      //while(Secuencia_inicio_expedidor());                                        /* procedimiento de inicio de transporte (reset,
+             - y grabar eeprom)*/
+ 172   1        ValTimeOutCom=TIME_CARD;
+ 173   1                                                    
+ 174   1        while (1)                                                                 /* Loop Principal               */  
+ 175   1        {   
+ 176   2        
+C51 COMPILER V9.59.0.0   MAIN                                                              06/04/2021 16:31:57 PAGE 4   
 
- 177   2              if (rx_ip==0)                                                         /*pregunto si llega datos de monitor pto serie emulado*/
- 178   2              {
- 179   3                 Rx_Monitor();
- 180   3              }
- 181   2              
- 182   2            
- 183   2                
- 184   2              Estado_Comunicacion_Secuencia_MF=SecuenciaExpedidorMF(Estado_Comunicacion_Secuencia_MF);          //Secuenc
-             -iaExpedidor();
- 185   2              
- 186   2                  
- 187   2                                                          
- 188   2            
- 189   2              if ((busy == 0) && (pto_paraleo == 0))                              /*comunicacion con el pto paralelo*/
- 190   2              {
- 191   3            
- 192   3              Length_trama=recibe_port(buffer);                                   /*recibe informacion del pto paralelo*/
- 193   3              
- 194   3                  /*solo de prueba*/    
- 195   3              Debug_pto_paralelo(buffer,Length_trama);        
- 196   3                Valida_Trama_Pto(buffer,Length_trama);                                /*valido la informacion recibida */
- 197   3              
- 198   3                  
- 199   3              
- 200   3               
- 201   3              }
- 202   2          msj_lcd_informativo();                                                  /*muestra la informacion de  ID cliente, cod parque, fech
+ 177   2              
+ 178   2              if (rx_ip==0)                                                         /*pregunto si llega datos de monitor pto serie emulado*/
+ 179   2              {
+ 180   3                 Rx_Monitor();
+ 181   3              }
+ 182   2              
+ 183   2            
+ 184   2                
+ 185   2            //  Estado_Comunicacion_Secuencia_MF=SecuenciaExpedidorMF(Estado_Comunicacion_Secuencia_MF);          //Secue
+             -nciaExpedidor();
+ 186   2              
+ 187   2                  
+ 188   2                                                          
+ 189   2            
+ 190   2              if ((busy == 0) && (pto_paraleo == 0))                              /*comunicacion con el pto paralelo*/
+ 191   2              {
+ 192   3            
+ 193   3              Length_trama=recibe_port(buffer);                                   /*recibe informacion del pto paralelo*/
+ 194   3              
+ 195   3                  /*solo de prueba*/    
+ 196   3              Debug_pto_paralelo(buffer,Length_trama);        
+ 197   3                Valida_Trama_Pto(buffer,Length_trama);                                /*valido la informacion recibida */
+ 198   3              
+ 199   3                  
+ 200   3              
+ 201   3               
+ 202   3              }
+ 203   2          msj_lcd_informativo();                                                  /*muestra la informacion de  ID cliente, cod parque, fech
              -a,comparacion*/
- 203   2        
- 204   2      
- 205   2          //}
- 206   2        }
- 207   1      
- 208   1      }
- 209          
- 210          /*------------------------------------------------------------------------------
- 211          ------------------------------------------------------------------------------*/
- 212          
+ 204   2        
+ 205   2      
+ 206   2          //}
+ 207   2        }
+ 208   1      
+ 209   1      }
+*** WARNING C280 IN LINE 145 OF main.c: 'Estado_Comunicacion_Secuencia_MF': unreferenced local variable
+ 210          
+ 211          /*------------------------------------------------------------------------------
+ 212          ------------------------------------------------------------------------------*/
+ 213          
 
 
 MODULE INFORMATION:   STATIC OVERLAYABLE
-   CODE SIZE        =    434    ----
+   CODE SIZE        =    407    ----
    CONSTANT SIZE    =   ----    ----
    XDATA SIZE       =    108      10
    PDATA SIZE       =   ----    ----
@@ -243,4 +245,4 @@ MODULE INFORMATION:   STATIC OVERLAYABLE
 END OF MODULE INFORMATION.
 
 
-C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)
+C51 COMPILATION COMPLETE.  1 WARNING(S),  0 ERROR(S)
