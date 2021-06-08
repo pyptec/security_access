@@ -42,6 +42,7 @@ sbit rx_ip = P0^0;
 sbit lock = P1^7;						//Relevo 
 sbit Atascado_GP0_PIN_3 = P0^3;				//Rele de on/off del verificador o transporte
 sbit led_err_imp = P0^2;			//Error 
+sbit ready = P3^2;					//Salida. solicitud envio Datos			
 
 #define STX											02 
 #define ETX											03 
@@ -112,8 +113,8 @@ void Valida_Trama_Pto(unsigned char *buffer, unsigned char length_trama)
 	
 	 static unsigned char cont;
 		unsigned char bcc=0;
-	 unsigned char buff[11];
-	unsigned buffer_port[4];
+		unsigned char buff[11];
+		unsigned char buffer_port[4];
 	//USE_LPR=rd_eeprom(0xa8,EE_USE_LPR);
 	/*-------------------------------CMD H reloj para el board y la pantalla lcd------------------------------------------*/
 		if((length_trama==26)&&(*buffer==STX)&&(*(buffer+2)=='H')&&*(buffer+(length_trama-2))==ETX)													/*cmd de Accescan que me envia el reloj actualizado*/
@@ -127,9 +128,7 @@ void Valida_Trama_Pto(unsigned char *buffer, unsigned char length_trama)
 			Debug_txt_Tibbo((unsigned char *) "\r\n");
 			if (bcc == *(buffer+25))
 			{
-					Debug_txt_Tibbo((unsigned char *) "BCC= ");
-					Debug_chr_Tibbo(bcc);
-					Debug_txt_Tibbo((unsigned char *) "\r\n");
+					
 				if(validar_clk(buffer+3)==0)
 				{
 					Block_write_clock_ascii(buffer+3);																																								/* se escribe el reloj de hardware*/
@@ -142,11 +141,12 @@ void Valida_Trama_Pto(unsigned char *buffer, unsigned char length_trama)
 			}
 			else
 			{
+				
 				buffer_port[0]=02;
 				buffer_port[1]=05;
 				buffer_port[2]=03;
-				
-				 send_port(buffer_port,3);
+				buffer_port[3]=0;
+				 send_port(buffer_port,4);
 				
 				Debug_txt_Tibbo((unsigned char *) "REENVIAR trama Hora: ");
 				Debug_chr_Tibbo(buffer_port[0]);

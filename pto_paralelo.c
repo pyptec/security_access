@@ -8,7 +8,7 @@ extern void off_Timer0_Interrup(void);
 extern void on_Timer0_Interrup(void);
 extern void          _nop_     (void);
 extern void Block_read_Clock(unsigned char *datos_clock);
-extern char lee_clk (unsigned char dir_clk);
+extern unsigned char lee_clk (unsigned char dir_clk);
 extern int sprintf  (char *, const char *, ...);
 extern void DebugBufferMF(unsigned char *str,unsigned char num_char,char io);
 extern void Debug_txt_Tibbo(unsigned char * str);
@@ -239,16 +239,20 @@ msj informativo con el pulsador funcion
 ------------------------------------------------------------------------------*/
 void load_and_send_info_reloj()
 {
-	 unsigned char buffer_info[11];
+	unsigned  char buffer_info[11];
 	
 		buffer_info[0]=STX; 									/*STX*/
 		
 		buffer_info[1]='i';										/*se envia el cmd*/
 		
 	
+	
+	
+	
 		Block_read_Clock(buffer_info+2);			/*año, mes,dia, hora, minutos, segundos*/
 	
-		buffer_info[8]=lee_clk(RDIA_SEMANA);				//Dia semana
+		
+		buffer_info[8]=lee_clk(0x8b);				//Dia semana
 		buffer_info[9]=ETX; 									//ETX
 		buffer_info[10]=0; 
 		Debug_txt_Tibbo((unsigned char *) "Envia trama pto_paralelo= ");

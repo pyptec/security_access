@@ -90,7 +90,7 @@ void eb_clk(char dir_clk) {
 	}
 }
 //*********************************************************************************
-char lee_clk (unsigned char dir_clk) {            
+unsigned char lee_clk (unsigned char dir_clk) {            
 int	nbits;
 	rst=1;
 	Delay_20us(3);
@@ -599,22 +599,22 @@ void  hora_entrada_vehiculo(unsigned char *Atributos_Expedidor)
 void Block_read_Clock(unsigned char *datos_clock)
 {
 	/*año*/ 
-	*datos_clock = (char)lee_clk(RANO);			
+	*datos_clock = lee_clk(RANO);			
 	 datos_clock++;
 	/*mes*/
-	*datos_clock = (char)lee_clk(RMES);			
+	*datos_clock = lee_clk(RMES);			
 	 datos_clock++;
 	/*Dia*/
-	*datos_clock = (char)lee_clk(RDIA);			
+	*datos_clock = lee_clk(RDIA);			
 	 datos_clock++;
 	/*hora*/	
-	*datos_clock = (char)lee_clk(RHORA);			
+	*datos_clock = lee_clk(RHORA);			
 	 datos_clock++;
 	/*minutos*/	
-	*datos_clock = (char)lee_clk(RMIN);			
+	*datos_clock = lee_clk(RMIN);			
 	 datos_clock++;
 	/*segundos*/	
-	*datos_clock = (char)lee_clk(RSEG);
+	*datos_clock = lee_clk(RSEG);
 	datos_clock++;
 	*datos_clock=00;
 		

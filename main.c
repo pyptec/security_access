@@ -156,7 +156,7 @@ EA = 1;                         																					/* Enable Interrupts global
 time_bit();																																/*solo para pruebas*/
 Delay_20us(33);
 time_mbit();
-//	Debug_txt_Tibbo((unsigned char *) "pqui estoy");	
+
 tx_aux('a');	
 
 sel_Funcion();																															/*el pulsador funcion es el cmd q da la entrada a programacion */
@@ -168,7 +168,7 @@ sel_Funcion();																															/*el pulsador funcion es el cmd q d
 
 
 	variable_inicio();																												/*leo y cargo  las variables de inicio de configuracion*/
-//while(Secuencia_inicio_expedidor());																				/* procedimiento de inicio de transporte (reset, y grabar eeprom)*/
+while(Secuencia_inicio_expedidor());																				/* procedimiento de inicio de transporte (reset, y grabar eeprom)*/
 	ValTimeOutCom=TIME_CARD;
 																							
 	while (1) 																																/* Loop Principal								*/	
@@ -182,7 +182,7 @@ sel_Funcion();																															/*el pulsador funcion es el cmd q d
 				
 			
 					
-			//	Estado_Comunicacion_Secuencia_MF=SecuenciaExpedidorMF(Estado_Comunicacion_Secuencia_MF);					//SecuenciaExpedidor();
+				Estado_Comunicacion_Secuencia_MF=SecuenciaExpedidorMF(Estado_Comunicacion_Secuencia_MF);					//SecuenciaExpedidor();
 				
 						
 					  																				
@@ -203,10 +203,10 @@ sel_Funcion();																															/*el pulsador funcion es el cmd q d
 		msj_lcd_informativo();																									/*muestra la informacion de  ID cliente, cod parque, fecha,comparacion*/
 	
 
-		//}
-	}
-
+		}
 }
+
+
 
 /*------------------------------------------------------------------------------
 ------------------------------------------------------------------------------*/

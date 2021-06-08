@@ -15,7 +15,7 @@ Marzo 07 de 2019
 /*funcion prototipo*/
 void p_ck (void);
 void eb_clk(char dir_clk);
-char lee_clk (unsigned char dir_clk);
+unsigned char lee_clk (unsigned char dir_clk);
 void wr_clk (unsigned char dir_clk, unsigned char byte);
 unsigned char two_one (unsigned char byte_h,unsigned char byte_l);
 void Block_write_clock_ascii(unsigned char *datos_clock);

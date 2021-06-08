@@ -29,7 +29,7 @@ void Block_read_clock_ascii(unsigned char *datos_clock);
 void ByteHex_Decimal(unsigned char *buffer,unsigned char valorhex);
 void Two_ByteHex_Decimal(unsigned char *buffer,unsigned char id_h,unsigned char id_l);
 extern char check_fechaOut(char *buffer);
-extern char lee_clk (unsigned char dir_clk);
+extern unsigned char lee_clk (unsigned char dir_clk);
 extern unsigned char bcd_hex (unsigned char l_data);
 extern void hex_ascii(unsigned char * datos,unsigned char * fecha_asii);
 extern void  hora_entrada_vehiculo(unsigned char *Atributos_Expedidor);

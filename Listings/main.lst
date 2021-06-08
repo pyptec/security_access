@@ -1,4 +1,4 @@
-C51 COMPILER V9.59.0.0   MAIN                                                              06/04/2021 16:31:57 PAGE 1   
+C51 COMPILER V9.59.0.0   MAIN                                                              06/08/2021 15:03:36 PAGE 1   
 
 
 C51 COMPILER V9.59.0.0, COMPILATION OF MODULE MAIN
@@ -62,7 +62,7 @@ line level    source
   52          {
   53   1        ET0=0;                  // enable interrupcion bit 1 del registro IENO
   54   1        
-C51 COMPILER V9.59.0.0   MAIN                                                              06/04/2021 16:31:57 PAGE 2   
+C51 COMPILER V9.59.0.0   MAIN                                                              06/08/2021 15:03:36 PAGE 2   
 
   55   1      }
   56          /*------------------------------------------------------------------------------
@@ -126,7 +126,7 @@ line level    source
  114   1      sel_com=1;                    /*seleccionar el pto serie */
  115   1      lock=0;                       /*barrera off*/ 
  116   1        
-C51 COMPILER V9.59.0.0   MAIN                                                              06/04/2021 16:31:57 PAGE 3   
+C51 COMPILER V9.59.0.0   MAIN                                                              06/08/2021 15:03:36 PAGE 3   
 
  117   1      }
  118          
@@ -170,7 +170,7 @@ line level    source
  156   1      time_bit();                                                               /*solo para pruebas*/
  157   1      Delay_20us(33);
  158   1      time_mbit();
- 159   1      //  Debug_txt_Tibbo((unsigned char *) "pqui estoy");  
+ 159   1      
  160   1      tx_aux('a');  
  161   1      
  162   1      sel_Funcion();                                                              /*el pulsador funcion es el cmd q da la entrada a programacio
@@ -183,14 +183,14 @@ line level    source
  168   1      
  169   1      
  170   1        variable_inicio();                                                        /*leo y cargo  las variables de inicio de configuracion*/
- 171   1      //while(Secuencia_inicio_expedidor());                                        /* procedimiento de inicio de transporte (reset,
-             - y grabar eeprom)*/
+ 171   1      while(Secuencia_inicio_expedidor());                                        /* procedimiento de inicio de transporte (reset, y
+             - grabar eeprom)*/
  172   1        ValTimeOutCom=TIME_CARD;
  173   1                                                    
  174   1        while (1)                                                                 /* Loop Principal               */  
  175   1        {   
  176   2        
-C51 COMPILER V9.59.0.0   MAIN                                                              06/04/2021 16:31:57 PAGE 4   
+C51 COMPILER V9.59.0.0   MAIN                                                              06/08/2021 15:03:36 PAGE 4   
 
  177   2              
  178   2              if (rx_ip==0)                                                         /*pregunto si llega datos de monitor pto serie emulado*/
@@ -200,8 +200,8 @@ line level    source
  182   2              
  183   2            
  184   2                
- 185   2            //  Estado_Comunicacion_Secuencia_MF=SecuenciaExpedidorMF(Estado_Comunicacion_Secuencia_MF);          //Secue
-             -nciaExpedidor();
+ 185   2              Estado_Comunicacion_Secuencia_MF=SecuenciaExpedidorMF(Estado_Comunicacion_Secuencia_MF);          //Secuenc
+             -iaExpedidor();
  186   2              
  187   2                  
  188   2                                                          
@@ -223,11 +223,10 @@ line level    source
              -a,comparacion*/
  204   2        
  205   2      
- 206   2          //}
- 207   2        }
- 208   1      
- 209   1      }
-*** WARNING C280 IN LINE 145 OF main.c: 'Estado_Comunicacion_Secuencia_MF': unreferenced local variable
+ 206   2          }
+ 207   1      }
+ 208          
+ 209          
  210          
  211          /*------------------------------------------------------------------------------
  212          ------------------------------------------------------------------------------*/
@@ -235,7 +234,7 @@ line level    source
 
 
 MODULE INFORMATION:   STATIC OVERLAYABLE
-   CODE SIZE        =    407    ----
+   CODE SIZE        =    426    ----
    CONSTANT SIZE    =   ----    ----
    XDATA SIZE       =    108      10
    PDATA SIZE       =   ----    ----
@@ -245,4 +244,4 @@ MODULE INFORMATION:   STATIC OVERLAYABLE
 END OF MODULE INFORMATION.
 
 
-C51 COMPILATION COMPLETE.  1 WARNING(S),  0 ERROR(S)
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

@@ -1,4 +1,4 @@
-C51 COMPILER V9.59.0.0   PTO_PARALELO                                                      06/04/2021 16:31:58 PAGE 1   
+C51 COMPILER V9.59.0.0   PTO_PARALELO                                                      06/08/2021 15:03:37 PAGE 1   
 
 
 C51 COMPILER V9.59.0.0, COMPILATION OF MODULE PTO_PARALELO
@@ -18,7 +18,7 @@ line level    source
    8          extern void on_Timer0_Interrup(void);
    9          extern void          _nop_     (void);
   10          extern void Block_read_Clock(unsigned char *datos_clock);
-  11          extern char lee_clk (unsigned char dir_clk);
+  11          extern unsigned char lee_clk (unsigned char dir_clk);
   12          extern int sprintf  (char *, const char *, ...);
   13          extern void DebugBufferMF(unsigned char *str,unsigned char num_char,char io);
   14          extern void Debug_txt_Tibbo(unsigned char * str);
@@ -62,7 +62,7 @@ line level    source
   52          buffer_port= apuntador donde se almacena el dato recibido
   53          busy=0    significa que el principla me transmite una cadena de datos
   54          Ready=0   significa que estoy listo para recibir los datos
-C51 COMPILER V9.59.0.0   PTO_PARALELO                                                      06/04/2021 16:31:58 PAGE 2   
+C51 COMPILER V9.59.0.0   PTO_PARALELO                                                      06/08/2021 15:03:37 PAGE 2   
 
   55          time_out= es el tiempo de espera que le damos al ciclo de reloj en alto si se pasa el tiempo se sale por f
              -in de la transmicion 
@@ -126,7 +126,7 @@ line level    source
  113   2          ready=1;
  114   2          rx_in_data=1;
  115   2        }
-C51 COMPILER V9.59.0.0   PTO_PARALELO                                                      06/04/2021 16:31:58 PAGE 3   
+C51 COMPILER V9.59.0.0   PTO_PARALELO                                                      06/08/2021 15:03:37 PAGE 3   
 
  116   1        on_Timer0_Interrup();
  117   1           
@@ -190,7 +190,7 @@ line level    source
  175   1      }
  176          
  177          /*-------------------------------------------------------------------------------------------
-C51 COMPILER V9.59.0.0   PTO_PARALELO                                                      06/04/2021 16:31:58 PAGE 4   
+C51 COMPILER V9.59.0.0   PTO_PARALELO                                                      06/08/2021 15:03:37 PAGE 4   
 
  178          Reloj del pto paralelo
  179          -------------------------------------------------------------------------------------------*/
@@ -254,71 +254,75 @@ line level    source
  237          Funcion q carga el reloj y lo envia por el pto paralelo
  238          msj informativo con el pulsador funcion 
  239          ------------------------------------------------------------------------------*/
-C51 COMPILER V9.59.0.0   PTO_PARALELO                                                      06/04/2021 16:31:58 PAGE 5   
+C51 COMPILER V9.59.0.0   PTO_PARALELO                                                      06/08/2021 15:03:37 PAGE 5   
 
  240          void load_and_send_info_reloj()
  241          {
- 242   1         unsigned char buffer_info[11];
+ 242   1        unsigned  char buffer_info[11];
  243   1        
  244   1          buffer_info[0]=STX;                   /*STX*/
  245   1          
  246   1          buffer_info[1]='i';                   /*se envia el cmd*/
  247   1          
  248   1        
- 249   1          Block_read_Clock(buffer_info+2);      /*año, mes,dia, hora, minutos, segundos*/
+ 249   1        
  250   1        
- 251   1          buffer_info[8]=lee_clk(RDIA_SEMANA);        //Dia semana
- 252   1          buffer_info[9]=ETX;                   //ETX
- 253   1          buffer_info[10]=0; 
- 254   1          Debug_txt_Tibbo((unsigned char *) "Envia trama pto_paralelo= ");
- 255   1          DebugBufferMF(buffer_info,10,2);  
- 256   1          Debug_Dividir_texto();
- 257   1          send_port(buffer_info,10);
- 258   1      }
- 259          
- 260          /*------------------------------------------------------------------------------
- 261          procedimiento que transmite por el pto paralelo ID_cliente,COD_park
- 262          con el pulsador funcion
- 263          ------------------------------------------------------------------------------*/ 
- 264          void load_and_send_id_cod()
- 265          {
- 266   1        
- 267   1      unsigned char buffer_info[11];
- 268   1      unsigned char buf[4];
- 269   1      unsigned char i;
- 270   1      unsigned int ID_CLIENTE;
- 271   1      unsigned int COD_PARK;      
- 272   1        
- 273   1          ID_CLIENTE=rd_eeprom(0xa8,EE_ID_CLIENTE); 
- 274   1          //Debug_chr_Tibbo(ID_CLIENTE);
- 275   1          COD_PARK=rd_eeprom(0xa8,EE_ID_PARK);
- 276   1          //Debug_chr_Tibbo(COD_PARK);
- 277   1          buffer_info[0]=STX;                       //STX
- 278   1          buffer_info[1]='D';                       // nombre del comando de id_cliente, cod_park
- 279   1          buffer_info[2]=0; 
- 280   1          
- 281   1              sprintf(buf,"%d",ID_CLIENTE);             /*ID_CLIENTE lo paso a strim */
- 282   1              strcat(buffer_info,buf);
- 283   1            
- 284   1            
- 285   1           strcat(buffer_info,";\0");
- 286   1          
+ 251   1        
+ 252   1          Block_read_Clock(buffer_info+2);      /*año, mes,dia, hora, minutos, segundos*/
+ 253   1        
+ 254   1          
+ 255   1          buffer_info[8]=lee_clk(0x8b);       //Dia semana
+ 256   1          buffer_info[9]=ETX;                   //ETX
+ 257   1          buffer_info[10]=0; 
+ 258   1          Debug_txt_Tibbo((unsigned char *) "Envia trama pto_paralelo= ");
+ 259   1          DebugBufferMF(buffer_info,10,2);  
+ 260   1          Debug_Dividir_texto();
+ 261   1          send_port(buffer_info,10);
+ 262   1      }
+ 263          
+ 264          /*------------------------------------------------------------------------------
+ 265          procedimiento que transmite por el pto paralelo ID_cliente,COD_park
+ 266          con el pulsador funcion
+ 267          ------------------------------------------------------------------------------*/ 
+ 268          void load_and_send_id_cod()
+ 269          {
+ 270   1        
+ 271   1      unsigned char buffer_info[11];
+ 272   1      unsigned char buf[4];
+ 273   1      unsigned char i;
+ 274   1      unsigned int ID_CLIENTE;
+ 275   1      unsigned int COD_PARK;      
+ 276   1        
+ 277   1          ID_CLIENTE=rd_eeprom(0xa8,EE_ID_CLIENTE); 
+ 278   1          //Debug_chr_Tibbo(ID_CLIENTE);
+ 279   1          COD_PARK=rd_eeprom(0xa8,EE_ID_PARK);
+ 280   1          //Debug_chr_Tibbo(COD_PARK);
+ 281   1          buffer_info[0]=STX;                       //STX
+ 282   1          buffer_info[1]='D';                       // nombre del comando de id_cliente, cod_park
+ 283   1          buffer_info[2]=0; 
+ 284   1          
+ 285   1              sprintf(buf,"%d",ID_CLIENTE);             /*ID_CLIENTE lo paso a strim */
+ 286   1              strcat(buffer_info,buf);
  287   1            
- 288   1           sprintf(buf,"%d",COD_PARK);                /*cod_park lo paso a strim*/
- 289   1           strcat(buffer_info,buf);
- 290   1            
- 291   1            strcat(buffer_info,";\0");
- 292   1            i=strlen(buffer_info);
- 293   1            buffer_info[i++]=ETX;                     //ETX
- 294   1            buffer_info[i++]=0;
- 295   1            i--;
- 296   1            Debug_txt_Tibbo((unsigned char *) "Envia trama pto_paralelo= ");
- 297   1            DebugBufferMF(buffer_info,i,2); 
- 298   1            Debug_Dividir_texto();
- 299   1            send_port(buffer_info,i);                 /*se transmite informacion pt0 paralelo*/
- 300   1      }
+ 288   1            
+ 289   1           strcat(buffer_info,";\0");
+ 290   1          
+ 291   1            
+ 292   1           sprintf(buf,"%d",COD_PARK);                /*cod_park lo paso a strim*/
+ 293   1           strcat(buffer_info,buf);
+ 294   1            
+ 295   1            strcat(buffer_info,";\0");
+ 296   1            i=strlen(buffer_info);
+ 297   1            buffer_info[i++]=ETX;                     //ETX
+ 298   1            buffer_info[i++]=0;
+ 299   1            i--;
+ 300   1            Debug_txt_Tibbo((unsigned char *) "Envia trama pto_paralelo= ");
+ 301   1            DebugBufferMF(buffer_info,i,2); 
+C51 COMPILER V9.59.0.0   PTO_PARALELO                                                      06/08/2021 15:03:37 PAGE 6   
 
-C51 COMPILER V9.59.0.0   PTO_PARALELO                                                      06/04/2021 16:31:58 PAGE 6   
+ 302   1            Debug_Dividir_texto();
+ 303   1            send_port(buffer_info,i);                 /*se transmite informacion pt0 paralelo*/
+ 304   1      }
 
 
 MODULE INFORMATION:   STATIC OVERLAYABLE

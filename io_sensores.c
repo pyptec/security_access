@@ -4,6 +4,7 @@
 
 /*funciones externas*/
 extern void Debug_txt_Tibbo(unsigned char * str);
+extern void Debug_chr_Tibbo(unsigned char Dat);
 extern void load_and_send_info_reloj();
 extern void load_and_send_id_cod();
 extern void send_portERR(unsigned char cod_err);
@@ -246,26 +247,35 @@ unsigned char  ValidaSensoresPaso(void)
 	
 /*------------------------------------------------------------------------------
 funcion de msj en lcd de informacion
-toggle=0		envia por el pto paralelo STX, cmd (i), año, mes, dia, hora, minutos, seg, dia de la semana, ETX
+toggle=0						envia por el pto paralelo STX, cmd (i), año, mes, dia, hora, minutos, seg, dia de la semana, ETX
 toggle=1		
-toggle=2		envia ID y COD_PARK   por el pto paralelo STX, cmd (D), ID_CLIENTE, COD_CLIENTE, ETX  
+toggle=2						envia ID y COD_PARK   por el pto paralelo STX, cmd (D), ID_CLIENTE, COD_CLIENTE, ETX  
+sel_funcion = 			es el pulsador de funcion 
+DataIn = 						regresa el dato de la entrada
+ValidaSensor_cero = El tiempo del pulsador presionado
 ------------------------------------------------------------------------------*/
  void msj_lcd_informativo()
  {
-	static unsigned char contador=0;
+ static unsigned char contador = 0;
  unsigned char info=0;
- static unsigned char toggle=0;
+ static unsigned char toggle = 0;
 	 contador++;
 	 if (contador >= 50)
 	 {
+		 
 			contador = 0;
   		sel_Funcion();
 		if ((DataIn==0)&&(info==0))
 		{
 			if (ValidaSensor_cero()==0)
 			{
+				//toggle=0;
+				Debug_txt_Tibbo((unsigned char *) "msj_lcd_informativo reloj");
+				Debug_chr_Tibbo(info);
+				Debug_chr_Tibbo(toggle);
  		   if ((toggle==0)&&(info==0))
 			{
+				
 			 if (busy==1)
 				{
 					info=1;
@@ -279,9 +289,10 @@ toggle=2		envia ID y COD_PARK   por el pto paralelo STX, cmd (D), ID_CLIENTE, CO
 			}
 			else if((toggle==1)&&(info==0))
 				{
+					Debug_txt_Tibbo((unsigned char *) "msj_lcd_informativo ID");
 					if (busy==1)
 					{
-					info=1;
+					info=0;
 					load_and_send_id_cod();	
 					toggle=0;	
 					}
