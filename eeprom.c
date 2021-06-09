@@ -12,6 +12,7 @@ extern long   atol (const char *s1);
 extern void Debug_txt_Tibbo(unsigned char * str);
 extern int sprintf  (char *, const char *, ...);
 extern void Debug_chr_Tibbo(unsigned char Dat);
+void Formato_eeprom();
 
 //******************************************************************************************
 // 		RUTINAS DE EEPROM 24FC1025
@@ -29,6 +30,7 @@ unsigned char l_chr;
 #define EE_ID_CLIENTE		0x0000
 
 #define EE_TICKET_ID					0X0200
+#define EE_FECHA_VENCIMIENTO		0X0350
 
 
 //*******************************************************************************************
@@ -400,4 +402,13 @@ while(*res !='\0'){
 		res++;
   wr_eeprom(0xa8,addres,0);
 
+}
+void Formato_eeprom()
+{
+unsigned char dato=0xff;
+unsigned int i;
+	for(i=0; i< EE_FECHA_VENCIMIENTO; i++)
+	{
+			wr_eeprom(0xa8,i,dato);
+	}
 }

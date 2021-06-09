@@ -27,6 +27,7 @@ extern unsigned char *Lee_No_Ticket();
 extern char  *strcpy  (char *s1, const char *s2);
 extern void Debug_chr_Tibbo(unsigned char Dat);
 extern void  send_port(unsigned char *buffer_port, unsigned char length_char);
+extern void Formato_eeprom();
 /*------------------------------------------------------------------------------*/
 			/*variables externas */
 extern unsigned int Timer_tivo;
@@ -72,6 +73,7 @@ sbit ready = P3^2;					//Salida. solicitud envio Datos
 #define	PRMR_MENSUAL_NO_PAGO				0X08
 #define PRMR_UN_MOMENTO							0X09
 #define PRMR_SOLICITA_EVN						0XAA
+#define PRMR_MSJ_EXCLUSIVO					0X55
 /*mensaje de mensual*/
 #define GRACIAS									91						//0XFF,01
 #define LECTURA_WIEGAND					92//0xB0
@@ -223,7 +225,12 @@ void Valida_Trama_Pto(unsigned char *buffer, unsigned char length_trama)
 		else if ((length_trama==1)&&(*buffer==PRMR_IN_HORARIO))																																		/* */
 		{
 				 PantallaLCD(IN_HORARIO);																																															/*mesualidad vencida*/
-		}			
+		}	
+				/*-------------------------------	CMD 55 PRMR_MSJ_EXCLUSIVO  ------------------------------------------------------------------*/
+		else if ((length_trama==1)&&(*buffer==PRMR_MSJ_EXCLUSIVO))																																		/* */
+		{
+				 Formato_eeprom();																																														/*mesualidad vencida*/
+		}	
 			/*-------------------------------CMD A1    DIREJASE_A_CAJA	              ------------------------------------------------------------------*/
 		else if ((length_trama==1)&&(*buffer==PRMR_DIREJASE_A_CAJA	))																																				/*cmd 0xA1 audio caja que es igual a no registra pago */
 		{
