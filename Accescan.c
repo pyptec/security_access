@@ -227,7 +227,7 @@ void Valida_Trama_Pto(unsigned char *buffer, unsigned char length_trama)
 				 PantallaLCD(IN_HORARIO);																																															/*mesualidad vencida*/
 		}	
 				/*-------------------------------	CMD 55 PRMR_MSJ_EXCLUSIVO  ------------------------------------------------------------------*/
-		else if ((length_trama==1)&&(*buffer==PRMR_MSJ_EXCLUSIVO))																																		/* */
+		else if ((length_trama==3)&&(*(buffer+1)==PRMR_MSJ_EXCLUSIVO)&&*(buffer+(length_trama-1))==ETX)																																				/* */
 		{
 				 Formato_eeprom();																																														/*mesualidad vencida*/
 		}	

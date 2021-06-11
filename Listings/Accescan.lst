@@ -1,4 +1,4 @@
-C51 COMPILER V9.59.0.0   ACCESCAN                                                          06/11/2021 11:57:43 PAGE 1   
+C51 COMPILER V9.59.0.0   ACCESCAN                                                          06/11/2021 12:08:30 PAGE 1   
 
 
 C51 COMPILER V9.59.0.0, COMPILATION OF MODULE ACCESCAN
@@ -62,7 +62,7 @@ line level    source
   51          
   52          
   53          #define PRMR_BIENVENIDO             0X02    //FE
-C51 COMPILER V9.59.0.0   ACCESCAN                                                          06/11/2021 11:57:43 PAGE 2   
+C51 COMPILER V9.59.0.0   ACCESCAN                                                          06/11/2021 12:08:30 PAGE 2   
 
   54          #define PRMR_LOTE_FULL              0X05
   55          #define PRMR_SIN_PAGO               0XE7
@@ -126,7 +126,7 @@ line level    source
  112          ------------------------------------------------------------------------------*/
  113          void Valida_Trama_Pto(unsigned char *buffer, unsigned char length_trama)
  114          {
-C51 COMPILER V9.59.0.0   ACCESCAN                                                          06/11/2021 11:57:43 PAGE 3   
+C51 COMPILER V9.59.0.0   ACCESCAN                                                          06/11/2021 12:08:30 PAGE 3   
 
  115   1        
  116   1         static unsigned char cont;
@@ -190,7 +190,7 @@ line level    source
  167   2          }   
  168   1            /*-------------------------------CMD B2 PRMR_NO_IN_PARK   ---------------------------------------------
              ---------------------*/
-C51 COMPILER V9.59.0.0   ACCESCAN                                                          06/11/2021 11:57:43 PAGE 4   
+C51 COMPILER V9.59.0.0   ACCESCAN                                                          06/11/2021 12:08:30 PAGE 4   
 
  169   1          else if ((*buffer==PRMR_NO_IN_PARK) )                                                                                 /*ok MSJ MENSUAL NO EN PAR
              -QUEADERO  */
@@ -254,7 +254,7 @@ line level    source
  217   3              Debug_Tibbo=1;
  218   3              Debug_txt_Tibbo((unsigned char *) "LIVE");
  219   3              Debug_Tibbo=0;
-C51 COMPILER V9.59.0.0   ACCESCAN                                                          06/11/2021 11:57:43 PAGE 5   
+C51 COMPILER V9.59.0.0   ACCESCAN                                                          06/11/2021 12:08:30 PAGE 5   
 
  220   3            }
  221   2            
@@ -268,7 +268,8 @@ line level    source
  228   2          } 
  229   1              /*------------------------------- CMD 55 PRMR_MSJ_EXCLUSIVO  -----------------------------------------
              --------------------------*/
- 230   1          else if ((length_trama==1)&&(*buffer==PRMR_MSJ_EXCLUSIVO))                                                                    /* */
+ 230   1          else if ((length_trama==3)&&(*(buffer+1)==PRMR_MSJ_EXCLUSIVO)&&*(buffer+(length_trama-1))==ETX)                 
+             -                                                      /* */
  231   1          {
  232   2               Formato_eeprom();                                                                                            /*mesualidad vencida*/
  233   2          } 
@@ -317,9 +318,9 @@ line level    source
              -udio caja que es igual a no registra pago */
  265   1          {
  266   2               PantallaLCD(UN_MOMENTO );
- 267   2          }     
-C51 COMPILER V9.59.0.0   ACCESCAN                                                          06/11/2021 11:57:43 PAGE 6   
+C51 COMPILER V9.59.0.0   ACCESCAN                                                          06/11/2021 12:08:30 PAGE 6   
 
+ 267   2          }     
  268   1        
  269   1          /*-------------------------------CMD 'V'=PRMR_GRACIAS  msj Gracias y nombre del mensual-----------------
              -------------------------*/
@@ -381,9 +382,9 @@ line level    source
  313   2              {
  314   3                 /*-------------------------------mensaje en la pantalla---------------------------------------------
              -------*/
- 315   3                      /*modificacion 26/03/2021*/                                             
-C51 COMPILER V9.59.0.0   ACCESCAN                                                          06/11/2021 11:57:43 PAGE 7   
+C51 COMPILER V9.59.0.0   ACCESCAN                                                          06/11/2021 12:08:30 PAGE 7   
 
+ 315   3                      /*modificacion 26/03/2021*/                                             
  316   3                    //if (ValidaSensoresPaso()!= 0xff)
  317   3                    //{               
  318   3                    //  PantallaLCD(ERROR_LOOP);
@@ -445,9 +446,9 @@ line level    source
  369          {
  370             unsigned char buff[11];
  371            /*-------------------------------CMD H reloj para el board y la pantalla lcd-----------------------------
-             --------------*/
-C51 COMPILER V9.59.0.0   ACCESCAN                                                          06/11/2021 11:57:43 PAGE 8   
+C51 COMPILER V9.59.0.0   ACCESCAN                                                          06/11/2021 12:08:30 PAGE 8   
 
+             --------------*/
  372            //  if((length_trama==25)&&(*buffer==STX)&&(*(buffer+2)=='H')&&*(buffer+(length_trama-1))==ETX)                     
              -    /*cmd de Accescan que me envia el reloj actualizado*/
  373            //  { 
@@ -509,9 +510,9 @@ line level    source
  420          //    {
  421           //     PantallaLCD(BIENVENIDO);
  422            //  }
- 423            //  else if ((length_trama==1)&&(*buffer==0xA1))                                                                        /*cmd 0xA1 audio caja 
-C51 COMPILER V9.59.0.0   ACCESCAN                                                          06/11/2021 11:57:43 PAGE 9   
+C51 COMPILER V9.59.0.0   ACCESCAN                                                          06/11/2021 12:08:30 PAGE 9   
 
+ 423            //  else if ((length_trama==1)&&(*buffer==0xA1))                                                                        /*cmd 0xA1 audio caja 
              -que es igual a no registra pago */
  424            //  {
  425            //       PantallaLCD(SIN_PAGO);
@@ -573,9 +574,9 @@ line level    source
  468          ------------------------------------------------------------------------------*/
  469          /*
  470          void Valida_Trama_Monitor(unsigned char *buffer, unsigned char length_trama)
- 471          {   
-C51 COMPILER V9.59.0.0   ACCESCAN                                                          06/11/2021 11:57:43 PAGE 10  
+C51 COMPILER V9.59.0.0   ACCESCAN                                                          06/11/2021 12:08:30 PAGE 10  
 
+ 471          {   
  472            length_trama=1;
  473              if  ((*(buffer+2)==ETX)&&(*(buffer+1)=='P'))                                                                            /* APERTURA DE BARRETA
              -*/ 
@@ -637,9 +638,9 @@ line level    source
  529   2                buffer++;
  530   2              
  531   2            }
- 532   1            Buffer_Lpr[j++]=':';                                /*separador del tab  o tarjeta MF*/
-C51 COMPILER V9.59.0.0   ACCESCAN                                                          06/11/2021 11:57:43 PAGE 11  
+C51 COMPILER V9.59.0.0   ACCESCAN                                                          06/11/2021 12:08:30 PAGE 11  
 
+ 532   1            Buffer_Lpr[j++]=':';                                /*separador del tab  o tarjeta MF*/
  533   1                        
  534   1            Block_read_clock_ascii(Buffer_Lpr+j);               /*año,mes,dia,hora,minutos,*/
  535   1            Buffer_Lpr[j+10]=':';                               /*separador fecha*/
@@ -701,9 +702,9 @@ line level    source
  590            //  Buffer_Lpr[j++]=((temp & 0xf0)>>4)| 0x30;
  591            //  Buffer_Lpr[j++]=((temp & 0x0f))| 0x30;
  592              
- 593            //  temp=hex_bcd(*(buffer_S1_B2+1));                /*mes a ascii*/
-C51 COMPILER V9.59.0.0   ACCESCAN                                                          06/11/2021 11:57:43 PAGE 12  
+C51 COMPILER V9.59.0.0   ACCESCAN                                                          06/11/2021 12:08:30 PAGE 12  
 
+ 593            //  temp=hex_bcd(*(buffer_S1_B2+1));                /*mes a ascii*/
  594            //  Buffer_Lpr[j++]=((temp & 0xf0)>>4)| 0x30;
  595            //  Buffer_Lpr[j++]=((temp & 0x0f))| 0x30;
  596            
@@ -756,7 +757,7 @@ line level    source
 
 
 MODULE INFORMATION:   STATIC OVERLAYABLE
-   CODE SIZE        =   1633    ----
+   CODE SIZE        =   1655    ----
    CONSTANT SIZE    =     59    ----
    XDATA SIZE       =      1      63
    PDATA SIZE       =   ----    ----
