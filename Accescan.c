@@ -115,8 +115,9 @@ void Valida_Trama_Pto(unsigned char *buffer, unsigned char length_trama)
 	
 	 static unsigned char cont;
 		unsigned char bcc=0;
+		unsigned char j; 
 		unsigned char buff[11];
-		unsigned char buffer_port[4];
+	
 	//USE_LPR=rd_eeprom(0xa8,EE_USE_LPR);
 	/*-------------------------------CMD H reloj para el board y la pantalla lcd------------------------------------------*/
 		if((length_trama==26)&&(*buffer==STX)&&(*(buffer+2)=='H')&&*(buffer+(length_trama-2))==ETX)													/*cmd de Accescan que me envia el reloj actualizado*/
@@ -124,7 +125,11 @@ void Valida_Trama_Pto(unsigned char *buffer, unsigned char length_trama)
 			Debug_txt_Tibbo((unsigned char *) "primario BCC= ");
 			Debug_chr_Tibbo(*(buffer+25));
 			Debug_txt_Tibbo((unsigned char *) "\r\n");
-			bcc=Calculo_bcc(buffer,length_trama-1);
+			for (j=0; j<length_trama-1; j++)
+			{
+				bcc=*(buffer+j) ^ bcc;
+			}
+			
 			Debug_txt_Tibbo((unsigned char *) "calculo BCC= ");
 			Debug_chr_Tibbo(bcc);
 			Debug_txt_Tibbo((unsigned char *) "\r\n");
@@ -144,16 +149,16 @@ void Valida_Trama_Pto(unsigned char *buffer, unsigned char length_trama)
 			else
 			{
 				
-				buffer_port[0]=02;
-				buffer_port[1]=05;
-				buffer_port[2]=03;
-				buffer_port[3]=0;
-				 send_port(buffer_port,4);
+				buff[0]=02;
+				buff[1]=05;
+				buff[2]=03;
+				buff[3]=0;
+				 send_port(buff,4);
 				
 				Debug_txt_Tibbo((unsigned char *) "REENVIAR trama Hora: ");
-				Debug_chr_Tibbo(buffer_port[0]);
-				Debug_chr_Tibbo(buffer_port[1]);
-				Debug_chr_Tibbo(buffer_port[2]);
+				Debug_chr_Tibbo(buff[0]);
+				Debug_chr_Tibbo(buff[1]);
+				Debug_chr_Tibbo(buff[2]);
 				Debug_txt_Tibbo((unsigned char *) "\r\n");
 			}
 			
@@ -539,6 +544,7 @@ void Cmd_LPR_Salida_wiegand(unsigned char *buffer)
 		
 			Monitor_chr(Buffer_Lpr,j+12);												/*rutina de envio de la trama a monitor*/
 }
+/*
 unsigned char Calculo_bcc(unsigned char *buffer, unsigned char leng_trama)
 {
 	unsigned char bcc=0;
@@ -550,6 +556,7 @@ unsigned char Calculo_bcc(unsigned char *buffer, unsigned char leng_trama)
 	}
 	return bcc;
 }
+*/
 /*------------------------------------------------------------------------------
 
 ------------------------------------------------------------------------------*/

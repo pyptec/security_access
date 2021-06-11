@@ -716,8 +716,9 @@ if((temp=Trama_Validacion_P_N())!=RSPT_TRP_OK	)
 			}	
 			else if (temp==ERROR_TRP_TRAMA)
 			{
-			Debug_txt_Tibbo((unsigned char *) "RTA_CMD_ERROR\r\n");											/* trama no valida respuesta incorrecta falla en la escritura */
+			Debug_txt_Tibbo((unsigned char *) "RTA_CMD_ERROR\r\n");															/* trama no valida respuesta incorrecta falla en la escritura */
 			DebugBufferMF(Buffer_Rta_Lintech,g_cContByteRx,RESPUESTA);														/*imprimo la trama recibida*/	
+			
 			EstadoComSeqMF=*(secuencia_Expedidor + EstadoPasado);	
 			//EstadoComSeqMF=SEQ_INICIO	;																														/// (3) Trama invalida cmd (N)reenvio cmd*/	
 			}			
@@ -2587,9 +2588,12 @@ unsigned char SecuenciaExpedidorMF( unsigned char EstadoActivo)
 			EstadoActivo = Valida_Tipo_Tarjeta(Atributos_Expedidor,Buffer_Write_MF);;
 			break;
 		case SEQ_CAPTURE_CARD_LOOP:
-			Mov_Card(MovPos_Capture);
-			EstadoActivo = Load_Secuencia_Expedidor(Secuencia_Expedidor,EstadoActivo,SEQ_CMD_ACEPTADO,SEQ_RESPUESTA_TRANSPORTE);		 //SEQ_INICIOSEQ_MOVER_CARD_RF TAREA_PRESENCIA_ROTACION
-		  Secuencia_Expedidor[TareadelCmd ] = TAREA_PRESENCIA_ROTACION;
+			
+			
+				Mov_Card(MovPos_Capture);
+				EstadoActivo = Load_Secuencia_Expedidor(Secuencia_Expedidor,EstadoActivo,SEQ_CMD_ACEPTADO,SEQ_RESPUESTA_TRANSPORTE);		 //SEQ_INICIOSEQ_MOVER_CARD_RF TAREA_PRESENCIA_ROTACION
+				Secuencia_Expedidor[TareadelCmd ] = TAREA_PRESENCIA_ROTACION;
+			
 			break;
 		case SEQ_POWER_OFF:
 			Power_off();
