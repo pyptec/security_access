@@ -22,6 +22,7 @@ extern char check_fechaOut(char *buffer);
 extern void ByteHex_Decimal(unsigned char *buffer,unsigned char valorhex);
 extern unsigned char hex_bcd (unsigned char byte);
 extern void hex_ascii(unsigned char * datos,unsigned char * fecha_asii);
+extern unsigned char *Lee_No_Ticket();
 
 unsigned char cursor[20] = "/"; //current working directory
 unsigned char validacion [11]={"admin"};	//usuario
@@ -1291,6 +1292,11 @@ void Ver_Prog()
 		
 		hex_ascii(buffer,fecha);	
 		printf("\r\n ACTUAL FECHA DE VENCIMIENTO PROGRAMADA =%s\r\n",fecha);	
+	/*numero de ticket programado*/
+	
+	strcpy(buffer, Lee_No_Ticket());
+	printf("\r\n Numero de ticket =%s\r\n",buffer);	
+
 }
 
 /*------------------------------------------------------------------------------

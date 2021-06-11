@@ -125,10 +125,10 @@ void variable_inicio()
 	
 	T_GRACIA=rd_eeprom(0xa8,EE_TIEMPO_GRACIA);
 	SIN_COBRO=rd_eeprom(0xa8,EE_SIN_COBRO);
-	//Debug_Tibbo=rd_eeprom(0xa8,EE_DEBUG);
+	Debug_Tibbo=rd_eeprom(0xa8,EE_DEBUG);
 	USE_LPR=rd_eeprom(0xa8,EE_USE_LPR);
 	Raspberry = rd_eeprom(0xa8,EE_TIPO_PANTALLA);
-	Debug_Tibbo = 1;
+	//Debug_Tibbo = 1;
 	
 }
 /*------------------------------------------------------------------------------

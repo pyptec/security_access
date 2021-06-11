@@ -1,4 +1,4 @@
-C51 COMPILER V9.59.0.0   EEPROM                                                            06/09/2021 12:25:33 PAGE 1   
+C51 COMPILER V9.59.0.0   EEPROM                                                            06/11/2021 11:57:44 PAGE 1   
 
 
 C51 COMPILER V9.59.0.0, COMPILATION OF MODULE EEPROM
@@ -62,7 +62,7 @@ line level    source
   52   2        }
   53   1        
   54   1        if (memory_flag==1)
-C51 COMPILER V9.59.0.0   EEPROM                                                            06/09/2021 12:25:33 PAGE 2   
+C51 COMPILER V9.59.0.0   EEPROM                                                            06/11/2021 11:57:44 PAGE 2   
 
   55   1        { 
   56   2      
@@ -126,7 +126,7 @@ line level    source
  114          //*******************************************************************************************
  115          void stop (void)
  116          {
-C51 COMPILER V9.59.0.0   EEPROM                                                            06/09/2021 12:25:33 PAGE 3   
+C51 COMPILER V9.59.0.0   EEPROM                                                            06/11/2021 11:57:44 PAGE 3   
 
  117   1        scl=0;
  118   1        sda=0;
@@ -190,7 +190,7 @@ line level    source
  176   1        e_d_m(data_eeprom);
  177   1        ackd();
  178   1        stop();
-C51 COMPILER V9.59.0.0   EEPROM                                                            06/09/2021 12:25:33 PAGE 4   
+C51 COMPILER V9.59.0.0   EEPROM                                                            06/11/2021 11:57:44 PAGE 4   
 
  179   1        Delay_1ms(13);
  180   1        
@@ -254,7 +254,7 @@ line level    source
  237   1          ack_lect();
  238   1        e_d_m(dir_l);
  239   1        ack_lect();
-C51 COMPILER V9.59.0.0   EEPROM                                                            06/09/2021 12:25:33 PAGE 5   
+C51 COMPILER V9.59.0.0   EEPROM                                                            06/11/2021 11:57:44 PAGE 5   
 
  240   1        start();
  241   1        e_d_m(control+0x01);
@@ -318,7 +318,7 @@ line level    source
  299   1        unsigned long int Noticket,Bnoticket=0;
  300   1        Debug_txt_Tibbo((unsigned char *) "Numero de ticket:");
  301   1        Debug_txt_Tibbo((unsigned char *) buffer);
-C51 COMPILER V9.59.0.0   EEPROM                                                            06/09/2021 12:25:33 PAGE 6   
+C51 COMPILER V9.59.0.0   EEPROM                                                            06/11/2021 11:57:44 PAGE 6   
 
  302   1        Debug_txt_Tibbo((unsigned char *) "\n\r");
  303   1        Noticket= atol(buffer);
@@ -382,7 +382,7 @@ line level    source
  361          /*----------------------------------------------------------------------------------
  362          Procedimiento que incrementa en uno el numero del Ticket y la graba en  EEprom 
  363          -----------------------------------------------------------------------------------*/
-C51 COMPILER V9.59.0.0   EEPROM                                                            06/09/2021 12:25:33 PAGE 7   
+C51 COMPILER V9.59.0.0   EEPROM                                                            06/11/2021 11:57:44 PAGE 7   
 
  364          void Incremente_Ticket()
  365          {
@@ -447,7 +447,7 @@ MODULE INFORMATION:   STATIC OVERLAYABLE
    BIT SIZE         =      1    ----
 END OF MODULE INFORMATION.
 
-C51 COMPILER V9.59.0.0   EEPROM                                                            06/09/2021 12:25:33 PAGE 8   
+C51 COMPILER V9.59.0.0   EEPROM                                                            06/11/2021 11:57:44 PAGE 8   
 
 
 C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)
