@@ -1,4 +1,4 @@
-C51 COMPILER V9.59.0.0   IO_SENSORES                                                       06/11/2021 16:40:23 PAGE 1   
+C51 COMPILER V9.59.0.0   IO_SENSORES                                                       06/23/2021 14:18:02 PAGE 1   
 
 
 C51 COMPILER V9.59.0.0, COMPILATION OF MODULE IO_SENSORES
@@ -62,7 +62,7 @@ line level    source
   52   1        sel_C=0;
   53   1      }
   54          
-C51 COMPILER V9.59.0.0   IO_SENSORES                                                       06/11/2021 16:40:23 PAGE 2   
+C51 COMPILER V9.59.0.0   IO_SENSORES                                                       06/23/2021 14:18:02 PAGE 2   
 
   55          //***************************************************************************************************
   56          void sel_Sensor2(void)
@@ -126,7 +126,7 @@ line level    source
  114   1        while ((DataIn==0)&&(Valido==1))
  115   1        {
  116   2          Tmin--;
-C51 COMPILER V9.59.0.0   IO_SENSORES                                                       06/11/2021 16:40:23 PAGE 3   
+C51 COMPILER V9.59.0.0   IO_SENSORES                                                       06/23/2021 14:18:02 PAGE 3   
 
  117   2          if (Tmin==0)
  118   2          {
@@ -190,7 +190,7 @@ line level    source
  176   1        unsigned char sensor; 
  177   1              sel_Sensor1();  
  178   1              if (DataIn==0)                            // sensor1  se encuentra activo puede ser carro, si esta inhabilitado debe
-C51 COMPILER V9.59.0.0   IO_SENSORES                                                       06/11/2021 16:40:23 PAGE 4   
+C51 COMPILER V9.59.0.0   IO_SENSORES                                                       06/23/2021 14:18:02 PAGE 4   
 
              - ser moto          
  179   1              {  sel_Auto();
@@ -254,7 +254,7 @@ line level    source
  237   3            }
  238   2          }else 
  239   1          {
-C51 COMPILER V9.59.0.0   IO_SENSORES                                                       06/11/2021 16:40:23 PAGE 5   
+C51 COMPILER V9.59.0.0   IO_SENSORES                                                       06/23/2021 14:18:02 PAGE 5   
 
  240   2          Debug_txt_Tibbo((unsigned char *) "Vehiculo Saliendo. Un momento.\n\r");
  241   2          return 0x00;
@@ -318,7 +318,7 @@ line level    source
  298   6                }
  299   5              }
  300   4            }
-C51 COMPILER V9.59.0.0   IO_SENSORES                                                       06/11/2021 16:40:23 PAGE 6   
+C51 COMPILER V9.59.0.0   IO_SENSORES                                                       06/23/2021 14:18:02 PAGE 6   
 
  301   3          }
  302   2           sel_Funcion();                   // el antirebote

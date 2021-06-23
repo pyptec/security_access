@@ -46,6 +46,7 @@ unsigned char validacion [11]={"admin"};	//usuario
 #define EE_JUST_ONE_TIME_CLAVE	0X0013
 #define EE_VALIDA_TIPO_VEHICULO_MENSUAL 0X0014
 #define	EE_HABILITA_APB_MENSUAL 0X0015
+#define EE_MENSUAL_BOCA_ON_OFF	0X0016
 #define EE_HORARIO_1						0X0019
 #define EE_HORARIO_2						0x0032
 #define EE_HORARIO_3						0x004b
@@ -61,7 +62,7 @@ unsigned char validacion [11]={"admin"};	//usuario
 #define EE_FECHA_VENCIMIENTO		0X0350
 /* Definicion del tamaño de comando y longitud de cmd*/
 
-#define 	NUMCOMMAND 18
+#define 	NUMCOMMAND 19
 #define 	LONGSIZE 3
 
 #define True										0x01
@@ -107,10 +108,11 @@ char comandos[NUMCOMMAND][LONGSIZE]=
 	"11",			// prog horario
 	"12",			// Validar tipo de vehiculo mensual
 	"13",			// habilita apb para mensual
-	"14",     // ver comandos programados
-	"15",			//AYUDA Ayuda!muestra todos los comandos
-	"16",			//SALIRSalir de programacion
-	"17"			//cmd escondido fecha de vencimiento password
+	"14",     // configura mensuales
+	"15",     // ver comandos programados
+	"16",			//AYUDA Ayuda!muestra todos los comandos
+	"17",			//SALIRSalir de programacion
+	"18"			//cmd escondido fecha de vencimiento password
 };
 
 /*------------------------------------------------------------------------------
@@ -1173,6 +1175,40 @@ void Ver_Horario()
 	
 		
 }
+void Prog_mensuales()
+{
+	unsigned char buffer[10];
+	unsigned int dataee;
+
+	
+	dataee=rd_eeprom(0xa8,EE_MENSUAL_BOCA_ON_OFF);																					/*se lee el id_cliente actual */
+	sprintf(buffer,"%d",dataee);																									/*se convierte  un entero a un string*/
+	if(dataee==0)
+	{
+		printf("\r\n\n ACTUAL MENSUAL POR BOCA INHABILITADO=%s\r\n\n",buffer);														/*se muestra el id_cliente actual en pantalla*/
+	}
+	else
+	{
+		printf("\r\n\n ACTUAL MENSUAL POR BOCA HABILITADO=%s\r\n\n",buffer);			
+	}
+	
+	printf("\r\n\n DIGITE EL NUEVO ESTADO DEL MENSUAL=");																	/*digite el nuevo id_cliente*/
+	IngresaDato(buffer,0);																												/*trae el dato digitado*/
+	dataee=atoi(buffer);																													/*lo convierto a un dato hex*/
+	wr_eeprom(0xa8,EE_MENSUAL_BOCA_ON_OFF,dataee);																					/*grabo el dato en la eeprom*/
+	
+	dataee=rd_eeprom(0xa8,EE_MENSUAL_BOCA_ON_OFF);																				/*leo el dato grabado*/
+	sprintf(buffer,"%d",dataee);	
+	if(dataee==0)
+	{
+		printf("\r\n\n ACTUAL MENSUAL POR BOCA INHABILITADO=%s\r\n\n",buffer);														/*se muestra el id_cliente actual en pantalla*/
+	}
+	else
+	{
+		printf("\r\n\n ACTUAL MENSUAL POR BOCA HABILITADO=%s\r\n\n",buffer);			
+	}
+	
+}
 void Ver_Prog()
 {
 	unsigned char buffer[10];
@@ -1287,6 +1323,19 @@ void Ver_Prog()
 	{
 		printf("\r\n  ANTIPASSBACK MENSUAL = ON\r\n");			
 	}
+		
+	/*MENSUAL POR BOCA */
+	dataee=rd_eeprom(0xa8,EE_MENSUAL_BOCA_ON_OFF);																					/*se lee el id_cliente actual */
+	sprintf(buffer,"%d",dataee);																									/*se convierte  un entero a un string*/
+	if(dataee==0)
+	{
+		printf("\r\nMENSUAL POR BOCA = OFF\r\n");														/*se muestra el id_cliente actual en pantalla*/
+	}
+	else
+	{
+		printf("\r\n  MENSUAL POR BOCA = ON\r\n");			
+	}
+	
 	/*Fecha de vencimiento clave*/
 	LeerMemoria(EE_FECHA_VENCIMIENTO,buffer);
 		
@@ -1318,9 +1367,10 @@ void Show()
 	 printf("\r\n HORARIO            --- CMD 11 Progama 10 horarios del 1 al 10");
 	 printf("\r\n VALIDA_VEHI_MENSUAL--- CMD 12 Habilitar = 1, Inhabilitar = 0");
 	 printf("\r\n USE_APB_MENSUAL    --- CMD 13 Habilitar = 1, Inhabilitar = 0");
-	 printf("\r\n VER_PROGRAMACION   --- CMD 14 Muestra la programacion");
-	 printf("\r\n AYUDA              --- CMD 15 Muestra los comandos");
-   printf("\r\n SALIR              --- CMD 16 Salir de programacion");
+	 printf("\r\n MENSUALES			     --- CMD 14 Habilitar = 1, Inhabilitar = 0");
+	 printf("\r\n VER_PROGRAMACION   --- CMD 15 Muestra la programacion");
+	 printf("\r\n AYUDA              --- CMD 16 Muestra los comandos");
+   printf("\r\n SALIR              --- CMD 17 Salir de programacion");
 
 }
 
@@ -1465,16 +1515,20 @@ unsigned char buffer[20];
 						case 13:		//cmd configuracion los horarios
 							Prog_Apb_Mensual();
             break;
-						case 14:  //help me
-           		Ver_Prog();
+						
+						case 14:  //configura los mensuales por boca
+           		Prog_mensuales();
             break;
 						case 15:  //help me
+           		Ver_Prog();
+            break;
+						case 16:  //help me
            		Show();
             break;
-						case 16:  //salir
+						case 17:  //salir
 							return;
             break;
-						case 17:
+						case 18:
 							Prog_fecha_vencimiento();
 							break;
 		

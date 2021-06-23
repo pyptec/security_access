@@ -528,13 +528,14 @@ enum Tipos_Vehiculos{
 #define EE_PLACA								0X0011
 #define EE_VALIDA_TIPO_VEHICULO_MENSUAL 0X0014
 #define	EE_HABILITA_APB_MENSUAL 0X0015
+#define EE_MENSUAL_BOCA_ON_OFF	0X0016
 
 /*----------------------------------------------------------------------------
 Definicion de varaibles globales del objeto
 ------------------------------------------------------------------------------*/
 
 static unsigned char Estado=INICIA_LINTECH;
-bit MenSual = False;
+bit MenSual = False;											/*bit que informa si esta activo mensual*/
 /*------------------------------------------------------------------------------
 
 ------------------------------------------------------------------------------*/
@@ -750,12 +751,21 @@ if((temp=Trama_Validacion_P_N())!=RSPT_TRP_OK	)
 unsigned char Analiza_Presencia_Mensual()
 {
 	unsigned char Estado_expedidor;
-	
+
 	
 	if((ValidaSensoresPaso())!=False)	 																							// valido los sensor de piso
 		{
-			MenSual = True;
-			Estado_expedidor = SEQ_TIPO_CARD;									//SEQ_UID
+			if(rd_eeprom(0xa8,EE_MENSUAL_BOCA_ON_OFF) == True)	
+				{
+						MenSual = True;
+						Estado_expedidor = SEQ_TIPO_CARD;									//SEQ_UID
+				}
+			else
+				{
+					Estado_expedidor = SEQ_DETAIL_CARD_TRAMPA;
+				}
+			
+			
 		}
 	else
 		{	
@@ -2467,6 +2477,8 @@ unsigned char SecuenciaExpedidorMF( unsigned char EstadoActivo)
 	static unsigned char Atributos_Expedidor[20];
 	static unsigned char Secuencia_Expedidor[4];
 	static unsigned char Nombre_Mensual[17];
+	
+	
 	
 	switch (EstadoActivo)
 	{
