@@ -219,6 +219,7 @@ ERROR_TRP_TRAMA					(3) error_transpote_trama
 #define 	ERROR_TRP_TRAMA				3
 
 
+
 /*----------------------------------------------------------------------------
  definiciones de lintech en el comando Check_Status
 ------------------------------------------------------------------------------*/
@@ -263,6 +264,7 @@ Definicion de la trama Lintech de las respuestas de los cmd
 
 #define Pos_Length					3
 #define Pos_TipoResp				4
+#define ERROR_COLLECT_CARD	6
 #define Pos_St0							7
 #define Pos_St1							8
 #define Pos_St2							9
@@ -715,8 +717,12 @@ if((temp=Trama_Validacion_P_N())!=RSPT_TRP_OK	)
 			}	
 			else if (temp==ERROR_TRP_TRAMA)
 			{
-			Debug_txt_Tibbo((unsigned char *) "RTA_CMD_ERROR\r\n");											/* trama no valida respuesta incorrecta falla en la escritura */
+			Debug_txt_Tibbo((unsigned char *) "RTA_CMD_ERROR\r\n");																/* trama no valida respuesta incorrecta falla en la escritura */
 			DebugBufferMF(Buffer_Rta_Lintech,g_cContByteRx,RESPUESTA);														/*imprimo la trama recibida*/	
+				if(Buffer_Rta_Lintech[ERROR_COLLECT_CARD]==0x33)
+				{
+					Debug_txt_Tibbo((unsigned char *) "RTA_CMD_ERROR COLECTOR LLENO\r\n");	
+				}
 			EstadoComSeqMF=*(secuencia_Expedidor + EstadoPasado);	
 			//EstadoComSeqMF=SEQ_INICIO	;																														/// (3) Trama invalida cmd (N)reenvio cmd*/	
 			}			
@@ -1757,6 +1763,7 @@ unsigned char Disparo_Lock_Entrada_Vehiculo(unsigned char *Nombre_Mensual)
 		}
 		else
 		{
+			ValTimeOutCom=TIME_PULSADOR;
 			Estado_expedidor=SEQ_CAPTURE_CARD;
 		}
 	
@@ -1809,7 +1816,7 @@ unsigned char Entrega_Card_Captura()
 		{
 			lock=OFF;
 			pto_paraleo=False;
-			Debug_txt_Tibbo((unsigned char *) "Vehiculo Entrando OFF_BARRERA\r\n");
+			Debug_txt_Tibbo((unsigned char *) "Vehiculo Entrando OFF_BARRERA SENSOR2\r\n");
 			Estado_expedidor=SEQ_INICIO;
 		}
 		
@@ -1823,18 +1830,19 @@ unsigned char Entrega_Card_Captura()
 				
 				if ((ValTimeOutCom == 1) || (ValTimeOutCom > TIME_WAIT))
 				{
-						if (Timer_wait >= 5)
-				 {
+					if (Timer_wait >= 5)
+					{
 					 pto_paraleo=False;
-					 Debug_txt_Tibbo((unsigned char *) "Vehiculo TIEMPO OFF_BARRERA\r\n");
+					 Debug_txt_Tibbo((unsigned char *) "Vehiculo TIEMPO OFF_BARRERA \r\n");
 					
 					 lock=OFF;
-					 Estado_expedidor=SEQ_INICIO;;
-				 }
-				else if (Timer_wait <= 4)
-				 {
+						Timer_wait=0;
+					 Estado_expedidor=SEQ_ESPERA_VEHICULO_ENTRE;
+					}
+					else if (Timer_wait <= 4)
+					{
 					ValTimeOutCom=TIME_WAIT	;
-				 }
+					}
 			 }
 				
 			}
@@ -2509,8 +2517,10 @@ unsigned char SecuenciaExpedidorMF( unsigned char EstadoActivo)
 			Secuencia_Expedidor[TareadelCmd ] = TAREA_WRITE_TARJETA_SECTOR_BLOQUE;
 			break;
 		case SEQ_CAPTURE_CARD:
+			
 			Mov_Card(MovPos_Capture);
 			EstadoActivo=Load_Secuencia_Expedidor(Secuencia_Expedidor,EstadoActivo,SEQ_CMD_ACEPTADO,SEQ_INICIO);		 //SEQ_INICIOSEQ_MOVER_CARD_RF
+			
 			break;
 		case SEQ_CARD_INSERCION_OFF:
 			Card_Insercion(Inhabilita);
