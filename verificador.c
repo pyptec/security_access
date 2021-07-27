@@ -264,6 +264,7 @@ Definicion de la trama Lintech de las respuestas de los cmd
 
 #define Pos_Length					3
 #define Pos_TipoResp				4
+#define ERROR_COLLECT_CARD	6
 #define Pos_St0							7
 #define Pos_St1							8
 #define Pos_St2							9
@@ -719,7 +720,11 @@ if((temp=Trama_Validacion_P_N())!=RSPT_TRP_OK	)
 			{
 			Debug_txt_Tibbo((unsigned char *) "RTA_CMD_ERROR\r\n");															/* trama no valida respuesta incorrecta falla en la escritura */
 			DebugBufferMF(Buffer_Rta_Lintech,g_cContByteRx,RESPUESTA);														/*imprimo la trama recibida*/	
-			
+			if(Buffer_Rta_Lintech[ERROR_COLLECT_CARD]==0x33)
+				{
+					Debug_txt_Tibbo((unsigned char *) "RTA_CMD_ERROR COLECTOR LLENO\r\n");	
+				}
+
 			EstadoComSeqMF=*(secuencia_Expedidor + EstadoPasado);	
 			//EstadoComSeqMF=SEQ_INICIO	;																														/// (3) Trama invalida cmd (N)reenvio cmd*/	
 			}			
