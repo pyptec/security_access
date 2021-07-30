@@ -1765,6 +1765,7 @@ unsigned char Disparo_Lock_Entrada_Vehiculo(unsigned char *Nombre_Mensual)
 			take_card=6;
 			lock=ON;
 			send_portERR(BIENVENIDO);
+			send_portERR(AUDIO_ENTRADA);	
 			PantallaLCD_LINEA_2(BIENVENIDO,Nombre_Mensual);
 			Estado_expedidor=SEQ_PTO_PARALELO;
 			
