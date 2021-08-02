@@ -1,4 +1,4 @@
-C51 COMPILER V9.59.0.0   TIBBO                                                             07/30/2021 10:52:53 PAGE 1   
+C51 COMPILER V9.59.0.0   TIBBO                                                             08/02/2021 16:39:50 PAGE 1   
 
 
 C51 COMPILER V9.59.0.0, COMPILATION OF MODULE TIBBO
@@ -62,7 +62,7 @@ line level    source
   52   2          _nop_();
   53   2          _nop_();
   54   2          _nop_();
-C51 COMPILER V9.59.0.0   TIBBO                                                             07/30/2021 10:52:53 PAGE 2   
+C51 COMPILER V9.59.0.0   TIBBO                                                             08/02/2021 16:39:50 PAGE 2   
 
   55   2        }
   56   1      
@@ -126,7 +126,7 @@ line level    source
  114   1        {  
  115   2          while (xfc>=0x064)        // resto 100
  116   2          {
-C51 COMPILER V9.59.0.0   TIBBO                                                             07/30/2021 10:52:53 PAGE 3   
+C51 COMPILER V9.59.0.0   TIBBO                                                             08/02/2021 16:39:50 PAGE 3   
 
  117   3            xfc=xfc-0x64;
  118   3            centena=centena+1;
@@ -190,7 +190,7 @@ line level    source
  176   2          for (j=0; j<num_char; j++)
  177   2          {
  178   3          Debug_chr_Tibbo(*str);
-C51 COMPILER V9.59.0.0   TIBBO                                                             07/30/2021 10:52:53 PAGE 4   
+C51 COMPILER V9.59.0.0   TIBBO                                                             08/02/2021 16:39:50 PAGE 4   
 
  179   3          str++;
  180   3          }
@@ -254,7 +254,7 @@ line level    source
  238   1          temporal>>=1;
  239   1      //------------------------------------------------------------------------------------
  240   1          time_bit();
-C51 COMPILER V9.59.0.0   TIBBO                                                             07/30/2021 10:52:53 PAGE 5   
+C51 COMPILER V9.59.0.0   TIBBO                                                             08/02/2021 16:39:50 PAGE 5   
 
  241   1      //------------------------------------------------------------------------------------
  242   1          temporal=(rx_ip==0)?(temporal&0x7f):(temporal|0x80);
@@ -318,7 +318,7 @@ line level    source
  300   1      } 
  301          void Debug_monitor(unsigned char *buffer, unsigned char Length_trama )
  302          {
-C51 COMPILER V9.59.0.0   TIBBO                                                             07/30/2021 10:52:53 PAGE 6   
+C51 COMPILER V9.59.0.0   TIBBO                                                             08/02/2021 16:39:50 PAGE 6   
 
  303   1        Debug_Dividir_texto();                                              /*se divide el texto */     
  304   1        Debug_txt_Tibbo((unsigned char *) "Recibe trama Monitor= ");        

@@ -1,4 +1,4 @@
-C51 COMPILER V9.59.0.0   PTO_PARALELO                                                      07/30/2021 10:52:53 PAGE 1   
+C51 COMPILER V9.59.0.0   PTO_PARALELO                                                      08/02/2021 16:39:50 PAGE 1   
 
 
 C51 COMPILER V9.59.0.0, COMPILATION OF MODULE PTO_PARALELO
@@ -62,7 +62,7 @@ line level    source
   52          buffer_port= apuntador donde se almacena el dato recibido
   53          busy=0    significa que el principla me transmite una cadena de datos
   54          Ready=0   significa que estoy listo para recibir los datos
-C51 COMPILER V9.59.0.0   PTO_PARALELO                                                      07/30/2021 10:52:53 PAGE 2   
+C51 COMPILER V9.59.0.0   PTO_PARALELO                                                      08/02/2021 16:39:50 PAGE 2   
 
   55          time_out= es el tiempo de espera que le damos al ciclo de reloj en alto si se pasa el tiempo se sale por f
              -in de la transmicion 
@@ -126,7 +126,7 @@ line level    source
  113   2          ready=1;
  114   2          rx_in_data=1;
  115   2        }
-C51 COMPILER V9.59.0.0   PTO_PARALELO                                                      07/30/2021 10:52:53 PAGE 3   
+C51 COMPILER V9.59.0.0   PTO_PARALELO                                                      08/02/2021 16:39:50 PAGE 3   
 
  116   1        on_Timer0_Interrup();
  117   1           
@@ -190,7 +190,7 @@ line level    source
  175   1      }
  176          
  177          /*-------------------------------------------------------------------------------------------
-C51 COMPILER V9.59.0.0   PTO_PARALELO                                                      07/30/2021 10:52:53 PAGE 4   
+C51 COMPILER V9.59.0.0   PTO_PARALELO                                                      08/02/2021 16:39:50 PAGE 4   
 
  178          Reloj del pto paralelo
  179          -------------------------------------------------------------------------------------------*/
@@ -254,7 +254,7 @@ line level    source
  237          Funcion q carga el reloj y lo envia por el pto paralelo
  238          msj informativo con el pulsador funcion 
  239          ------------------------------------------------------------------------------*/
-C51 COMPILER V9.59.0.0   PTO_PARALELO                                                      07/30/2021 10:52:53 PAGE 5   
+C51 COMPILER V9.59.0.0   PTO_PARALELO                                                      08/02/2021 16:39:50 PAGE 5   
 
  240          void load_and_send_info_reloj()
  241          {
@@ -318,7 +318,7 @@ line level    source
  299   1            i--;
  300   1            Debug_txt_Tibbo((unsigned char *) "Envia trama pto_paralelo= ");
  301   1            DebugBufferMF(buffer_info,i,2); 
-C51 COMPILER V9.59.0.0   PTO_PARALELO                                                      07/30/2021 10:52:53 PAGE 6   
+C51 COMPILER V9.59.0.0   PTO_PARALELO                                                      08/02/2021 16:39:50 PAGE 6   
 
  302   1            Debug_Dividir_texto();
  303   1            send_port(buffer_info,i);                 /*se transmite informacion pt0 paralelo*/

@@ -882,7 +882,7 @@ unsigned char Ingreso_Vehiculo(void)
 			if (CardAutomatic==True)																										//se pregunta si expide la tarjeta automatica o por presionar el boton
 				{
 					Debug_txt_Tibbo((unsigned char *) "Tarjeta: Automatico\r\n");						//expide tarjetas automatico con presencia
-																																									// muevo la tarjeta hasta el lector de rf
+					send_portERR(AUDIO_ENTRADA);																																			// muevo la tarjeta hasta el lector de rf
 					Estado=SEQ_MOVER_CARD_RF;	  																						// valido el cmd enviado al verificador
 				 }
 			else
@@ -1765,7 +1765,7 @@ unsigned char Disparo_Lock_Entrada_Vehiculo(unsigned char *Nombre_Mensual)
 			take_card=6;
 			lock=ON;
 			send_portERR(BIENVENIDO);
-			send_portERR(AUDIO_ENTRADA);	
+			//send_portERR(AUDIO_ENTRADA);	
 			PantallaLCD_LINEA_2(BIENVENIDO,Nombre_Mensual);
 			Estado_expedidor=SEQ_PTO_PARALELO;
 			
@@ -1863,7 +1863,9 @@ unsigned char Entrega_Card_Captura()
 					 Debug_txt_Tibbo((unsigned char *) "Vehiculo TIEMPO OFF_BARRERA\r\n");
 					
 					 lock=OFF;
-					 Estado_expedidor=SEQ_INICIO;;
+					 Timer_wait=0;
+					 Estado_expedidor=SEQ_ESPERA_VEHICULO_ENTRE;
+					 //Estado_expedidor=SEQ_INICIO;;
 				 }
 				else if (Timer_wait <= 4)
 				 {
