@@ -34,6 +34,7 @@ extern void Debug_monitor(unsigned char *buffer, unsigned char Length_trama );
 extern void Debug_txt_Tibbo(unsigned char * str);
 extern void Delay_10ms(unsigned int cntd_10ms);
 extern void tx_aux(unsigned char caracter);
+extern void Debug_chr_Tibbo(unsigned char Dat);
 
 #define True										0x01
 #define False										0x00
@@ -91,19 +92,40 @@ void Valida_Trama_Monitor(unsigned char *buffer, unsigned char length_trama)
 	unsigned char j=0;
 	unsigned char p=2;
 	unsigned char cont=0;
-	length_trama=1;
+	unsigned char bcc=0;
+	
 		
 			/*habilita relevo abre barrera*/
-		if	((*(buffer+1)=='P')) 																																						/* APERTURA DE BARRETA*/ 
-				{
-				
+		if	((*(buffer+1)=='P')&&*(buffer+(length_trama-2))==ETX) 																																						/* APERTURA DE BARRETA*/ 
+		{
+			Debug_txt_Tibbo((unsigned char *) "BCC PC MONITOR = ");
+			Debug_chr_Tibbo(*(buffer+length_trama));
+			Debug_txt_Tibbo((unsigned char *) "\n");
+			for (j=0; j<length_trama-1; j++)
+			{
+				bcc=*(buffer+j) ^ bcc;
+			}
+			
+			Debug_txt_Tibbo((unsigned char *) "calculo BCC= ");
+			Debug_chr_Tibbo(bcc);
+			Debug_txt_Tibbo((unsigned char *) "\n");
+			if (bcc == *(buffer+length_trama))
+			{
 					lock=1;		
-					
 					Delay_10ms(70);					/*habilita el relevo ON*/
-					tx_aux(06);							//ack		
-				//	Timer_wait=0;
+					tx_aux(06);							//ack							
+						
+			}
+			else
+			{
+				tx_aux(06);							
+				Debug_txt_Tibbo((unsigned char *) "EERROR REENVIAR trama de apertura ");
+				Debug_txt_Tibbo((unsigned char *) "\n");
+			}
+			
+			
 				
-	 			}
+	 	}
 			/*se recive la placa O EL CANCEL Y NO_PLATE*/	
 		else if ((*(buffer+1)=='<')|| (*(buffer+1)=='['))
 		{

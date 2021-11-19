@@ -1,4 +1,4 @@
-C51 COMPILER V9.59.0.0   PANTALLAS                                                         08/02/2021 16:39:50 PAGE 1   
+C51 COMPILER V9.59.0.0   PANTALLAS                                                         11/19/2021 16:07:16 PAGE 1   
 
 
 C51 COMPILER V9.59.0.0, COMPILATION OF MODULE PANTALLAS
@@ -62,7 +62,7 @@ line level    source
   52          #define ERROR_LOOP              170         //0XE0
   53          #define ERROR_COD_PARK          171         //0XE5
   54          #define PULSE_BOTON             172
-C51 COMPILER V9.59.0.0   PANTALLAS                                                         08/02/2021 16:39:50 PAGE 2   
+C51 COMPILER V9.59.0.0   PANTALLAS                                                         11/19/2021 16:07:16 PAGE 2   
 
   55          #define TARJETA_SIN_FORMATO     173         //0xDF
   56          #define OFF_LINE                174         //B6
@@ -126,7 +126,7 @@ line level    source
  114   2            switch (cod_msg)
  115   2            {
  116   3            /*mensajes de entrada lcd pto serie*/
-C51 COMPILER V9.59.0.0   PANTALLAS                                                         08/02/2021 16:39:50 PAGE 3   
+C51 COMPILER V9.59.0.0   PANTALLAS                                                         11/19/2021 16:07:16 PAGE 3   
 
  117   3                case INGRESE:
  118   3                    num_chr=strlen((unsigned char  *) "INGRESE TARJETA ");                    /*cmd 31 es en proceso de ejecucion
@@ -190,7 +190,7 @@ line level    source
  173   3                    tx_chrlcd(num_chr*2,0);
  174   3                    LCD_txt ((unsigned char *)"MENSUALIDAD VENCIDA ",1); 
  175   3                    break;
-C51 COMPILER V9.59.0.0   PANTALLAS                                                         08/02/2021 16:39:50 PAGE 4   
+C51 COMPILER V9.59.0.0   PANTALLAS                                                         11/19/2021 16:07:16 PAGE 4   
 
  176   3               case EXCEDE_HORARIO:
  177   3                    num_chr=strlen((unsigned char  *) "MENSUALIDAD EXCEDE HORARIO ACERQUESE A CAJA ");
@@ -254,7 +254,7 @@ line level    source
  235   3                    tx_chrlcd(num_chr*2,0);
  236   3                    LCD_txt((unsigned char *)        "FUERA DE LINEA ",1);
  237   3                    break;
-C51 COMPILER V9.59.0.0   PANTALLAS                                                         08/02/2021 16:39:50 PAGE 5   
+C51 COMPILER V9.59.0.0   PANTALLAS                                                         11/19/2021 16:07:16 PAGE 5   
 
  238   3                   
  239   3                 case UN_MOMENTO:
@@ -318,7 +318,7 @@ line level    source
  297   3                    LCD_txt((unsigned char *)        "BIENVENIDO ",1);
  298   3                    break;
  299   3                    case LOW_CARD:
-C51 COMPILER V9.59.0.0   PANTALLAS                                                         08/02/2021 16:39:50 PAGE 6   
+C51 COMPILER V9.59.0.0   PANTALLAS                                                         11/19/2021 16:07:16 PAGE 6   
 
  300   3                    num_chr=strlen((unsigned char *) "NIVEL BAJO DE TARJETAS ");
  301   3                    tx_chrlcd(0x00,0);
@@ -382,7 +382,7 @@ line level    source
  357   3                        //Raspberry_data((unsigned char  *) "a;90;DIRIJASE A CAJA\n\r\0");                    /*cmd 31 es en proces
              -o de ejecucion del firtware*/
  358   3                        break;
-C51 COMPILER V9.59.0.0   PANTALLAS                                                         08/02/2021 16:39:50 PAGE 7   
+C51 COMPILER V9.59.0.0   PANTALLAS                                                         11/19/2021 16:07:16 PAGE 7   
 
  359   3                  case GRACIAS:
  360   3                    strcpy(msjpantalla,"a;91;GRACIAS... \n\0");
@@ -446,7 +446,7 @@ line level    source
  418   3                  case TARJETA_SIN_FORMATO:
  419   3                    strcpy(msjpantalla,"a;98;TARJETA SIN FORMATO\n\0");
  420   3                        Raspberry_data (msjpantalla);
-C51 COMPILER V9.59.0.0   PANTALLAS                                                         08/02/2021 16:39:50 PAGE 8   
+C51 COMPILER V9.59.0.0   PANTALLAS                                                         11/19/2021 16:07:16 PAGE 8   
 
  421   3                        //Raspberry_data((unsigned char  *) "a;98;TARJETA SIN FORMATO \n\r\0");
  422   3                        break;
@@ -510,7 +510,7 @@ line level    source
  480   3                    break;    
  481   3                
  482   3                case NOREAD_CARD:
-C51 COMPILER V9.59.0.0   PANTALLAS                                                         08/02/2021 16:39:50 PAGE 9   
+C51 COMPILER V9.59.0.0   PANTALLAS                                                         11/19/2021 16:07:16 PAGE 9   
 
  483   3                    strcpy(msjpantalla,"a;98;ACERQUE SU TARJETA DE NUEVO\n\0");
  484   3                    Raspberry_data (msjpantalla);
@@ -574,7 +574,7 @@ line level    source
  542   2            {
  543   3          
  544   3              case  LECTURA_WIEGAND:
-C51 COMPILER V9.59.0.0   PANTALLAS                                                         08/02/2021 16:39:50 PAGE 10  
+C51 COMPILER V9.59.0.0   PANTALLAS                                                         11/19/2021 16:07:16 PAGE 10  
 
  545   3                LCD_txt (Ini_LCD_Line_one,0);
  546   3                num_chr=strlen((unsigned char *) "WIEGAND ");
@@ -638,7 +638,7 @@ line level    source
  601   3                  break;
  602   3                 case BIENVENIDO:
  603   3                   
-C51 COMPILER V9.59.0.0   PANTALLAS                                                         08/02/2021 16:39:50 PAGE 11  
+C51 COMPILER V9.59.0.0   PANTALLAS                                                         11/19/2021 16:07:16 PAGE 11  
 
  604   3                  strcpy(msjpantalla,"a;03;BIENVENIDO ");
  605   3                 Raspberry_data (msjpantalla);
@@ -702,7 +702,7 @@ line level    source
  663   3                break;  
  664   3             }
  665   2            // free(msjpantalla);
-C51 COMPILER V9.59.0.0   PANTALLAS                                                         08/02/2021 16:39:50 PAGE 12  
+C51 COMPILER V9.59.0.0   PANTALLAS                                                         11/19/2021 16:07:16 PAGE 12  
 
  666   2             msjpantalla [0]=0;
  667   2             sel_com=1; 
@@ -766,7 +766,7 @@ line level    source
  725   2            
  726   2          for (d=0; d<100; d++)
  727   2         {
-C51 COMPILER V9.59.0.0   PANTALLAS                                                         08/02/2021 16:39:50 PAGE 13  
+C51 COMPILER V9.59.0.0   PANTALLAS                                                         11/19/2021 16:07:16 PAGE 13  
 
  728   3         }
  729   2          d=putchar(*(msjpantalla + i));
@@ -830,7 +830,7 @@ MODULE INFORMATION:   STATIC OVERLAYABLE
    CODE SIZE        =   2973    ----
    CONSTANT SIZE    =   1775    ----
    XDATA SIZE       =   ----      93
-C51 COMPILER V9.59.0.0   PANTALLAS                                                         08/02/2021 16:39:50 PAGE 14  
+C51 COMPILER V9.59.0.0   PANTALLAS                                                         11/19/2021 16:07:16 PAGE 14  
 
    PDATA SIZE       =   ----    ----
    DATA SIZE        =   ----    ----
